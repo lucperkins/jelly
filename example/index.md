@@ -1,5 +1,5 @@
 ---
-title: Here is a title
+title: Welcome
 ---
 
 Here is some content.
