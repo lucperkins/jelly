@@ -7,6 +7,7 @@ edition = "2021"
 base64 = "0.13.1"
 glob = "0.3.0"
 gray_matter = "0.2.4"
+markdown = "0.3.0"
 serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.88"
 thiserror = "1.0.37"

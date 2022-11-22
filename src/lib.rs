@@ -13,6 +13,7 @@ pub struct Page {
     pub relative_path: String,
     pub title: String,
     pub body: String,
+    pub html: String,
 }
 
 impl Page {
@@ -35,12 +36,15 @@ impl Page {
 
         let relative_path = path.strip_prefix(config.root)?.to_string_lossy();
 
+        let html = markdown::to_html(&result.content);
+
         Ok(Page {
             id,
             path: String::from(path.to_string_lossy()),
             relative_path: String::from(relative_path),
             title,
             body: result.content,
+            html,
         })
     }
 }
@@ -90,7 +94,8 @@ impl Default for TitleConfig {
 fn infer_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> String {
     front.title.unwrap_or_else(|| {
         let stem = path.file_stem().unwrap();
-        let deslugged = stem.to_string_lossy().replace("'-'", " ");
+
+        let deslugged = stem.to_string_lossy().replace("-", " ");
 
         if title_config.title_case {
             titlecase(&deslugged)
@@ -123,21 +128,34 @@ pub fn get_pages(config: Config) -> Result<Vec<Page>, ContentError> {
 mod tests {
     #[test]
     fn example_dir() {
+        use super::{get_pages, Config, Page, TitleConfig};
+
         let config = Config {
             root: "example",
             title_config: TitleConfig::default(),
         };
         let pages: Vec<Page> = get_pages(config).unwrap();
-        assert!(!pages[0].title.is_empty());
+        assert!(!pages[0].id.is_empty());
         assert_eq!(&pages[0].title, "Getting started");
         assert_eq!(&pages[0].path, "example/getting-started.md");
         assert_eq!(&pages[0].relative_path, "getting-started.md");
         assert_eq!(&pages[0].body, "Here is a getting started thingie.");
+        assert_eq!(
+            &pages[0].html,
+            "<p>Here is a getting started thingie.</p>\n"
+        );
 
-        assert!(!pages[1].title.is_empty());
+        assert!(!pages[1].id.is_empty());
         assert_eq!(&pages[1].title, "Welcome");
         assert_eq!(&pages[1].path, "example/index.md");
         assert_eq!(&pages[1].relative_path, "index.md");
-        assert_eq!(&pages[1].body, "Here is some content.");
+        assert_eq!(
+            &pages[1].body,
+            "Here is some content.\n\n## Heading\n\nAnd some more."
+        );
+        assert_eq!(
+            &pages[1].html,
+            "<p>Here is some content.</p>\n\n<h2 id='heading'>Heading</h2>\n\n<p>And some more.</p>\n"
+        );
     }
 }
