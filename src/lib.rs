@@ -1,3 +1,4 @@
+use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use serde::{Deserialize, Serialize};
@@ -36,7 +37,10 @@ impl Page {
 
         let relative_path = path.strip_prefix(config.root)?.to_string_lossy();
 
-        let html = markdown::to_html(&result.content);
+        let mut options = ComrakOptions::default();
+        //options.extension.header_ids = Some("user-content-".to_string());
+
+        let html = markdown_to_html(&result.content, &options);
 
         Ok(Page {
             id,
@@ -155,7 +159,7 @@ mod tests {
         );
         assert_eq!(
             &pages[1].html,
-            "<p>Here is some content.</p>\n\n<h2 id='heading'>Heading</h2>\n\n<p>And some more.</p>\n"
+            "<p>Here is some content.</p>\n<h2>Heading</h2>\n<p>And some more.</p>\n"
         );
     }
 }
