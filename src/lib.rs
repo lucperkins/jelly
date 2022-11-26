@@ -10,6 +10,7 @@ use std::path::{Path, PathBuf};
 use std::string::FromUtf8Error;
 use titlecase::titlecase;
 
+#[allow(dead_code)]
 fn render_page(page: &Page) -> Result<String, ContentError> {
     let mut h = Handlebars::new();
     h.register_template_file("html", "src/template/page.hbs")?;
@@ -118,6 +119,7 @@ fn infer_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> S
     front.title.unwrap_or_else(|| {
         let stem = path.file_stem().unwrap();
 
+        #[allow(clippy::single_char_pattern)]
         let deslugged = stem.to_string_lossy().replace("-", " ");
 
         if title_config.title_case {
