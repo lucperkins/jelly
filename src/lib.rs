@@ -13,6 +13,7 @@ use titlecase::titlecase;
 #[allow(dead_code)]
 fn render_page(page: &Page) -> Result<String, ContentError> {
     let mut h = Handlebars::new();
+    h.set_strict_mode(true);
     h.register_template_file("html", "src/template/page.hbs")?;
     let html = page.html.as_str();
     let s = h.render("html", &json!({ "content": html, "title": page.title }))?;
