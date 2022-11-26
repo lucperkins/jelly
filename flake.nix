@@ -29,6 +29,11 @@
         (writeScriptBin "dev" ''
           cargo watch -x check
         '')
+
+        (writeScriptBin "ci" ''
+          cargo build --release
+          cargo test
+        '')
       ];
     in
     {
