@@ -12,16 +12,9 @@ use titlecase::titlecase;
 
 fn render_page(page: &Page) -> Result<String, ContentError> {
     let mut h = Handlebars::new();
-
-    h.register_template_string(
-        "html",
-        r#"<html><body><div id="content">{{{ content }}}</div></body></html>"#,
-    )?;
+    h.register_template_file("html", "src/template/page.hbs")?;
     let html = page.html.as_str();
-    let s = h.render("html", &json!({ "content": html }))?;
-
-    println!("{}", s);
-
+    let s = h.render("html", &json!({ "content": html, "title": page.title }))?;
     Ok(s)
 }
 
@@ -159,6 +152,7 @@ mod tests {
     #[test]
     fn example_dir() {
         use super::{get_pages, render_page, Config, Page, TitleConfig};
+        use indoc::indoc;
 
         let config = Config {
             root: "example",
@@ -177,10 +171,21 @@ mod tests {
 
         let page = render_page(&pages[0]).unwrap();
 
-        assert_eq!(
-            &page,
-            "<html><body><div id=\"content\"><p>Here is a getting started thingie.</p>\n</div></body></html>"
-        );
+        let result = indoc! {"
+            <html>
+              <head>
+                <title>Getting started</title>
+              </head>
+              <body>
+                <div id=\"content\">
+                  <p>Here is a getting started thingie.</p>
+
+                </div>
+              </body>
+            </html>
+        "};
+
+        assert_eq!(&page, result);
 
         assert!(!pages[1].id.is_empty());
         assert_eq!(&pages[1].title, "Welcome");
