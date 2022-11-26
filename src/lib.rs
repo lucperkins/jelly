@@ -1,11 +1,24 @@
 use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
+use handlebars::{Handlebars, RenderError, TemplateError};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
+use std::string::FromUtf8Error;
 use titlecase::titlecase;
+
+#[allow(dead_code)]
+fn render_page(page: &Page) -> Result<String, ContentError> {
+    let mut h = Handlebars::new();
+    h.set_strict_mode(true);
+    h.register_template_file("html", "src/template/page.hbs")?;
+    let html = page.html.as_str();
+    let s = h.render("html", &json!({ "content": html, "title": page.title }))?;
+    Ok(s)
+}
 
 #[derive(Serialize)]
 pub struct Page {
@@ -37,8 +50,7 @@ impl Page {
 
         let relative_path = path.strip_prefix(config.root)?.to_string_lossy();
 
-        let mut options = ComrakOptions::default();
-        //options.extension.header_ids = Some("user-content-".to_string());
+        let options = ComrakOptions::default();
 
         let html = markdown_to_html(&result.content, &options);
 
@@ -74,6 +86,15 @@ pub enum ContentError {
 
     #[error("prefix error: {0}")]
     Prefix(#[from] std::path::StripPrefixError),
+
+    #[error("render error: {0}")]
+    Render(#[from] RenderError),
+
+    #[error("UTF-8 error: {0}")]
+    Utf8(#[from] FromUtf8Error),
+
+    #[error("template error: {0}")]
+    Template(#[from] TemplateError),
 }
 
 pub struct Config {
@@ -99,6 +120,7 @@ fn infer_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> S
     front.title.unwrap_or_else(|| {
         let stem = path.file_stem().unwrap();
 
+        #[allow(clippy::single_char_pattern)]
         let deslugged = stem.to_string_lossy().replace("-", " ");
 
         if title_config.title_case {
@@ -132,7 +154,8 @@ pub fn get_pages(config: Config) -> Result<Vec<Page>, ContentError> {
 mod tests {
     #[test]
     fn example_dir() {
-        use super::{get_pages, Config, Page, TitleConfig};
+        use super::{get_pages, render_page, Config, Page, TitleConfig};
+        use indoc::indoc;
 
         let config = Config {
             root: "example",
@@ -148,6 +171,24 @@ mod tests {
             &pages[0].html,
             "<p>Here is a getting started thingie.</p>\n"
         );
+
+        let page = render_page(&pages[0]).unwrap();
+
+        let result = indoc! {"
+            <html>
+              <head>
+                <title>Getting started</title>
+              </head>
+              <body>
+                <div id=\"content\">
+                  <p>Here is a getting started thingie.</p>
+
+                </div>
+              </body>
+            </html>
+        "};
+
+        assert_eq!(&page, result);
 
         assert!(!pages[1].id.is_empty());
         assert_eq!(&pages[1].title, "Welcome");
