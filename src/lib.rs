@@ -1,11 +1,29 @@
 use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
+use handlebars::{Handlebars, RenderError, TemplateError};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
+use std::string::FromUtf8Error;
 use titlecase::titlecase;
+
+fn render_page(page: &Page) -> Result<String, ContentError> {
+    let mut h = Handlebars::new();
+
+    h.register_template_string(
+        "html",
+        r#"<html><body><div id="content">{{{ content }}}</div></body></html>"#,
+    )?;
+    let html = page.html.as_str();
+    let s = h.render("html", &json!({ "content": html }))?;
+
+    println!("{}", s);
+
+    Ok(s)
+}
 
 #[derive(Serialize)]
 pub struct Page {
@@ -37,8 +55,7 @@ impl Page {
 
         let relative_path = path.strip_prefix(config.root)?.to_string_lossy();
 
-        let mut options = ComrakOptions::default();
-        //options.extension.header_ids = Some("user-content-".to_string());
+        let options = ComrakOptions::default();
 
         let html = markdown_to_html(&result.content, &options);
 
@@ -74,6 +91,15 @@ pub enum ContentError {
 
     #[error("prefix error: {0}")]
     Prefix(#[from] std::path::StripPrefixError),
+
+    #[error("render error: {0}")]
+    Render(#[from] RenderError),
+
+    #[error("UTF-8 error: {0}")]
+    Utf8(#[from] FromUtf8Error),
+
+    #[error("template error: {0}")]
+    Template(#[from] TemplateError),
 }
 
 pub struct Config {
@@ -132,7 +158,7 @@ pub fn get_pages(config: Config) -> Result<Vec<Page>, ContentError> {
 mod tests {
     #[test]
     fn example_dir() {
-        use super::{get_pages, Config, Page, TitleConfig};
+        use super::{get_pages, render_page, Config, Page, TitleConfig};
 
         let config = Config {
             root: "example",
@@ -147,6 +173,13 @@ mod tests {
         assert_eq!(
             &pages[0].html,
             "<p>Here is a getting started thingie.</p>\n"
+        );
+
+        let page = render_page(&pages[0]).unwrap();
+
+        assert_eq!(
+            &page,
+            "<html><body><div id=\"content\"><p>Here is a getting started thingie.</p>\n</div></body></html>"
         );
 
         assert!(!pages[1].id.is_empty());
