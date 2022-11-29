@@ -31,6 +31,7 @@
       '';
 
       ci = writeScriptBin "ci" ''
+        cargo fmt --check
         cargo clippy
         cargo build --release
         cargo test
