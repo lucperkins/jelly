@@ -32,7 +32,7 @@ impl Page {
             None => FrontMatter::default(),
         };
 
-        let title: String = infer_title(front, path, &config.title_config);
+        let title: String = infer_page_title(front, path, &config.title_config);
 
         let id = base64::encode(&title);
 
@@ -59,8 +59,8 @@ struct FrontMatter {
 }
 
 pub struct TitleConfig {
-    title_case: bool,
-    first_letter_capitalized: bool,
+    pub title_case: bool,
+    pub first_letter_capitalized: bool,
 }
 
 impl Default for TitleConfig {
@@ -72,7 +72,7 @@ impl Default for TitleConfig {
     }
 }
 
-fn infer_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> String {
+fn infer_page_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> String {
     front.title.unwrap_or_else(|| {
         let stem = path.file_stem().unwrap();
 

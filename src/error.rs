@@ -12,6 +12,9 @@ pub enum ContentError {
     #[error("glob error: {0}")]
     Glob(#[from] glob::GlobError),
 
+    #[error("no pages found in directory: {0}")]
+    NoPages(String),
+
     #[error("prefix error: {0}")]
     Prefix(#[from] std::path::StripPrefixError),
 
