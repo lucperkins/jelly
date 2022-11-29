@@ -1,4 +1,7 @@
+use crate::error::ContentError;
 use crate::page::TitleConfig;
+use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 use titlecase::titlecase;
 
@@ -22,6 +25,13 @@ pub fn name_from_path(
             deslugged
         }
     })
+}
+
+pub fn get_file(path: &Path) -> Result<String, ContentError> {
+    let mut file = File::open(path.as_os_str())?;
+    let mut contents = String::new();
+    let _ = file.read_to_string(&mut contents)?;
+    Ok(contents)
 }
 
 fn capitalize_first_letter(s: &str) -> String {

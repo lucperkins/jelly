@@ -1,12 +1,10 @@
 use super::config::Config;
 use super::error::ContentError;
-use super::utils::name_from_path;
+use super::utils::{get_file, name_from_path};
 use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use serde::Deserialize;
-use std::fs::File;
-use std::io::Read;
 use std::path::Path;
 
 pub struct Page {
@@ -20,12 +18,10 @@ pub struct Page {
 
 impl Page {
     pub fn from_path(path: &Path, config: &Config) -> Result<Self, ContentError> {
-        let mut file = File::open(path.as_os_str())?;
-        let mut contents = String::new();
-        let _ = file.read_to_string(&mut contents)?;
+        let file = get_file(path)?;
 
         let matter = Matter::<YAML>::new();
-        let result = matter.parse(&contents);
+        let result = matter.parse(&file);
 
         let front: FrontMatter = match result.data {
             Some(f) => f.deserialize()?,
