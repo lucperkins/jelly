@@ -31,11 +31,11 @@ pub fn get_sections(config: &Config) -> Result<Vec<Section>, ContentError> {
                 let yaml_file_str = read_to_string(yaml_path)?;
                 let section_config: SectionConfig = serde_yaml::from_str(&yaml_file_str)?;
                 let section_title =
-                    name_from_path(section_config.title, &path, &config.title_config);
+                    name_from_path(section_config.title, path, &config.title_config);
 
                 let pages = get_pages_in_dir(path, config)?;
 
-                if pages.len() == 0 {
+                if pages.is_empty() {
                     return Err(ContentError::NoPages(String::from(path.to_string_lossy())));
                 }
 
