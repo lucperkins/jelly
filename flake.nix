@@ -24,25 +24,25 @@
       ];
 
       pkgs = import nixpkgs { inherit system overlays; };
+      inherit (pkgs) mkShell writeScriptBin;
 
-      xFunc = cmd: pkgs.writeScriptBin "x-${cmd}" ''
+      xFunc = cmd: writeScriptBin "x-${cmd}" ''
         cargo watch -x ${cmd}
       '';
 
-      scripts = with pkgs; [
-        (xFunc "check")
-        (xFunc "run")
-        (xFunc "test")
+      ci = writeScriptBin "ci" ''
+        cargo clippy
+        cargo build --release
+        cargo test
+      '';
 
-        (writeScriptBin "ci" ''
-          cargo clippy
-          cargo build --release
-          cargo test
-        '')
+      scripts = [
+        ci
+        (builtins.map (cmd: xFunc cmd) [ "build" "check" "run" "test" ])
       ];
     in
     {
-      devShells.default = pkgs.mkShell {
+      devShells.default = mkShell {
         buildInputs = (with pkgs; [
           rustToolchain
           cargo-edit
