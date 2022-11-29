@@ -35,6 +35,7 @@
         (xFunc "test")
 
         (writeScriptBin "ci" ''
+          cargo clippy
           cargo build --release
           cargo test
         '')

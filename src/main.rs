@@ -5,7 +5,7 @@ use std::path::PathBuf;
 #[derive(Args)]
 #[command(about = "Build a Jelly project")]
 struct Build {
-    #[arg(short, long, default_value = ".")]
+    #[arg(short, long, help = "The root docs directory", default_value = "docs")]
     source: PathBuf,
 }
 
