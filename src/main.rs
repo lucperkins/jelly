@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::{build_site, Config, ContentError, TitleConfig};
+use jelly::{build_site, config::Config, error::ContentError, page::TitleConfig};
 use std::path::PathBuf;
 
 #[derive(Args)]

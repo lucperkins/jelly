@@ -1,16 +1,13 @@
-use comrak::{markdown_to_html, ComrakOptions};
-use gray_matter::engine::YAML;
-use gray_matter::Matter;
-use handlebars::{Handlebars, RenderError, TemplateError};
-use serde::{Deserialize, Serialize};
+use crate::config::Config;
+use crate::error::ContentError;
+use handlebars::Handlebars;
+use page::Page;
 use serde_json::json;
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::{Path, PathBuf};
-use std::string::FromUtf8Error;
-use titlecase::titlecase;
+use std::path::PathBuf;
 
-static DEFAULT_DOCS_DIR: &str = "docs";
+pub mod config;
+pub mod error;
+pub mod page;
 
 pub fn build_site(config: &Config) -> Result<(), ContentError> {
     let pages = get_pages(config)?;
@@ -30,132 +27,6 @@ fn render_page(page: &Page) -> Result<String, ContentError> {
     let html = page.html.as_str();
     let s = h.render("html", &json!({ "content": html, "title": page.title }))?;
     Ok(s)
-}
-
-#[derive(Serialize)]
-pub struct Page {
-    pub id: String,
-    pub path: String,
-    pub relative_path: String,
-    pub title: String,
-    pub body: String,
-    pub html: String,
-}
-
-impl Page {
-    fn from_path(path: &Path, config: &Config) -> Result<Self, ContentError> {
-        let mut file = File::open(path.as_os_str())?;
-        let mut contents = String::new();
-        let _ = file.read_to_string(&mut contents)?;
-
-        let matter = Matter::<YAML>::new();
-        let result = matter.parse(&contents);
-
-        let front: FrontMatter = match result.data {
-            Some(f) => f.deserialize()?,
-            None => FrontMatter::default(),
-        };
-
-        let title: String = infer_title(front, path, &config.title_config);
-
-        let id = base64::encode(&title);
-
-        let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
-
-        let options = ComrakOptions::default();
-
-        let html = markdown_to_html(&result.content, &options);
-
-        Ok(Page {
-            id,
-            path: String::from(path.to_string_lossy()),
-            relative_path: String::from(relative_path),
-            title,
-            body: result.content,
-            html,
-        })
-    }
-}
-
-#[derive(Default, Deserialize)]
-struct FrontMatter {
-    title: Option<String>,
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum ContentError {
-    #[error("I/O error: {0}")]
-    Io(#[from] std::io::Error),
-
-    #[error("JSON error: {0}")]
-    Json(#[from] serde_json::Error),
-
-    #[error("pattern error: {0}")]
-    Pattern(#[from] glob::PatternError),
-
-    #[error("glob error: {0}")]
-    Glob(#[from] glob::GlobError),
-
-    #[error("prefix error: {0}")]
-    Prefix(#[from] std::path::StripPrefixError),
-
-    #[error("render error: {0}")]
-    Render(#[from] RenderError),
-
-    #[error("UTF-8 error: {0}")]
-    Utf8(#[from] FromUtf8Error),
-
-    #[error("template error: {0}")]
-    Template(#[from] TemplateError),
-}
-
-pub struct Config {
-    pub root: PathBuf,
-    pub title_config: TitleConfig,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            root: PathBuf::from(DEFAULT_DOCS_DIR),
-            title_config: TitleConfig::default(),
-        }
-    }
-}
-
-pub struct TitleConfig {
-    title_case: bool,
-    first_letter_capitalized: bool,
-}
-
-impl Default for TitleConfig {
-    fn default() -> Self {
-        Self {
-            title_case: false,
-            first_letter_capitalized: true,
-        }
-    }
-}
-
-fn infer_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> String {
-    front.title.unwrap_or_else(|| {
-        let stem = path.file_stem().unwrap();
-
-        #[allow(clippy::single_char_pattern)]
-        let deslugged = stem.to_string_lossy().replace("-", " ");
-
-        if title_config.title_case {
-            titlecase(&deslugged)
-        } else if title_config.first_letter_capitalized {
-            capitalize_first_letter(&deslugged)
-        } else {
-            deslugged
-        }
-    })
-}
-
-fn capitalize_first_letter(s: &str) -> String {
-    s[0..1].to_uppercase() + &s[1..]
 }
 
 pub fn get_pages(config: &Config) -> Result<Vec<Page>, ContentError> {
