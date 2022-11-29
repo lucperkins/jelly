@@ -9,6 +9,7 @@ pub mod config;
 pub mod error;
 pub mod page;
 pub mod section;
+pub mod utils;
 
 pub fn build_site(config: &Config) -> Result<(), ContentError> {
     let pages = get_pages(config)?;

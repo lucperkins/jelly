@@ -1,5 +1,6 @@
 use super::config::Config;
 use super::error::ContentError;
+use super::utils::name_from_path;
 use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
@@ -7,7 +8,6 @@ use serde::Deserialize;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use titlecase::titlecase;
 
 pub struct Page {
     pub id: String,
@@ -73,22 +73,5 @@ impl Default for TitleConfig {
 }
 
 fn infer_page_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> String {
-    front.title.unwrap_or_else(|| {
-        let stem = path.file_stem().unwrap();
-
-        #[allow(clippy::single_char_pattern)]
-        let deslugged = stem.to_string_lossy().replace("-", " ");
-
-        if title_config.title_case {
-            titlecase(&deslugged)
-        } else if title_config.first_letter_capitalized {
-            capitalize_first_letter(&deslugged)
-        } else {
-            deslugged
-        }
-    })
-}
-
-fn capitalize_first_letter(s: &str) -> String {
-    s[0..1].to_uppercase() + &s[1..]
+    name_from_path(front.title, path, title_config)
 }
