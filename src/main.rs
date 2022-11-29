@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::{build_site, config::Config, error::ContentError, page::TitleConfig};
+use jelly::{config::Config, error::ContentError, page::TitleConfig, section::get_sections};
 use std::path::PathBuf;
 
 #[derive(Args)]
@@ -34,7 +34,15 @@ fn main() -> Result<(), ContentError> {
                 title_config: TitleConfig::default(),
             };
 
-            build_site(&config)?;
+            let sections = get_sections(&config)?;
+
+            for section in sections {
+                println!(
+                    "(title: {title}, num_pages: {num})",
+                    title = section.title,
+                    num = section.pages.len()
+                );
+            }
         }
     }
 

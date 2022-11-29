@@ -23,4 +23,10 @@ pub enum ContentError {
 
     #[error("template error: {0}")]
     Template(#[from] handlebars::TemplateError),
+
+    #[error("walk dir error: {0}")]
+    Walk(#[from] walkdir::Error),
+
+    #[error("yaml parse error: {0}")]
+    Yaml(#[from] serde_yaml::Error),
 }

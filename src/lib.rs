@@ -3,11 +3,12 @@ use crate::error::ContentError;
 use handlebars::Handlebars;
 use page::Page;
 use serde_json::json;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub mod config;
 pub mod error;
 pub mod page;
+pub mod section;
 
 pub fn build_site(config: &Config) -> Result<(), ContentError> {
     let pages = get_pages(config)?;
@@ -27,6 +28,18 @@ fn render_page(page: &Page) -> Result<String, ContentError> {
     let html = page.html.as_str();
     let s = h.render("html", &json!({ "content": html, "title": page.title }))?;
     Ok(s)
+}
+
+pub fn get_pages_in_dir(dir: &Path, config: &Config) -> Result<Vec<Page>, ContentError> {
+    let mut pages: Vec<Page> = Vec::new();
+    let md = format!("{}/*.md", dir.display());
+    let entries = glob::glob(&md)?;
+    for entry in entries {
+        let path: PathBuf = entry?;
+        let page = Page::from_path(&path, config)?;
+        pages.push(page);
+    }
+    Ok(pages)
 }
 
 pub fn get_pages(config: &Config) -> Result<Vec<Page>, ContentError> {
