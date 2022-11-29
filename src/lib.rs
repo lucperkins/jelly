@@ -9,16 +9,8 @@ pub mod config;
 pub mod error;
 pub mod page;
 pub mod section;
+pub mod site;
 pub mod utils;
-
-pub fn build_site(config: &Config) -> Result<(), ContentError> {
-    let pages = get_pages(config)?;
-    for page in pages {
-        let html = render_page(&page)?;
-        println!("{}", html);
-    }
-    Ok(())
-}
 
 #[allow(dead_code)]
 fn render_page(page: &Page) -> Result<String, ContentError> {

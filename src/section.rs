@@ -18,24 +18,23 @@ pub struct Section {
     pub pages: Vec<Page>,
 }
 
-pub fn get_sections(config: &Config) -> Result<Vec<Section>, ContentError> {
+pub fn get_sections(path: &Path, config: &Config) -> Result<Vec<Section>, ContentError> {
     let mut sections: Vec<Section> = Vec::new();
 
-    for entry in WalkDir::new(&config.root) {
+    for entry in WalkDir::new(path) {
         let maybe_entry = entry?;
         let path = maybe_entry.path();
-
         if path.is_dir() {
             let section = dir_to_section(path, config)?;
             sections.push(section);
         }
     }
 
-    Ok(sections)
+    Ok(vec![])
 }
 
 fn dir_to_section(path: &Path, config: &Config) -> Result<Section, ContentError> {
-    let yaml_path = Path::new(path).join("_meta.yaml");
+    let yaml_path = Path::new(path).join("_dir.yaml");
     if yaml_path.exists() {
         let yaml_file_str = read_to_string(yaml_path)?;
         let section_config: SectionConfig = serde_yaml::from_str(&yaml_file_str)?;
