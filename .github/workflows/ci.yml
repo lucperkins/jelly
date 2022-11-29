@@ -10,6 +10,7 @@ on:
 
 jobs:
   build_and_test:
+    environment: build
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -17,6 +18,15 @@ jobs:
         with:
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            binary-caches = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
       - run: nix develop --command cargo clippy
       - run: nix develop --command cargo build --release
+      - uses: cachix/cachix-action@v12
+        with:
+          name: ${{ secrets.CACHIX_CACHE }}
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - run: nix develop --command cargo build
       - run: nix develop --command cargo test
+      - run: |
+          nix develop --profile jelly-dev-env
+          cachix push ${{ secrets.CACHIX_CACHE }} jelly-dev-env
