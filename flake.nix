@@ -25,12 +25,17 @@
 
       pkgs = import nixpkgs { inherit system overlays; };
 
+      xFunc = cmd: pkgs.writeScriptBin "x-${cmd}" ''
+        cargo watch -x ${cmd}
+      '';
+
       scripts = with pkgs; [
-        (writeScriptBin "dev" ''
-          cargo watch -x check
-        '')
+        (xFunc "check")
+        (xFunc "run")
+        (xFunc "test")
 
         (writeScriptBin "ci" ''
+          cargo clippy
           cargo build --release
           cargo test
         '')

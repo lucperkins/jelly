@@ -10,11 +10,23 @@ use std::path::{Path, PathBuf};
 use std::string::FromUtf8Error;
 use titlecase::titlecase;
 
+static DEFAULT_DOCS_DIR: &str = "docs";
+
+pub fn build_site(config: &Config) -> Result<(), ContentError> {
+    let pages = get_pages(config)?;
+    for page in pages {
+        let html = render_page(&page)?;
+        println!("{}", html);
+    }
+    Ok(())
+}
+
 #[allow(dead_code)]
 fn render_page(page: &Page) -> Result<String, ContentError> {
     let mut h = Handlebars::new();
     h.set_strict_mode(true);
-    h.register_template_file("html", "src/template/page.hbs")?;
+    let template = include_str!("template/page.hbs");
+    let _ = h.register_template_string("html", template);
     let html = page.html.as_str();
     let s = h.render("html", &json!({ "content": html, "title": page.title }))?;
     Ok(s)
@@ -48,7 +60,7 @@ impl Page {
 
         let id = base64::encode(&title);
 
-        let relative_path = path.strip_prefix(config.root)?.to_string_lossy();
+        let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
 
         let options = ComrakOptions::default();
 
@@ -98,11 +110,20 @@ pub enum ContentError {
 }
 
 pub struct Config {
-    root: &'static str,
-    title_config: TitleConfig,
+    pub root: PathBuf,
+    pub title_config: TitleConfig,
 }
 
-struct TitleConfig {
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            root: PathBuf::from(DEFAULT_DOCS_DIR),
+            title_config: TitleConfig::default(),
+        }
+    }
+}
+
+pub struct TitleConfig {
     title_case: bool,
     first_letter_capitalized: bool,
 }
@@ -137,14 +158,14 @@ fn capitalize_first_letter(s: &str) -> String {
     s[0..1].to_uppercase() + &s[1..]
 }
 
-pub fn get_pages(config: Config) -> Result<Vec<Page>, ContentError> {
+pub fn get_pages(config: &Config) -> Result<Vec<Page>, ContentError> {
     let mut pages: Vec<Page> = Vec::new();
-    let md = format!("{}/**/*.md", config.root);
+    let md = format!("{}/**/*.md", config.root.display());
     let entries = glob::glob(&md)?;
 
     for entry in entries {
         let path: PathBuf = entry?;
-        let page = Page::from_path(&path, &config)?;
+        let page = Page::from_path(&path, config)?;
         pages.push(page);
     }
 
@@ -154,17 +175,14 @@ pub fn get_pages(config: Config) -> Result<Vec<Page>, ContentError> {
 mod tests {
     #[test]
     fn example_dir() {
-        use super::{get_pages, render_page, Config, Page, TitleConfig};
+        use super::{get_pages, render_page, Config, Page};
         use indoc::indoc;
 
-        let config = Config {
-            root: "example",
-            title_config: TitleConfig::default(),
-        };
-        let pages: Vec<Page> = get_pages(config).unwrap();
+        let config = Config::default();
+        let pages: Vec<Page> = get_pages(&config).unwrap();
         assert!(!pages[0].id.is_empty());
         assert_eq!(&pages[0].title, "Getting started");
-        assert_eq!(&pages[0].path, "example/getting-started.md");
+        assert_eq!(&pages[0].path, "docs/getting-started.md");
         assert_eq!(&pages[0].relative_path, "getting-started.md");
         assert_eq!(&pages[0].body, "Here is a getting started thingie.");
         assert_eq!(
@@ -192,7 +210,7 @@ mod tests {
 
         assert!(!pages[1].id.is_empty());
         assert_eq!(&pages[1].title, "Welcome");
-        assert_eq!(&pages[1].path, "example/index.md");
+        assert_eq!(&pages[1].path, "docs/index.md");
         assert_eq!(&pages[1].relative_path, "index.md");
         assert_eq!(
             &pages[1].body,
