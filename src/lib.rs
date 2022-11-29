@@ -10,6 +10,15 @@ use std::path::{Path, PathBuf};
 use std::string::FromUtf8Error;
 use titlecase::titlecase;
 
+pub fn build_site(config: &Config) -> Result<(), ContentError> {
+    let pages = get_pages(config)?;
+    for page in pages {
+        let html = render_page(&page)?;
+        println!("{}", html);
+    }
+    Ok(())
+}
+
 #[allow(dead_code)]
 fn render_page(page: &Page) -> Result<String, ContentError> {
     let mut h = Handlebars::new();
@@ -48,7 +57,7 @@ impl Page {
 
         let id = base64::encode(&title);
 
-        let relative_path = path.strip_prefix(config.root)?.to_string_lossy();
+        let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
 
         let options = ComrakOptions::default();
 
@@ -98,11 +107,11 @@ pub enum ContentError {
 }
 
 pub struct Config {
-    root: &'static str,
-    title_config: TitleConfig,
+    pub root: PathBuf,
+    pub title_config: TitleConfig,
 }
 
-struct TitleConfig {
+pub struct TitleConfig {
     title_case: bool,
     first_letter_capitalized: bool,
 }
@@ -137,14 +146,15 @@ fn capitalize_first_letter(s: &str) -> String {
     s[0..1].to_uppercase() + &s[1..]
 }
 
-pub fn get_pages(config: Config) -> Result<Vec<Page>, ContentError> {
+pub fn get_pages(config: &Config) -> Result<Vec<Page>, ContentError> {
+    let root = config.root.display();
     let mut pages: Vec<Page> = Vec::new();
-    let md = format!("{}/**/*.md", config.root);
+    let md = format!("{}/**/*.md", root);
     let entries = glob::glob(&md)?;
 
     for entry in entries {
         let path: PathBuf = entry?;
-        let page = Page::from_path(&path, &config)?;
+        let page = Page::from_path(&path, config)?;
         pages.push(page);
     }
 
@@ -156,9 +166,10 @@ mod tests {
     fn example_dir() {
         use super::{get_pages, render_page, Config, Page, TitleConfig};
         use indoc::indoc;
+        use std::path::PathBuf;
 
         let config = Config {
-            root: "example",
+            root: PathBuf::from("example"),
             title_config: TitleConfig::default(),
         };
         let pages: Vec<Page> = get_pages(config).unwrap();
