@@ -15,6 +15,9 @@ pub enum ContentError {
     #[error("no pages found in directory: {0}")]
     NoPages(String),
 
+    #[error("no _meta.yaml found in directory: {0}")]
+    NoMetaYamlFile(String),
+
     #[error("prefix error: {0}")]
     Prefix(#[from] std::path::StripPrefixError),
 
