@@ -1,5 +1,6 @@
 use super::config::Config;
 use super::error::ContentError;
+use super::md::get_document_title;
 use super::utils::{get_file, name_from_path};
 use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
@@ -28,7 +29,7 @@ impl Page {
             None => FrontMatter::default(),
         };
 
-        let title: String = infer_page_title(front, path, &config.title_config);
+        let title: String = infer_page_title(front, path, file, &config.title_config)?;
 
         let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
 
@@ -65,6 +66,17 @@ impl Default for TitleConfig {
     }
 }
 
-fn infer_page_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> String {
-    name_from_path(front.title, path, title_config)
+fn infer_page_title(
+    front: FrontMatter,
+    path: &Path,
+    file: String,
+    title_config: &TitleConfig,
+) -> Result<String, ContentError> {
+    match front.title {
+        Some(title) => Ok(title),
+        None => match get_document_title(&file)? {
+            Some(title) => Ok(title),
+            None => Ok(name_from_path(path, title_config)),
+        },
+    }
 }

@@ -10,6 +10,7 @@ use std::{
 
 pub mod config;
 pub mod error;
+pub mod md;
 pub mod page;
 pub mod section;
 pub mod site;

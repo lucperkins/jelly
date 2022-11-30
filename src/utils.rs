@@ -5,26 +5,20 @@ use std::io::Read;
 use std::path::Path;
 use titlecase::titlecase;
 
-pub fn name_from_path(
-    maybe_title: Option<String>,
-    path: &Path,
-    title_config: &TitleConfig,
-) -> String {
-    maybe_title.unwrap_or_else(|| {
-        let stem = path.file_stem().unwrap();
-        let stem_str = stem.to_string_lossy();
+pub fn name_from_path(path: &Path, title_config: &TitleConfig) -> String {
+    let stem = path.file_stem().unwrap();
+    let stem_str = stem.to_string_lossy();
 
-        #[allow(clippy::single_char_pattern)]
-        let deslugged = stem_str.replace("-", " ");
+    #[allow(clippy::single_char_pattern)]
+    let deslugged = stem_str.replace("-", " ");
 
-        if title_config.title_case {
-            titlecase(&deslugged)
-        } else if title_config.first_letter_capitalized {
-            capitalize_first_letter(&deslugged)
-        } else {
-            deslugged
-        }
-    })
+    if title_config.title_case {
+        titlecase(&deslugged)
+    } else if title_config.first_letter_capitalized {
+        capitalize_first_letter(&deslugged)
+    } else {
+        deslugged
+    }
 }
 
 pub fn get_file(path: &Path) -> Result<String, ContentError> {
