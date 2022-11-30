@@ -34,8 +34,12 @@ pub fn get_pages_in_dir(dir: &Path, config: &Config) -> Result<Vec<Page>, Conten
         let path = entry.path();
         let meta = metadata(&path)?;
         if meta.is_file() {
-            let page = Page::from_path(&path, config)?;
-            pages.push(page);
+            let ext = path.extension();
+
+            if ext.is_some() && ext.unwrap().to_string_lossy().ends_with("md") {
+                let page = Page::from_path(&path, config)?;
+                pages.push(page);
+            }
         }
     }
 

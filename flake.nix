@@ -14,15 +14,18 @@
     , rust-overlay
     }:
 
-    flake-utils.lib.eachDefaultSystem (system:
     let
+      cargoSha256 = "sha256-LBNvi9HTSKZb+OdFn4nmidUAqvdDlNJF1PnqYgw+2E0=";
+
       overlays = [
         (import rust-overlay)
         (self: super: {
           rustToolchain = super.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
         })
       ];
-
+    in
+    flake-utils.lib.eachDefaultSystem (system:
+    let
       pkgs = import nixpkgs { inherit system overlays; };
       inherit (pkgs) mkShell writeScriptBin;
 
@@ -46,7 +49,7 @@
       packages.default = pkgs.rustPlatform.buildRustPackage {
         name = "jelly";
         src = ./.;
-        cargoSha256 = "sha256-LBNvi9HTSKZb+OdFn4nmidUAqvdDlNJF1PnqYgw+2E0=";
+        inherit cargoSha256;
       };
 
       devShells.default = mkShell {
