@@ -1,10 +1,9 @@
-use crate::error::ContentError;
 use comrak::{
     nodes::{AstNode, NodeCode, NodeValue},
     parse_document, Arena, ComrakOptions,
 };
 
-pub fn get_document_title(body: &str) -> Result<Option<String>, ContentError> {
+pub fn get_document_title(body: &str) -> Option<String> {
     let arena = Arena::new();
     let root = parse_document(&arena, body, &ComrakOptions::default());
 
@@ -21,16 +20,14 @@ pub fn get_document_title(body: &str) -> Result<Option<String>, ContentError> {
         if header.level == 1 && num_headers == 1 {
             let mut text: Vec<u8> = Vec::new();
             get_header_text(node, &mut text);
-            return match String::from_utf8(text) {
-                Ok(s) => Ok(Some(s)),
-                Err(e) => Err(ContentError::Utf8(e)),
-            };
+            let h = String::from_utf8_lossy(&text).to_string();
+            return Some(h);
         } else {
             continue;
         }
     }
 
-    Ok(None)
+    None
 }
 
 fn get_header_text<'a>(node: &'a AstNode<'a>, output: &mut Vec<u8>) {

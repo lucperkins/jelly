@@ -29,7 +29,7 @@ impl Page {
             None => FrontMatter::default(),
         };
 
-        let title: String = infer_page_title(front, path, file, &config.title_config)?;
+        let title: String = infer_page_title(front, path, file, &config.title_config);
 
         let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
 
@@ -71,12 +71,8 @@ fn infer_page_title(
     path: &Path,
     file: String,
     title_config: &TitleConfig,
-) -> Result<String, ContentError> {
-    match front.title {
-        Some(title) => Ok(title),
-        None => match get_document_title(&file)? {
-            Some(title) => Ok(title),
-            None => Ok(name_from_path(path, title_config)),
-        },
-    }
+) -> String {
+    front
+        .title
+        .unwrap_or(get_document_title(&file).unwrap_or(name_from_path(path, title_config)))
 }
