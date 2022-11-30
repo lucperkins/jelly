@@ -30,9 +30,6 @@ pub enum ContentError {
     #[error("UTF-8 error: {0}")]
     Utf8(#[from] std::string::FromUtf8Error),
 
-    #[error("walk dir error: {0}")]
-    Walk(#[from] walkdir::Error),
-
     #[error("yaml parse error: {0}")]
     Yaml(#[from] serde_yaml::Error),
 }
