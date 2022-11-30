@@ -9,7 +9,6 @@ use std::path::Path;
 
 #[derive(Debug)]
 pub struct Page {
-    pub id: String,
     pub path: String,
     pub relative_path: String,
     pub title: String,
@@ -31,8 +30,6 @@ impl Page {
 
         let title: String = infer_page_title(front, path, &config.title_config);
 
-        let id = base64::encode(&title);
-
         let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
 
         let options = ComrakOptions::default();
@@ -40,7 +37,6 @@ impl Page {
         let html = markdown_to_html(&result.content, &options);
 
         Ok(Page {
-            id,
             path: String::from(path.to_string_lossy()),
             relative_path: String::from(relative_path),
             title,
