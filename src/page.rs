@@ -1,14 +1,13 @@
 use super::config::Config;
 use super::error::ContentError;
+use super::utils::{get_file, name_from_path};
 use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use serde::Deserialize;
-use std::fs::File;
-use std::io::Read;
 use std::path::Path;
-use titlecase::titlecase;
 
+#[derive(Debug)]
 pub struct Page {
     pub id: String,
     pub path: String,
@@ -20,19 +19,17 @@ pub struct Page {
 
 impl Page {
     pub fn from_path(path: &Path, config: &Config) -> Result<Self, ContentError> {
-        let mut file = File::open(path.as_os_str())?;
-        let mut contents = String::new();
-        let _ = file.read_to_string(&mut contents)?;
+        let file = get_file(path)?;
 
         let matter = Matter::<YAML>::new();
-        let result = matter.parse(&contents);
+        let result = matter.parse(&file);
 
         let front: FrontMatter = match result.data {
             Some(f) => f.deserialize()?,
             None => FrontMatter::default(),
         };
 
-        let title: String = infer_title(front, path, &config.title_config);
+        let title: String = infer_page_title(front, path, &config.title_config);
 
         let id = base64::encode(&title);
 
@@ -59,8 +56,8 @@ struct FrontMatter {
 }
 
 pub struct TitleConfig {
-    title_case: bool,
-    first_letter_capitalized: bool,
+    pub title_case: bool,
+    pub first_letter_capitalized: bool,
 }
 
 impl Default for TitleConfig {
@@ -72,23 +69,6 @@ impl Default for TitleConfig {
     }
 }
 
-fn infer_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> String {
-    front.title.unwrap_or_else(|| {
-        let stem = path.file_stem().unwrap();
-
-        #[allow(clippy::single_char_pattern)]
-        let deslugged = stem.to_string_lossy().replace("-", " ");
-
-        if title_config.title_case {
-            titlecase(&deslugged)
-        } else if title_config.first_letter_capitalized {
-            capitalize_first_letter(&deslugged)
-        } else {
-            deslugged
-        }
-    })
-}
-
-fn capitalize_first_letter(s: &str) -> String {
-    s[0..1].to_uppercase() + &s[1..]
+fn infer_page_title(front: FrontMatter, path: &Path, title_config: &TitleConfig) -> String {
+    name_from_path(front.title, path, title_config)
 }
