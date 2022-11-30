@@ -72,7 +72,7 @@ fn infer_page_title(
     file: String,
     title_config: &TitleConfig,
 ) -> String {
-    front
-        .title
-        .unwrap_or(get_document_title(&file).unwrap_or(name_from_path(path, title_config)))
+    front.title.unwrap_or_else(|| {
+        get_document_title(&file).unwrap_or_else(|| name_from_path(path, title_config))
+    })
 }

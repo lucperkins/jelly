@@ -65,12 +65,12 @@ fn dir_to_section(path: &Path, config: &Config) -> Result<Section, ContentError>
             }
             None => {
                 let t = title_from_index_page(path)?;
-                title = t.unwrap_or(name_from_path(path, &config.title_config))
+                title = t.unwrap_or_else(|| name_from_path(path, &config.title_config))
             }
         }
     } else {
         let t = title_from_index_page(path)?;
-        title = t.unwrap_or(name_from_path(path, &config.title_config));
+        title = t.unwrap_or_else(|| name_from_path(path, &config.title_config));
     }
 
     let pages = get_pages_in_dir(path, config)?;
