@@ -7,6 +7,7 @@ use gray_matter::Matter;
 use serde::Deserialize;
 use std::path::Path;
 
+#[derive(Debug)]
 pub struct Page {
     pub id: String,
     pub path: String,

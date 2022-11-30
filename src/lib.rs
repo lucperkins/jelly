@@ -3,7 +3,10 @@ use crate::error::ContentError;
 use handlebars::Handlebars;
 use page::Page;
 use serde_json::json;
-use std::path::{Path, PathBuf};
+use std::{
+    fs::{metadata, read_dir},
+    path::Path,
+};
 
 pub mod config;
 pub mod error;
@@ -25,77 +28,20 @@ fn render_page(page: &Page) -> Result<String, ContentError> {
 
 pub fn get_pages_in_dir(dir: &Path, config: &Config) -> Result<Vec<Page>, ContentError> {
     let mut pages: Vec<Page> = Vec::new();
-    let md = format!("{}/*.md", dir.display());
-    let entries = glob::glob(&md)?;
-    for entry in entries {
-        let path: PathBuf = entry?;
-        let page = Page::from_path(&path, config)?;
-        pages.push(page);
+
+    for entry in read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        let meta = metadata(&path)?;
+        if meta.is_file() {
+            let page = Page::from_path(&path, config)?;
+            pages.push(page);
+        }
     }
-    Ok(pages)
-}
 
-pub fn get_pages(config: &Config) -> Result<Vec<Page>, ContentError> {
-    let mut pages: Vec<Page> = Vec::new();
-    let md = format!("{}/**/*.md", config.root.display());
-    let entries = glob::glob(&md)?;
-
-    for entry in entries {
-        let path: PathBuf = entry?;
-        let page = Page::from_path(&path, config)?;
-        pages.push(page);
+    if pages.is_empty() {
+        return Err(ContentError::NoPages(String::from(dir.to_string_lossy())));
     }
 
     Ok(pages)
-}
-
-mod tests {
-    #[test]
-    fn example_dir() {
-        use super::{get_pages, render_page, Config, Page};
-        use indoc::indoc;
-
-        let config = Config::default();
-        let pages: Vec<Page> = get_pages(&config).unwrap();
-        assert!(!pages[0].id.is_empty());
-        assert_eq!(&pages[0].title, "Getting started");
-        assert_eq!(&pages[0].path, "docs/getting-started.md");
-        assert_eq!(&pages[0].relative_path, "getting-started.md");
-        assert_eq!(&pages[0].body, "Here is a getting started thingie.");
-        assert_eq!(
-            &pages[0].html,
-            "<p>Here is a getting started thingie.</p>\n"
-        );
-
-        let page = render_page(&pages[0]).unwrap();
-
-        let result = indoc! {"
-            <html>
-              <head>
-                <title>Getting started</title>
-              </head>
-              <body>
-                <div id=\"content\">
-                  <p>Here is a getting started thingie.</p>
-
-                </div>
-              </body>
-            </html>
-        "};
-
-        assert_eq!(&page, result);
-
-        assert!(!pages[1].id.is_empty());
-        assert_eq!(&pages[1].title, "Welcome");
-        assert_eq!(&pages[1].path, "docs/index.md");
-        assert_eq!(&pages[1].relative_path, "index.md");
-        assert_eq!(
-            &pages[1].body,
-            "Here is some content.\n\n## Heading\n\nAnd some more."
-        );
-        assert_eq!(
-            &pages[1].html,
-            "<p>Here is some content.</p>\n<h2>Heading</h2>\n<p>And some more.</p>\n"
-        );
-    }
 }

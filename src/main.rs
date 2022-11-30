@@ -37,7 +37,7 @@ fn main() -> Result<(), ContentError> {
             let site = build_site(&config)?;
 
             for section in site.sections {
-                println!("(title: {title})", title = section.title);
+                println!("{:?}", section);
             }
         }
     }
