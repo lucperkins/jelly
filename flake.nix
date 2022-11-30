@@ -43,6 +43,12 @@
       ];
     in
     {
+      packages.default = pkgs.rustPlatform.buildRustPackage {
+        name = "jelly";
+        src = ./.;
+        cargoSha256 = "sha256-LBNvi9HTSKZb+OdFn4nmidUAqvdDlNJF1PnqYgw+2E0=";
+      };
+
       devShells.default = mkShell {
         buildInputs = (with pkgs; [
           rustToolchain
