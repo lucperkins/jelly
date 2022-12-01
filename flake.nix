@@ -15,7 +15,10 @@
     }:
 
     let
-      cargoSha256 = "sha256-LBNvi9HTSKZb+OdFn4nmidUAqvdDlNJF1PnqYgw+2E0=";
+      cargoSha256 = "sha256-DY0V7c2Dn/Ium5vdMOga5NXQOFohHDCqIF+AQ9FsPHY=";
+
+      meta = (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package;
+      inherit (meta) name version;
 
       overlays = [
         (import rust-overlay)
@@ -47,7 +50,8 @@
     in
     {
       packages.default = pkgs.rustPlatform.buildRustPackage {
-        name = "jelly";
+        pname = name;
+        inherit version;
         src = ./.;
         inherit cargoSha256;
       };
