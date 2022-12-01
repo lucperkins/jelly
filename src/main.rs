@@ -35,10 +35,8 @@ fn main() -> Result<(), ContentError> {
             };
 
             let site = build_site(&config)?;
-
-            for section in site.sections {
-                println!("{:?}", section);
-            }
+            let site_as_str = serde_json::to_string_pretty(&site)?;
+            println!("{}", site_as_str);
         }
     }
 
