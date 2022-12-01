@@ -1,12 +1,12 @@
 use serde::Serialize;
 
 use crate::config::Config;
-use crate::content::{get_section, Section};
+use crate::content::{get_section, Content};
 use crate::error::ContentError;
 
 #[derive(Serialize)]
 pub struct Site {
-    pub content: Section,
+    pub content: Content,
 }
 
 pub fn build_site(config: &Config) -> Result<Site, ContentError> {

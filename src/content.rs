@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 use std::fs::{metadata, read_dir, read_to_string};
 use std::path::Path;
 
+pub type Content = Section;
+
 #[derive(Deserialize)]
 struct SectionConfig {
     title: Option<String>,
