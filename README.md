@@ -89,7 +89,11 @@ The table below shows the available parameters.
 
 Jelly provides numerous Markdown components out of the box:
 
-- Syntax highlighting.
+- Everything you expect from rich code blocks: syntax highlighting for numerous languages, copy code button upon hover, optional metadata like filename, optional line numbers, higlighted lines, and even annotations.
+- Admonition blocks (info, success, warning, danger, tip, bug, note, etc.).
+- Collapsible callout blocks (with open/closed status persisted in localStorage).
+- Per-page edit and view source buttons.
+- Hoverable tooltips for key terms.
 
 You can also create [custom components](#extensions).
 
@@ -114,6 +118,9 @@ The Jelly CLI makes it easy to create and develop extensions:
 
 ```shell
 jelly extension create my-extension && cd my-extension
+
+# Create JS, CSS, and other files
+
 jelly extension test
 ```
 
@@ -150,6 +157,15 @@ If you specify a realm, you can publish your site whenever you make changes:
 ```shell
 jelly publish
 ```
+
+When you publish, you coordinate with the central server, pushing any information upstream that the server needs to provide cross-project functionality (mostly search index information).
+
+Using realms has two key benefits:
+
+- You can toggle the site's search bar between local (in-project) and global (cross-project) search.
+- Each realm server produces a single (highly customizable) landing page providing information and links to all projects.
+
+In general, realms are intended largely for organizations with many documentation projects and software ecosystems with many closely related projects.
 
 [algolia]: https://algolia.com
 [es]: https://github.com/elastic/elasticsearch
