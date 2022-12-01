@@ -18,13 +18,16 @@ struct SectionConfig {
 #[derive(Debug, Serialize)]
 pub struct Section {
     title: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pages: Option<Vec<Page>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     sections: Option<Vec<Section>>,
 }
 
 pub fn get_section(path: &Path, config: &Config) -> Result<Section, ContentError> {
+    let root_section_title = get_section_title(path, config)?;
+    let pages: Vec<Page> = get_pages_in_dir(path, config)?;
     let mut sections: Vec<Section> = Vec::new();
-    let mut pages: Vec<Page> = Vec::new();
 
     for entry in read_dir(path)? {
         let entry = entry?;
@@ -32,21 +35,14 @@ pub fn get_section(path: &Path, config: &Config) -> Result<Section, ContentError
         let meta = metadata(&path)?;
 
         if meta.is_dir() {
-            let section = dir_to_section(&path, config)?;
+            let section = get_section(&path, config)?;
             sections.push(section);
-        }
-
-        if meta.is_file() && is_markdown(&path) {
-            let page = Page::from_path(&path, config)?;
-            pages.push(page);
         }
     }
 
-    let root_section_title = get_section_title(path, config)?;
-
     let root_section = Section {
         title: root_section_title,
-        pages: if pages.is_empty() { None } else { Some(pages) },
+        pages: get_or_none(pages),
         sections: get_or_none(sections),
     };
 
@@ -86,20 +82,6 @@ fn get_section_title(path: &Path, config: &Config) -> Result<String, ContentErro
     Ok(title)
 }
 
-fn dir_to_section(path: &Path, config: &Config) -> Result<Section, ContentError> {
-    let title = get_section_title(path, config)?;
-
-    let pages = get_pages_in_dir(path, config)?;
-
-    let sub_section = get_section(path, config)?;
-
-    Ok(Section {
-        title,
-        pages: get_or_none(pages),
-        sections: Some(vec![sub_section]),
-    })
-}
-
 // TODO: find a built-in function for this
 fn get_or_none<T>(items: Vec<T>) -> Option<Vec<T>> {
     if items.is_empty() {
@@ -107,9 +89,4 @@ fn get_or_none<T>(items: Vec<T>) -> Option<Vec<T>> {
     } else {
         Some(items)
     }
-}
-
-// TODO: make this more robust
-fn is_markdown(path: &Path) -> bool {
-    path.ends_with(".md")
 }
