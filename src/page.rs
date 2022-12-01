@@ -5,10 +5,10 @@ use super::utils::{get_file, name_from_path};
 use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Page {
     pub path: String,
     pub relative_path: String,

@@ -4,7 +4,7 @@ use crate::get_pages_in_dir;
 use crate::md::get_document_title;
 use crate::page::Page;
 use crate::utils::{get_file, name_from_path};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::fs::{metadata, read_dir, read_to_string};
 use std::path::Path;
 
@@ -13,7 +13,7 @@ struct SectionConfig {
     title: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Section {
     pub title: String,
     pub pages: Vec<Page>,

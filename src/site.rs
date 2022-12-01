@@ -1,7 +1,10 @@
+use serde::Serialize;
+
 use crate::config::Config;
 use crate::error::ContentError;
 use crate::section::{get_sections, Section};
 
+#[derive(Serialize)]
 pub struct Site {
     pub sections: Vec<Section>,
 }
