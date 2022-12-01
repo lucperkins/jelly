@@ -31,3 +31,12 @@ pub fn get_file(path: &Path) -> Result<String, ContentError> {
 fn capitalize_first_letter(s: &str) -> String {
     s[0..1].to_uppercase() + &s[1..]
 }
+
+// TODO: find a built-in function for this
+pub fn get_or_none<T>(items: Vec<T>) -> Option<Vec<T>> {
+    if items.is_empty() {
+        None
+    } else {
+        Some(items)
+    }
+}

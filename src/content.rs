@@ -3,7 +3,7 @@ use crate::error::ContentError;
 use crate::get_pages_in_dir;
 use crate::md::get_document_title;
 use crate::page::Page;
-use crate::utils::{get_file, name_from_path};
+use crate::utils::{get_file, get_or_none, name_from_path};
 use serde::{Deserialize, Serialize};
 use std::fs::{metadata, read_dir, read_to_string};
 use std::path::Path;
@@ -80,13 +80,4 @@ fn get_section_title(path: &Path, config: &Config) -> Result<String, ContentErro
         title = t.unwrap_or_else(|| name_from_path(path, &config.title_config))
     };
     Ok(title)
-}
-
-// TODO: find a built-in function for this
-fn get_or_none<T>(items: Vec<T>) -> Option<Vec<T>> {
-    if items.is_empty() {
-        None
-    } else {
-        Some(items)
-    }
 }
