@@ -7,10 +7,24 @@ use jelly::{
 use std::path::PathBuf;
 
 #[derive(Args)]
-#[command(about = "Build a Jelly project")]
+#[command(about = "Build a Jelly docs project")]
 struct Build {
-    #[arg(short, long, help = "The root docs directory", default_value = "docs")]
+    #[arg(
+        short,
+        long,
+        help = "The root content directory",
+        default_value = "./docs"
+    )]
     source: PathBuf,
+}
+
+impl From<Build> for SiteConfig {
+    fn from(b: Build) -> SiteConfig {
+        SiteConfig {
+            root: b.source,
+            title_config: TitleConfig::default(),
+        }
+    }
 }
 
 #[derive(Subcommand)]
@@ -31,18 +45,8 @@ fn main() -> Result<(), ContentError> {
 
     match cli.command {
         Build(args) => {
-            let root = args.source;
-
-            let config = SiteConfig {
-                root,
-                title_config: TitleConfig::default(),
-            };
-
-            let site = build_site(&config)?;
-            let site_as_str = serde_json::to_string_pretty(&site)?;
-            println!("{}", site_as_str);
+            let config: SiteConfig = args.into();
+            build_site(&config)
         }
     }
-
-    Ok(())
 }
