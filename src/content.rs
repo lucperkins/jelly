@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::config::SiteConfig;
 use crate::error::ContentError;
 use crate::get_pages_in_dir;
 use crate::md::get_document_title;
@@ -24,7 +24,7 @@ pub struct Section {
     sections: Option<Vec<Section>>,
 }
 
-pub fn get_section(path: &Path, config: &Config) -> Result<Section, ContentError> {
+pub fn get_section(path: &Path, config: &SiteConfig) -> Result<Section, ContentError> {
     let root_section_title = get_section_title(path, config)?;
     let pages: Vec<Page> = get_pages_in_dir(path, config)?;
     let mut sections: Vec<Section> = Vec::new();
@@ -62,7 +62,7 @@ fn title_from_index_page(path: &Path) -> Result<Option<String>, ContentError> {
     }
 }
 
-fn get_section_title(path: &Path, config: &Config) -> Result<String, ContentError> {
+fn get_section_title(path: &Path, config: &SiteConfig) -> Result<String, ContentError> {
     let title: String;
     let yaml_file_path = Path::new(&path).join("_dir.yaml");
     if yaml_file_path.exists() {

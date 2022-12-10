@@ -1,5 +1,5 @@
+use crate::config::TitleConfig;
 use crate::error::ContentError;
-use crate::page::TitleConfig;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;

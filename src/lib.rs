@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::config::SiteConfig;
 use crate::error::ContentError;
 use handlebars::Handlebars;
 use page::Page;
@@ -27,7 +27,7 @@ fn render_page(page: &Page) -> Result<String, ContentError> {
     Ok(s)
 }
 
-pub fn get_pages_in_dir(dir: &Path, config: &Config) -> Result<Vec<Page>, ContentError> {
+pub fn get_pages_in_dir(dir: &Path, config: &SiteConfig) -> Result<Vec<Page>, ContentError> {
     let mut pages: Vec<Page> = Vec::new();
 
     for entry in read_dir(dir)? {

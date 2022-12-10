@@ -1,5 +1,9 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::{config::Config, error::ContentError, page::TitleConfig, site::build_site};
+use jelly::{
+    config::{SiteConfig, TitleConfig},
+    error::ContentError,
+    site::build_site,
+};
 use std::path::PathBuf;
 
 #[derive(Args)]
@@ -29,7 +33,7 @@ fn main() -> Result<(), ContentError> {
         Build(args) => {
             let root = args.source;
 
-            let config = Config {
+            let config = SiteConfig {
                 root,
                 title_config: TitleConfig::default(),
             };

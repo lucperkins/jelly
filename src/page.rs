@@ -1,4 +1,4 @@
-use super::config::Config;
+use super::config::{SiteConfig, TitleConfig};
 use super::error::ContentError;
 use super::md::get_document_title;
 use super::utils::{get_file, name_from_path};
@@ -18,7 +18,7 @@ pub struct Page {
 }
 
 impl Page {
-    pub fn from_path(path: &Path, config: &Config) -> Result<Self, ContentError> {
+    pub fn from_path(path: &Path, config: &SiteConfig) -> Result<Self, ContentError> {
         let file = get_file(path)?;
 
         let matter = Matter::<YAML>::new();
@@ -50,20 +50,6 @@ impl Page {
 #[derive(Default, Deserialize)]
 struct FrontMatter {
     title: Option<String>,
-}
-
-pub struct TitleConfig {
-    pub title_case: bool,
-    pub first_letter_capitalized: bool,
-}
-
-impl Default for TitleConfig {
-    fn default() -> Self {
-        Self {
-            title_case: false,
-            first_letter_capitalized: true,
-        }
-    }
 }
 
 fn infer_page_title(
