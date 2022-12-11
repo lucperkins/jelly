@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 
 use crate::config::{SiteConfig, TitleConfig};
-use crate::content::{get_section, Content, Section};
+use crate::content::{Content, Section};
 use crate::error::ContentError;
 use crate::page::Page;
 use crate::render_page;
@@ -15,47 +15,10 @@ pub struct Site {
     pub content: Content,
 }
 
-fn handle_section<'a>(s: &'a Section) -> Vec<&'a Page> {
-    let mut pages: Vec<&'a Page> = Vec::new();
-
-    if let Some(ps) = &s.pages {
-        for p in ps {
-            pages.push(&p);
-        }
-    }
-
-    if let Some(ss) = &s.sections {
-        for s in ss {
-            let ps = handle_section(&s);
-            for p in ps {
-                pages.push(p);
-            }
-        }
-    }
-
-    pages
-}
-
 impl Site {
+    // TODO: find a less messy, more functional way to aggregate pages
     fn pages(&self) -> Vec<&Page> {
-        let mut pages: Vec<&Page> = Vec::new();
-
-        if let Some(ps) = &self.content.pages {
-            for page in ps {
-                pages.push(page);
-            }
-        }
-
-        if let Some(sections) = &self.content.sections {
-            for section in sections {
-                let ps = handle_section(section);
-                for p in ps {
-                    pages.push(p);
-                }
-            }
-        }
-
-        pages
+        self.content.pages()
     }
 }
 
@@ -65,12 +28,12 @@ pub fn build_site(source: PathBuf) -> Result<(), ContentError> {
         title_config: TitleConfig::default(),
     };
 
-    let content = get_section(&config.root, &config)?;
+    let content = Section::from_path(&config.root, &config)?;
 
     let site = Site { content };
 
     for page in site.pages() {
-        let html = render_page(&page)?;
+        let html = render_page(page)?;
         let mut path = Path::new("dist").join(&page.relative_path);
 
         path.set_extension("html");
@@ -79,7 +42,7 @@ pub fn build_site(source: PathBuf) -> Result<(), ContentError> {
         create_dir_all(dir)?;
 
         let mut file = File::create(path)?;
-        file.write_all(&html.as_bytes())?;
+        file.write_all(html.as_bytes())?;
     }
 
     Ok(())
