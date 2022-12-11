@@ -17,11 +17,11 @@ struct SectionConfig {
 
 #[derive(Debug, Serialize)]
 pub struct Section {
-    title: String,
+    pub title: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pages: Option<Vec<Page>>,
+    pub pages: Option<Vec<Page>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    sections: Option<Vec<Section>>,
+    pub sections: Option<Vec<Section>>,
 }
 
 pub fn get_section(path: &Path, config: &SiteConfig) -> Result<Section, ContentError> {
