@@ -18,15 +18,6 @@ struct Build {
     source: PathBuf,
 }
 
-impl From<Build> for SiteConfig {
-    fn from(b: Build) -> SiteConfig {
-        SiteConfig {
-            root: b.source,
-            title_config: TitleConfig::default(),
-        }
-    }
-}
-
 #[derive(Subcommand)]
 enum Command {
     Build(Build),
@@ -45,7 +36,10 @@ fn main() -> Result<(), ContentError> {
 
     match cli.command {
         Build(args) => {
-            let config: SiteConfig = args.into();
+            let config = SiteConfig {
+                root: args.source,
+                title_config: TitleConfig::default(),
+            };
             build_site(&config)
         }
     }
