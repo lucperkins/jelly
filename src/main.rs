@@ -12,6 +12,14 @@ struct Build {
         default_value = "./docs"
     )]
     source: PathBuf,
+
+    #[arg(
+        short,
+        long = "out",
+        help = "Output directory",
+        default_value = "./dist"
+    )]
+    out: PathBuf,
 }
 
 #[derive(Subcommand)]
@@ -31,6 +39,6 @@ fn main() -> Result<(), ContentError> {
     let cli = Cli::parse();
 
     match cli.command {
-        Build(args) => build_site(args.source),
+        Build(args) => build_site(args.source, args.out),
     }
 }

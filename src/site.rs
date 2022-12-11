@@ -1,6 +1,6 @@
 use std::fs::{create_dir_all, File};
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use serde::Serialize;
 
@@ -22,7 +22,7 @@ impl Site {
     }
 }
 
-pub fn build_site(source: PathBuf) -> Result<(), ContentError> {
+pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), ContentError> {
     let config = SiteConfig {
         root: source,
         title_config: TitleConfig::default(),
@@ -34,7 +34,7 @@ pub fn build_site(source: PathBuf) -> Result<(), ContentError> {
 
     for page in site.pages() {
         let html = render_page(page)?;
-        let mut path = Path::new("dist").join(&page.relative_path);
+        let mut path = out.join(&page.relative_path);
 
         path.set_extension("html");
 
