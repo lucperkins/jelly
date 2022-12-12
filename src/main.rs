@@ -1,9 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::{
-    config::{SiteConfig, TitleConfig},
-    error::ContentError,
-    site::build_site,
-};
+use jelly::{error::ContentError, site::build_site};
 use std::path::PathBuf;
 
 #[derive(Args)]
@@ -16,6 +12,14 @@ struct Build {
         default_value = "./docs"
     )]
     source: PathBuf,
+
+    #[arg(
+        short,
+        long = "out",
+        help = "Output directory",
+        default_value = "./dist"
+    )]
+    out: PathBuf,
 }
 
 #[derive(Subcommand)]
@@ -35,12 +39,6 @@ fn main() -> Result<(), ContentError> {
     let cli = Cli::parse();
 
     match cli.command {
-        Build(args) => {
-            let config = SiteConfig {
-                root: args.source,
-                title_config: TitleConfig::default(),
-            };
-            build_site(&config)
-        }
+        Build(args) => build_site(args.source, args.out),
     }
 }

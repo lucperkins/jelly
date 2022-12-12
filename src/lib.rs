@@ -14,6 +14,7 @@ pub mod error;
 pub mod md;
 pub mod page;
 pub mod site;
+pub mod title;
 pub mod utils;
 
 #[allow(dead_code)]
