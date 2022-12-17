@@ -10,20 +10,15 @@ pub fn get_document_title(body: &str) -> Option<String> {
     let mut num_headers = 0;
 
     for node in root.children() {
-        let header = match node.data.clone().into_inner().value {
-            NodeValue::Heading(c) => c,
-            _ => continue,
-        };
+        if let NodeValue::Heading(heading) = node.data.borrow().value {
+            num_headers += 1;
 
-        num_headers += 1;
-
-        if header.level == 1 && num_headers == 1 {
-            let mut text: Vec<u8> = Vec::new();
-            get_header_text(node, &mut text);
-            let h = String::from_utf8_lossy(&text).to_string();
-            return Some(h);
-        } else {
-            continue;
+            if heading.level == 1 && num_headers == 1 {
+                let mut text: Vec<u8> = Vec::new();
+                get_header_text(node, &mut text);
+                let h = String::from_utf8_lossy(&text).to_string();
+                return Some(h);
+            }
         }
     }
 
