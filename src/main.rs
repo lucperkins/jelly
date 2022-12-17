@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::{error::ContentError, site::build_site};
+use jelly::{cmd::build::build_site, error::Error};
 use std::path::PathBuf;
 
 #[derive(Args)]
@@ -33,7 +33,7 @@ struct Cli {
     command: Command,
 }
 
-fn main() -> Result<(), ContentError> {
+fn main() -> Result<(), Error> {
     use Command::*;
 
     let cli = Cli::parse();

@@ -1,5 +1,5 @@
 use crate::config::SiteConfig;
-use crate::error::ContentError;
+use crate::error::Error;
 use handlebars::Handlebars;
 use page::Page;
 use serde_json::json;
@@ -8,6 +8,7 @@ use std::{
     path::Path,
 };
 
+pub mod cmd;
 pub mod config;
 pub mod content;
 pub mod error;
@@ -18,7 +19,7 @@ pub mod title;
 pub mod utils;
 
 #[allow(dead_code)]
-fn render_page(page: &Page) -> Result<String, ContentError> {
+fn render_page(page: &Page) -> Result<String, Error> {
     let mut h = Handlebars::new();
     h.set_strict_mode(true);
     let template = include_str!("template/page.hbs");
@@ -28,7 +29,7 @@ fn render_page(page: &Page) -> Result<String, ContentError> {
     Ok(s)
 }
 
-pub fn get_pages_in_dir(dir: &Path, config: &SiteConfig) -> Result<Vec<Page>, ContentError> {
+pub fn get_pages_in_dir(dir: &Path, config: &SiteConfig) -> Result<Vec<Page>, Error> {
     let mut pages: Vec<Page> = Vec::new();
 
     for entry in read_dir(dir)? {
@@ -46,7 +47,7 @@ pub fn get_pages_in_dir(dir: &Path, config: &SiteConfig) -> Result<Vec<Page>, Co
     }
 
     if pages.is_empty() {
-        return Err(ContentError::NoPages(String::from(dir.to_string_lossy())));
+        return Err(Error::NoPages(String::from(dir.to_string_lossy())));
     }
 
     Ok(pages)

@@ -1,5 +1,5 @@
 #[derive(thiserror::Error, Debug)]
-pub enum ContentError {
+pub enum Error {
     #[error("glob error: {0}")]
     Glob(#[from] glob::GlobError),
 

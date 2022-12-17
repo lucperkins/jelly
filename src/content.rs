@@ -1,5 +1,5 @@
 use crate::config::SiteConfig;
-use crate::error::ContentError;
+use crate::error::Error;
 use crate::get_pages_in_dir;
 use crate::page::Page;
 use crate::title::get_section_title;
@@ -46,7 +46,7 @@ impl Section {
         pages
     }
 
-    pub fn from_path(path: &Path, config: &SiteConfig) -> Result<Self, ContentError> {
+    pub fn from_path(path: &Path, config: &SiteConfig) -> Result<Self, Error> {
         let root_section_title = get_section_title(path, config)?;
         let pages: Vec<Page> = get_pages_in_dir(path, config)?;
         let mut sections: Vec<Section> = Vec::new();

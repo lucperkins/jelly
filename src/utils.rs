@@ -1,5 +1,5 @@
 use crate::config::TitleConfig;
-use crate::error::ContentError;
+use crate::error::Error;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
@@ -21,7 +21,7 @@ pub fn name_from_path(path: &Path, title_config: &TitleConfig) -> String {
     }
 }
 
-pub fn get_file(path: &Path) -> Result<String, ContentError> {
+pub fn get_file(path: &Path) -> Result<String, Error> {
     let mut file = File::open(path.as_os_str())?;
     let mut contents = String::new();
     let _ = file.read_to_string(&mut contents)?;

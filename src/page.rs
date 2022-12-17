@@ -1,5 +1,5 @@
 use super::config::{SiteConfig, TitleConfig};
-use super::error::ContentError;
+use super::error::Error;
 use super::md::get_document_title;
 use super::utils::{get_file, name_from_path};
 use comrak::{markdown_to_html, ComrakOptions};
@@ -18,7 +18,7 @@ pub struct Page {
 }
 
 impl Page {
-    pub fn from_path(path: &Path, config: &SiteConfig) -> Result<Self, ContentError> {
+    pub fn from_path(path: &Path, config: &SiteConfig) -> Result<Self, Error> {
         let file = get_file(path)?;
 
         let matter = Matter::<YAML>::new();

@@ -3,12 +3,12 @@ use std::{fs::read_to_string, path::Path};
 use crate::{
     config::SiteConfig,
     content::SectionConfig,
-    error::ContentError,
+    error::Error,
     md::get_document_title,
     utils::{get_file, name_from_path},
 };
 
-fn title_from_index_page(path: &Path) -> Result<Option<String>, ContentError> {
+fn title_from_index_page(path: &Path) -> Result<Option<String>, Error> {
     let index_path = Path::new(&path).join("index.md");
     if index_path.exists() {
         let file = get_file(path)?;
@@ -21,7 +21,7 @@ fn title_from_index_page(path: &Path) -> Result<Option<String>, ContentError> {
     }
 }
 
-pub fn get_section_title(path: &Path, config: &SiteConfig) -> Result<String, ContentError> {
+pub fn get_section_title(path: &Path, config: &SiteConfig) -> Result<String, Error> {
     let title: String;
     let yaml_file_path = Path::new(&path).join("_dir.yaml");
     if yaml_file_path.exists() {
