@@ -25,7 +25,10 @@ fn render_page(page: &Page) -> Result<String, Error> {
     let template = include_str!("template/page.hbs");
     let _ = h.register_template_string("html", template);
     let html = page.html.as_str();
-    let s = h.render("html", &json!({ "content": html, "title": page.title }))?;
+    let s = h.render(
+        "html",
+        &json!({ "content": html, "title": page.title, "breadcrumb": page.breadcrumb }),
+    )?;
     Ok(s)
 }
 

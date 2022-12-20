@@ -9,13 +9,19 @@ use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Serialize)]
+pub struct Link {
+    path: PathBuf,
+    title: String,
+}
+
+#[derive(Debug, Serialize)]
 pub struct Page {
     pub path: String,
     pub relative_path: String,
     pub title: String,
     pub body: String,
     pub html: String,
-    pub breadcrumb: Vec<(PathBuf, String)>,
+    pub breadcrumb: Vec<Link>,
 }
 
 impl Page {
@@ -51,7 +57,10 @@ impl Page {
             breadcrumb: breadcrumb
                 .iter()
                 .copied()
-                .map(|(a, b)| (PathBuf::from(a), String::from(b)))
+                .map(|(a, b)| Link {
+                    path: PathBuf::from(a),
+                    title: String::from(b),
+                })
                 .collect(),
         })
     }
