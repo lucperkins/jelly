@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::{cmd::build::build_site, error::Error};
+use jelly::{cmd::build, error::Error};
 use std::path::PathBuf;
 
 #[derive(Args)]
@@ -39,6 +39,6 @@ fn main() -> Result<(), Error> {
     let cli = Cli::parse();
 
     match cli.command {
-        Build(args) => build_site(args.source, args.out),
+        Build(args) => build(args.source, args.out),
     }
 }
