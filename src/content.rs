@@ -6,7 +6,7 @@ use crate::title::get_section_title;
 use crate::utils::get_or_none;
 use serde::{Deserialize, Serialize};
 use std::fs::{metadata, read_dir};
-use std::path::Path;
+use std::path::PathBuf;
 
 pub type Content = Section;
 
@@ -47,12 +47,12 @@ impl Section {
     }
 
     pub fn from_path(
-        path: &Path,
-        breadcrumb: Option<&Vec<(&Path, &str)>>,
+        path: &PathBuf,
+        breadcrumb: Option<&Vec<(&PathBuf, &str)>>,
         config: &SiteConfig,
     ) -> Result<Self, Error> {
         let section_title = &get_section_title(path, config)?;
-        let mut breadcrumb_acc: Vec<(&Path, &str)> = Vec::new();
+        let mut breadcrumb_acc: Vec<(&PathBuf, &str)> = Vec::new();
 
         if let Some(bc) = breadcrumb {
             for t in bc {

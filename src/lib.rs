@@ -5,7 +5,7 @@ use page::Page;
 use serde_json::json;
 use std::{
     fs::{metadata, read_dir},
-    path::Path,
+    path::PathBuf,
 };
 
 pub mod cmd;
@@ -33,8 +33,8 @@ fn render_page(page: &Page) -> Result<String, Error> {
 }
 
 pub fn get_pages_in_dir(
-    dir: &Path,
-    breadcrumb: &[(&Path, &str)],
+    dir: &PathBuf,
+    breadcrumb: &Vec<(&PathBuf, &str)>,
     config: &SiteConfig,
 ) -> Result<Vec<Page>, Error> {
     let mut pages: Vec<Page> = Vec::new();

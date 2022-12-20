@@ -27,7 +27,7 @@ pub struct Page {
 impl Page {
     pub fn from_path(
         path: &Path,
-        breadcrumb: &[(&Path, &str)],
+        breadcrumb: &Vec<(&PathBuf, &str)>,
         config: &SiteConfig,
     ) -> Result<Self, Error> {
         let file = get_file(path)?;

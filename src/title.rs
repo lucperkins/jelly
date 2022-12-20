@@ -1,4 +1,7 @@
-use std::{fs::read_to_string, path::Path};
+use std::{
+    fs::read_to_string,
+    path::{Path, PathBuf},
+};
 
 use crate::{
     config::SiteConfig,
@@ -21,7 +24,7 @@ fn title_from_index_page(path: &Path) -> Result<Option<String>, Error> {
     }
 }
 
-pub fn get_section_title(path: &Path, config: &SiteConfig) -> Result<String, Error> {
+pub fn get_section_title(path: &PathBuf, config: &SiteConfig) -> Result<String, Error> {
     let title: String;
     let yaml_file_path = Path::new(&path).join("_dir.yaml");
     if yaml_file_path.exists() {
