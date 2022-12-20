@@ -48,19 +48,19 @@ impl Section {
 
     pub fn from_path(
         path: &Path,
-        breadcrumb: Option<&Vec<&str>>,
+        breadcrumb: Option<&Vec<(&Path, &str)>>,
         config: &SiteConfig,
     ) -> Result<Self, Error> {
         let section_title = &get_section_title(path, config)?;
-        let mut breadcrumb_acc: Vec<&str> = Vec::new();
+        let mut breadcrumb_acc: Vec<(&Path, &str)> = Vec::new();
 
         if let Some(bc) = breadcrumb {
             for t in bc {
-                breadcrumb_acc.push(t);
+                breadcrumb_acc.push(*t);
             }
         }
 
-        breadcrumb_acc.push(section_title);
+        breadcrumb_acc.push((path, section_title));
 
         let pages: Vec<Page> = get_pages_in_dir(path, &breadcrumb_acc, config)?;
         let mut sections: Vec<Section> = Vec::new();

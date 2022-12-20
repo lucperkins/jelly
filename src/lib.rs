@@ -31,7 +31,7 @@ fn render_page(page: &Page) -> Result<String, Error> {
 
 pub fn get_pages_in_dir(
     dir: &Path,
-    breadcrumb: &[&str],
+    breadcrumb: &[(&Path, &str)],
     config: &SiteConfig,
 ) -> Result<Vec<Page>, Error> {
     let mut pages: Vec<Page> = Vec::new();

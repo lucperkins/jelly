@@ -6,7 +6,7 @@ use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Serialize)]
 pub struct Page {
@@ -15,11 +15,15 @@ pub struct Page {
     pub title: String,
     pub body: String,
     pub html: String,
-    pub breadcrumb: Vec<String>,
+    pub breadcrumb: Vec<(PathBuf, String)>,
 }
 
 impl Page {
-    pub fn from_path(path: &Path, breadcrumb: &[&str], config: &SiteConfig) -> Result<Self, Error> {
+    pub fn from_path(
+        path: &Path,
+        breadcrumb: &[(&Path, &str)],
+        config: &SiteConfig,
+    ) -> Result<Self, Error> {
         let file = get_file(path)?;
 
         let matter = Matter::<YAML>::new();
@@ -44,7 +48,11 @@ impl Page {
             title,
             body: result.content,
             html,
-            breadcrumb: breadcrumb.iter().copied().map(String::from).collect(),
+            breadcrumb: breadcrumb
+                .iter()
+                .copied()
+                .map(|(a, b)| (PathBuf::from(a), String::from(b)))
+                .collect(),
         })
     }
 }
