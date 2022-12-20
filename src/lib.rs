@@ -29,7 +29,11 @@ fn render_page(page: &Page) -> Result<String, Error> {
     Ok(s)
 }
 
-pub fn get_pages_in_dir(dir: &Path, config: &SiteConfig) -> Result<Vec<Page>, Error> {
+pub fn get_pages_in_dir(
+    dir: &Path,
+    breadcrumb: &[&str],
+    config: &SiteConfig,
+) -> Result<Vec<Page>, Error> {
     let mut pages: Vec<Page> = Vec::new();
 
     for entry in read_dir(dir)? {
@@ -40,7 +44,7 @@ pub fn get_pages_in_dir(dir: &Path, config: &SiteConfig) -> Result<Vec<Page>, Er
             let ext = path.extension();
 
             if ext.is_some() && ext.unwrap().to_string_lossy().ends_with("md") {
-                let page = Page::from_path(&path, config)?;
+                let page = Page::from_path(&path, breadcrumb, config)?;
                 pages.push(page);
             }
         }

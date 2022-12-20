@@ -46,9 +46,23 @@ impl Section {
         pages
     }
 
-    pub fn from_path(path: &Path, config: &SiteConfig) -> Result<Self, Error> {
-        let root_section_title = get_section_title(path, config)?;
-        let pages: Vec<Page> = get_pages_in_dir(path, config)?;
+    pub fn from_path(
+        path: &Path,
+        breadcrumb: Option<&Vec<&str>>,
+        config: &SiteConfig,
+    ) -> Result<Self, Error> {
+        let section_title = &get_section_title(path, config)?;
+        let mut breadcrumb_acc: Vec<&str> = Vec::new();
+
+        if let Some(bc) = breadcrumb {
+            for t in bc {
+                breadcrumb_acc.push(t);
+            }
+        }
+
+        breadcrumb_acc.push(section_title);
+
+        let pages: Vec<Page> = get_pages_in_dir(path, &breadcrumb_acc, config)?;
         let mut sections: Vec<Section> = Vec::new();
 
         for entry in read_dir(path)? {
@@ -57,13 +71,13 @@ impl Section {
             let meta = metadata(&path)?;
 
             if meta.is_dir() {
-                let section = Self::from_path(&path, config)?;
+                let section = Self::from_path(&path, Some(&breadcrumb_acc), config)?;
                 sections.push(section);
             }
         }
 
         let root_section = Section {
-            title: root_section_title,
+            title: String::from(section_title),
             pages: get_or_none(pages),
             sections: get_or_none(sections),
         };

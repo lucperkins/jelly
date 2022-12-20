@@ -15,10 +15,11 @@ pub struct Page {
     pub title: String,
     pub body: String,
     pub html: String,
+    pub breadcrumb: Vec<String>,
 }
 
 impl Page {
-    pub fn from_path(path: &Path, config: &SiteConfig) -> Result<Self, Error> {
+    pub fn from_path(path: &Path, breadcrumb: &[&str], config: &SiteConfig) -> Result<Self, Error> {
         let file = get_file(path)?;
 
         let matter = Matter::<YAML>::new();
@@ -43,6 +44,7 @@ impl Page {
             title,
             body: result.content,
             html,
+            breadcrumb: breadcrumb.iter().copied().map(String::from).collect(),
         })
     }
 }
