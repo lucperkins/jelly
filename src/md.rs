@@ -4,6 +4,7 @@ use markdown_it::{
         cmark::{
             block::heading::ATXHeading,
             inline::{
+                autolink::Autolink,
                 backticks::CodeInline,
                 emphasis::{Em, Strong},
                 link::Link,
@@ -14,7 +15,7 @@ use markdown_it::{
     Node,
 };
 
-fn get_node_text(node: &Node) -> String {
+fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
     for sub in node.children.iter() {
         if let Some(txt) = sub.cast::<Text>() {
@@ -25,9 +26,11 @@ fn get_node_text(node: &Node) -> String {
             || sub.is::<Em>()
             || sub.is::<Strikethrough>()
         {
-            text.push_str(&get_node_text(sub));
-        } else if let Some(t) = sub.children[0].cast::<Text>() {
-            text.push_str(&t.content);
+            text.push_str(&node_to_string(sub));
+        } else if let Some(n) = sub.children.get(0) {
+            if let Some(t) = n.cast::<Text>() {
+                text.push_str(&t.content);
+            }
         }
     }
     text
@@ -46,7 +49,7 @@ pub fn get_document_title(body: &str) -> Option<String> {
             num_headers += 1;
 
             if num_headers == 1 && heading.level == 1 {
-                return Some(get_node_text(node));
+                return Some(node_to_string(node));
             }
         }
     }
