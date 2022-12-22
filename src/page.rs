@@ -1,3 +1,5 @@
+use crate::md::render;
+
 use super::config::{SiteConfig, TitleConfig};
 use super::error::Error;
 use super::md::get_document_title;
@@ -32,12 +34,7 @@ impl Page {
 
         let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
 
-        let parser = &mut markdown_it::MarkdownIt::new();
-        markdown_it::plugins::cmark::add(parser);
-        markdown_it::plugins::extra::add(parser);
-
-        let ast = parser.parse(&result.content);
-        let html = ast.render();
+        let html = render(&result.content);
 
         Ok(Page {
             path: String::from(path.to_string_lossy()),
