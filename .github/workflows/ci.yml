@@ -30,6 +30,7 @@ jobs:
           extra-conf: |
             binary-caches = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
             trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
+      - run: cat /etc/nix/nix.conf
       - uses: cachix/cachix-action@v12
         with:
           name: ${{ secrets.CACHIX_CACHE }}
