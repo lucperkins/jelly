@@ -19,18 +19,17 @@ fn get_node_text(node: &Node) -> String {
     for sub in node.children.iter() {
         if let Some(txt) = sub.cast::<Text>() {
             text.push_str(&txt.content);
-        } else if sub.cast::<CodeInline>().is_some()
-            || sub.cast::<Link>().is_some()
-            || sub.cast::<Strong>().is_some()
-            || sub.cast::<Em>().is_some()
-            || sub.cast::<Strikethrough>().is_some()
+        } else if sub.is::<CodeInline>()
+            || sub.is::<Link>()
+            || sub.is::<Strong>()
+            || sub.is::<Em>()
+            || sub.is::<Strikethrough>()
         {
             text.push_str(&get_node_text(sub));
-        } else {
-            println!("{:?}", sub);
+        } else if let Some(t) = sub.children[0].cast::<Text>() {
+            text.push_str(&t.content);
         }
     }
-    println!("{:?}", text);
     text
 }
 
