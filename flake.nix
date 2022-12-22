@@ -53,7 +53,9 @@
         pname = name;
         inherit version;
         src = ./.;
-        inherit cargoSha256;
+        cargoLock = {
+          lockFile = ./Cargo.lock;
+        };
       };
 
       devShells.default = mkShell {
