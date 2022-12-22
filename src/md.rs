@@ -1,7 +1,24 @@
-use markdown_it::{parser::inline::Text, plugins::cmark::block::heading::ATXHeading, Node};
+use markdown_it::{
+    parser::{block::LineOffset, inline::Text},
+    plugins::cmark::{
+        block::heading::ATXHeading,
+        inline::{backticks::CodeInline, link::Link, newline::Softbreak},
+    },
+    Node,
+};
 
-fn get_heading_text(node: &Node) -> Option<&String> {
-    node.children[0].cast::<Text>().map(|t| &t.content)
+fn get_node_text(node: &Node) -> String {
+    let mut text = String::new();
+    for sub in node.children.iter() {
+        if let Some(txt) = sub.cast::<Text>() {
+            text.push_str(&txt.content);
+        } else if sub.cast::<CodeInline>().is_some() {
+            text.push_str(&get_node_text(&sub));
+        } else if sub.cast::<Link>().is_some() {
+            text.push_str(&get_node_text(&sub));
+        }
+    }
+    text
 }
 
 pub fn get_document_title(body: &str) -> Option<String> {
@@ -15,7 +32,7 @@ pub fn get_document_title(body: &str) -> Option<String> {
             num_headers += 1;
 
             if num_headers == 1 && heading.level == 1 {
-                return get_heading_text(node).map(String::from);
+                return Some(get_node_text(node));
             }
         }
     }
