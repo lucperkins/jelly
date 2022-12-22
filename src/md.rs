@@ -13,7 +13,8 @@ use markdown_it::{
     },
     MarkdownIt, Node, NodeValue, Renderer,
 };
-use syntect::{highlighting::ThemeSet, html::highlighted_html_for_string, parsing::SyntaxSet};
+
+use crate::highlight::Highlighter;
 
 fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
@@ -93,15 +94,6 @@ struct FancyCodeBlock {
     content: String,
 }
 
-fn highlight_code(extension: &str, code: &str) -> String {
-    let ps = SyntaxSet::load_defaults_newlines();
-    let ts = ThemeSet::load_defaults();
-    let theme = &ts.themes["base16-ocean.dark"];
-    let syntax = ps.find_syntax_by_token(extension).unwrap();
-
-    highlighted_html_for_string(code, &ps, syntax, theme).unwrap()
-}
-
 impl NodeValue for FancyCodeBlock {
     fn render(&self, _: &Node, fmt: &mut dyn Renderer) {
         let default_lang = String::from("text");
@@ -109,7 +101,12 @@ impl NodeValue for FancyCodeBlock {
         let language = format!("language-{}", lang);
         let pre_attrs = vec![("class", language)];
 
-        let code = highlight_code(lang, &self.content);
+        let higlighter = Highlighter::default();
+
+        let code = match higlighter.highlight(lang, &self.content) {
+            Ok(html) => html,
+            Err(e) => e.to_string(),
+        };
 
         fmt.cr();
         fmt.open("pre", &pre_attrs);

@@ -3,6 +3,9 @@ pub enum Error {
     #[error("glob error: {0}")]
     Glob(#[from] glob::GlobError),
 
+    #[error("highlight error: {0}")]
+    Highlight(String),
+
     #[error("I/O error: {0}")]
     Io(#[from] std::io::Error),
 
@@ -23,6 +26,9 @@ pub enum Error {
 
     #[error("render error: {0}")]
     Render(#[from] handlebars::RenderError),
+
+    #[error("syntect error: {0}")]
+    Syntect(#[from] syntect::Error),
 
     #[error("template error: {0}")]
     Template(#[from] handlebars::TemplateError),
