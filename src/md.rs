@@ -4,7 +4,6 @@ use markdown_it::{
         cmark::{
             block::heading::ATXHeading,
             inline::{
-                autolink::Autolink,
                 backticks::CodeInline,
                 emphasis::{Em, Strong},
                 link::Link,
@@ -37,11 +36,7 @@ fn node_to_string(node: &Node) -> String {
 }
 
 pub fn get_document_title(body: &str) -> Option<String> {
-    let parser = &mut markdown_it::MarkdownIt::new();
-    markdown_it::plugins::cmark::add(parser);
-    markdown_it::plugins::extra::add(parser);
-
-    let ast = parser.parse(body);
+    let ast = ast(body);
     let mut num_headers = 0;
 
     for node in ast.children.iter() {
@@ -58,9 +53,13 @@ pub fn get_document_title(body: &str) -> Option<String> {
 }
 
 pub fn render(md: &str) -> String {
+    ast(md).render()
+}
+
+pub fn ast(md: &str) -> Node {
     let parser = &mut markdown_it::MarkdownIt::new();
     markdown_it::plugins::cmark::add(parser);
     markdown_it::plugins::extra::add(parser);
 
-    parser.parse(md).render()
+    parser.parse(md)
 }
