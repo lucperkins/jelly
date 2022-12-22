@@ -1,40 +1,24 @@
-use comrak::{
-    nodes::{AstNode, NodeCode, NodeValue},
-    parse_document, Arena, ComrakOptions,
-};
+use markdown_it::{parser::inline::Text, plugins::cmark::block::heading::ATXHeading};
 
 pub fn get_document_title(body: &str) -> Option<String> {
-    let arena = Arena::new();
-    let root = parse_document(&arena, body, &ComrakOptions::default());
-
+    let parser = &mut markdown_it::MarkdownIt::new();
+    markdown_it::plugins::cmark::add(parser);
+    let ast = parser.parse(body);
     let mut num_headers = 0;
 
-    for node in root.children() {
-        if let NodeValue::Heading(heading) = node.data.borrow().value {
+    let mut title: Option<&String> = None;
+
+    for node in ast.children.iter() {
+        if let Some(heading) = node.cast::<ATXHeading>() {
             num_headers += 1;
 
-            if heading.level == 1 && num_headers == 1 {
-                let mut text: Vec<u8> = Vec::new();
-                get_header_text(node, &mut text);
-                let h = String::from_utf8_lossy(&text).to_string();
-                return Some(h);
+            if num_headers == 1 && heading.level == 1 {
+                if let Some(text) = node.children[0].cast::<Text>() {
+                    title = Some(&text.content);
+                }
             }
         }
     }
 
-    None
-}
-
-fn get_header_text<'a>(node: &'a AstNode<'a>, output: &mut Vec<u8>) {
-    match node.data.borrow().value {
-        NodeValue::Text(ref literal) | NodeValue::Code(NodeCode { ref literal, .. }) => {
-            output.extend_from_slice(literal)
-        }
-        NodeValue::LineBreak | NodeValue::SoftBreak => output.push(b' '),
-        _ => {
-            for n in node.children() {
-                get_header_text(n, output);
-            }
-        }
-    }
+    title.map(String::from)
 }
