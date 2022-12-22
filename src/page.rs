@@ -1,8 +1,9 @@
+use crate::md::render;
+
 use super::config::{SiteConfig, TitleConfig};
 use super::error::Error;
 use super::md::get_document_title;
 use super::utils::{get_file, name_from_path};
-use comrak::{markdown_to_html, ComrakOptions};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use serde::{Deserialize, Serialize};
@@ -44,9 +45,7 @@ impl Page {
 
         let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
 
-        let options = ComrakOptions::default();
-
-        let html = markdown_to_html(&result.content, &options);
+        let html = render(&result.content);
 
         Ok(Page {
             path: String::from(path.to_string_lossy()),

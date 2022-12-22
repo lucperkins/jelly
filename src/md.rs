@@ -1,23 +1,50 @@
-use comrak::{
-    nodes::{AstNode, NodeCode, NodeValue},
-    parse_document, Arena, ComrakOptions,
+use markdown_it::{
+    parser::inline::Text,
+    plugins::{
+        cmark::{
+            block::heading::ATXHeading,
+            inline::{
+                backticks::CodeInline,
+                emphasis::{Em, Strong},
+                link::Link,
+            },
+        },
+        extra::strikethrough::Strikethrough,
+    },
+    Node,
 };
 
-pub fn get_document_title(body: &str) -> Option<String> {
-    let arena = Arena::new();
-    let root = parse_document(&arena, body, &ComrakOptions::default());
+fn node_to_string(node: &Node) -> String {
+    let mut text = String::new();
+    for sub in node.children.iter() {
+        if let Some(txt) = sub.cast::<Text>() {
+            text.push_str(&txt.content);
+        } else if sub.is::<CodeInline>()
+            || sub.is::<Link>()
+            || sub.is::<Strong>()
+            || sub.is::<Em>()
+            || sub.is::<Strikethrough>()
+        {
+            text.push_str(&node_to_string(sub));
+        } else if let Some(n) = sub.children.get(0) {
+            if let Some(t) = n.cast::<Text>() {
+                text.push_str(&t.content);
+            }
+        }
+    }
+    text
+}
 
+pub fn get_document_title(body: &str) -> Option<String> {
+    let ast = ast(body);
     let mut num_headers = 0;
 
-    for node in root.children() {
-        if let NodeValue::Heading(heading) = node.data.borrow().value {
+    for node in ast.children.iter() {
+        if let Some(heading) = node.cast::<ATXHeading>() {
             num_headers += 1;
 
-            if heading.level == 1 && num_headers == 1 {
-                let mut text: Vec<u8> = Vec::new();
-                get_header_text(node, &mut text);
-                let h = String::from_utf8_lossy(&text).to_string();
-                return Some(h);
+            if num_headers == 1 && heading.level == 1 {
+                return Some(node_to_string(node));
             }
         }
     }
@@ -25,16 +52,14 @@ pub fn get_document_title(body: &str) -> Option<String> {
     None
 }
 
-fn get_header_text<'a>(node: &'a AstNode<'a>, output: &mut Vec<u8>) {
-    match node.data.borrow().value {
-        NodeValue::Text(ref literal) | NodeValue::Code(NodeCode { ref literal, .. }) => {
-            output.extend_from_slice(literal)
-        }
-        NodeValue::LineBreak | NodeValue::SoftBreak => output.push(b' '),
-        _ => {
-            for n in node.children() {
-                get_header_text(n, output);
-            }
-        }
-    }
+pub fn render(md: &str) -> String {
+    ast(md).render()
+}
+
+pub fn ast(md: &str) -> Node {
+    let parser = &mut markdown_it::MarkdownIt::new();
+    markdown_it::plugins::cmark::add(parser);
+    markdown_it::plugins::extra::add(parser);
+
+    parser.parse(md)
 }
