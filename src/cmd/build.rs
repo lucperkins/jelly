@@ -18,11 +18,12 @@ pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {
         title_config: TitleConfig::default(),
     };
 
-    let content = Section::from_path(&config.root, &config)?;
+    let content = Section::from_path(&config.root, None, &config)?;
 
     let site = Site { content };
 
     for page in site.pages() {
+        println!("{:?}", page.breadcrumb);
         let html = render_page(page)?;
         let mut path = out.join(&page.relative_path);
 

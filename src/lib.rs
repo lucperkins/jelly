@@ -5,7 +5,7 @@ use page::Page;
 use serde_json::json;
 use std::{
     fs::{metadata, read_dir},
-    path::Path,
+    path::PathBuf,
 };
 
 pub mod cmd;
@@ -25,11 +25,18 @@ fn render_page(page: &Page) -> Result<String, Error> {
     let template = include_str!("template/page.hbs");
     let _ = h.register_template_string("html", template);
     let html = page.html.as_str();
-    let s = h.render("html", &json!({ "content": html, "title": page.title }))?;
+    let s = h.render(
+        "html",
+        &json!({ "content": html, "title": page.title, "breadcrumb": page.breadcrumb }),
+    )?;
     Ok(s)
 }
 
-pub fn get_pages_in_dir(dir: &Path, config: &SiteConfig) -> Result<Vec<Page>, Error> {
+pub fn get_pages_in_dir(
+    dir: &PathBuf,
+    breadcrumb: &[(&PathBuf, &str)],
+    config: &SiteConfig,
+) -> Result<Vec<Page>, Error> {
     let mut pages: Vec<Page> = Vec::new();
 
     for entry in read_dir(dir)? {
@@ -40,7 +47,7 @@ pub fn get_pages_in_dir(dir: &Path, config: &SiteConfig) -> Result<Vec<Page>, Er
             let ext = path.extension();
 
             if ext.is_some() && ext.unwrap().to_string_lossy().ends_with("md") {
-                let page = Page::from_path(&path, config)?;
+                let page = Page::from_path(&path, breadcrumb, config)?;
                 pages.push(page);
             }
         }

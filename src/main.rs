@@ -9,16 +9,11 @@ struct Build {
         short,
         long,
         help = "The root content directory",
-        default_value = "./docs"
+        default_value = "docs"
     )]
     source: PathBuf,
 
-    #[arg(
-        short,
-        long = "out",
-        help = "Output directory",
-        default_value = "./dist"
-    )]
+    #[arg(short, long = "out", help = "Output directory", default_value = "dist")]
     out: PathBuf,
 }
 
