@@ -15,6 +15,7 @@ pub mod error;
 pub mod highlight;
 pub mod md;
 pub mod page;
+pub mod search;
 pub mod site;
 pub mod title;
 pub mod utils;

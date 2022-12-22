@@ -2,11 +2,12 @@ use markdown_it::{
     parser::{core::CoreRule, inline::Text},
     plugins::{
         cmark::{
-            block::{code::CodeBlock, fence::CodeFence, heading::ATXHeading},
+            block::{code::CodeBlock, fence::CodeFence, heading::ATXHeading, paragraph::Paragraph},
             inline::{
                 backticks::CodeInline,
                 emphasis::{Em, Strong},
                 link::Link,
+                newline::{Hardbreak, Softbreak},
             },
         },
         extra::strikethrough::Strikethrough,
@@ -16,16 +17,19 @@ use markdown_it::{
 
 use crate::highlight::Highlighter;
 
-fn node_to_string(node: &Node) -> String {
+pub fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
     for sub in node.children.iter() {
-        if let Some(txt) = sub.cast::<Text>() {
+        if sub.is::<Softbreak>() | sub.is::<Hardbreak>() {
+            text.push(' ');
+        } else if let Some(txt) = sub.cast::<Text>() {
             text.push_str(&txt.content);
         } else if sub.is::<CodeInline>()
             || sub.is::<Link>()
             || sub.is::<Strong>()
             || sub.is::<Em>()
             || sub.is::<Strikethrough>()
+            || sub.is::<Paragraph>()
         {
             text.push_str(&node_to_string(sub));
         } else if let Some(n) = sub.children.get(0) {
