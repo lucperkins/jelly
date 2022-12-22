@@ -23,10 +23,11 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: jelly-${{ hashFiles('**/Cargo.lock') }}
-      - uses: cachix/install-nix-action@v17
+
+      - uses: DeterminateSystems/nix-installer@main
         with:
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          extra-conf: |
             binary-caches = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
             trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
       - uses: cachix/cachix-action@v12
