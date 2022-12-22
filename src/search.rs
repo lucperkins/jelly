@@ -14,7 +14,6 @@ pub struct Document {
 pub struct Index;
 
 pub fn build_search_index_for_page(page: &Page) -> Index {
-    let t = &page.title;
     let ast = ast(&page.body);
     let nodes = &ast.children;
 
@@ -48,7 +47,7 @@ pub fn build_search_index_for_page(page: &Page) -> Index {
         }
     }
 
-    println!("page: {},\n  {:?}", t, documents);
+    println!("{:?}", documents);
 
     Index
 }

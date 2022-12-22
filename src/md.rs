@@ -7,10 +7,9 @@ use markdown_it::{
                 backticks::CodeInline,
                 emphasis::{Em, Strong},
                 link::Link,
-                newline::{Hardbreak, Softbreak},
             },
         },
-        extra::strikethrough::Strikethrough,
+        extra::{linkify::Linkified, strikethrough::Strikethrough},
     },
     MarkdownIt, Node, NodeValue, Renderer,
 };
@@ -19,33 +18,32 @@ use crate::highlight::Highlighter;
 
 pub fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
-    for sub in node.children.iter() {
-        if sub.is::<Softbreak>() | sub.is::<Hardbreak>() {
-            text.push(' ');
-        } else if let Some(txt) = sub.cast::<Text>() {
-            text.push_str(&txt.content);
-        } else if sub.is::<CodeInline>()
-            || sub.is::<Link>()
-            || sub.is::<Strong>()
-            || sub.is::<Em>()
-            || sub.is::<Strikethrough>()
-            || sub.is::<Paragraph>()
-        {
-            text.push_str(&node_to_string(sub));
-        } else if let Some(n) = sub.children.get(0) {
-            if let Some(t) = n.cast::<Text>() {
-                text.push_str(&t.content);
-            }
+
+    if let Some(code) = node.cast::<FancyCodeBlock>() {
+        text.push_str(&code.content);
+    } else if let Some(txt) = node.cast::<Text>() {
+        text.push_str(&txt.content);
+    } else if node.is::<CodeInline>()
+        || node.is::<Link>()
+        || node.is::<Strong>()
+        || node.is::<Em>()
+        || node.is::<Strikethrough>()
+        || node.is::<Paragraph>()
+        || node.is::<Linkified>()
+    {
+        text.push_str(&node_to_string(&node.children[0]));
+    } else if let Some(n) = node.children.get(0) {
+        if let Some(t) = n.cast::<Text>() {
+            text.push_str(&t.content);
         }
     }
     text
 }
 
 pub fn get_document_title(body: &str) -> Option<String> {
-    let ast = ast(body);
     let mut num_headers = 0;
 
-    for node in ast.children.iter() {
+    for node in ast(body).children.iter() {
         if let Some(heading) = node.cast::<ATXHeading>() {
             num_headers += 1;
 
@@ -64,6 +62,8 @@ pub fn render(md: &str) -> String {
 
 pub fn ast(input: &str) -> Node {
     let md = &mut markdown_it::MarkdownIt::new();
+
+    md.add_rule::<FancyCodeBlocks>();
 
     // cmark except code blocks
     use markdown_it::plugins::cmark::*;
@@ -85,17 +85,15 @@ pub fn ast(input: &str) -> Node {
     block::lheading::add(md);
     block::paragraph::add(md);
 
-    md.add_rule::<FancyCodeBlocks>();
-
     markdown_it::plugins::extra::add(md);
 
     md.parse(input)
 }
 
 #[derive(Debug)]
-struct FancyCodeBlock {
-    meta: Option<String>,
-    content: String,
+pub struct FancyCodeBlock {
+    pub meta: Option<String>,
+    pub content: String,
 }
 
 impl NodeValue for FancyCodeBlock {
