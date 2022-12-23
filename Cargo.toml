@@ -9,10 +9,12 @@ clap = { version = "4.0.27", features = ["derive"] }
 glob = "0.3.0"
 gray_matter = "0.2.4"
 handlebars = "4.3.5"
+indoc = "1.0.8"
 markdown-it = "0.4.0"
 serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.88"
 serde_yaml = "0.9.14"
+slug = "0.1.4"
 syntect = "5.0.0"
 thiserror = "1.0.37"
 titlecase = "2.2.1"

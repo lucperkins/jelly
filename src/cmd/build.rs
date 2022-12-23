@@ -23,6 +23,8 @@ pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {
     let site = Site { content };
 
     for page in site.pages() {
+        println!("{:?}", page);
+
         let html = render_page(page)?;
         let mut path = out.join(&page.relative_path);
 

@@ -16,7 +16,7 @@ use markdown_it::{
 
 use crate::highlight::Highlighter;
 
-fn node_to_string(node: &Node) -> String {
+pub fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
     for sub in node.children.iter() {
         if let Some(txt) = sub.cast::<Text>() {
