@@ -11,6 +11,18 @@ struct Heading {
     slug: String,
 }
 
+impl Heading {
+    fn new(level: u8, text: &str) -> Self {
+        let slug = slugify(text);
+
+        Self {
+            level,
+            text: String::from(text),
+            slug,
+        }
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub struct TableOfContents(Vec<(Heading, TableOfContents)>);
 
@@ -28,12 +40,7 @@ fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
             //println!("{:?}", h);
             if h.level == level {
                 let text = &node_to_string(node);
-                let slug = slugify(text);
-                let heading = Heading {
-                    level,
-                    text: String::from(text),
-                    slug,
-                };
+                let heading = Heading::new(level, text);
 
                 toc.push((heading, toc_for_level(nodes, level + 1)));
             }
