@@ -13,12 +13,10 @@ struct Heading {
 
 impl Heading {
     fn new(level: u8, text: &str) -> Self {
-        let slug = slugify(text);
-
         Self {
             level,
             text: String::from(text),
-            slug,
+            slug: slugify(text),
         }
     }
 }
@@ -29,6 +27,11 @@ pub struct TableOfContents(Vec<(Heading, TableOfContents)>);
 impl TableOfContents {
     pub fn new(document: &Node, level: u8) -> Self {
         toc_for_level(&document.children, level)
+    }
+
+    #[cfg(test)]
+    fn empty() -> Self {
+        Self(vec![])
     }
 }
 
@@ -77,6 +80,8 @@ mod tests {
 
             More text.
 
+            ### Another heading 3
+
             ## And yet another heading 2
         "};
 
@@ -88,42 +93,25 @@ mod tests {
             toc,
             TableOfContents(vec![
                 (
-                    Heading {
-                        level: 2,
-                        text: String::from("Now a heading 2"),
-                        slug: String::from("now-a-heading-2"),
-                    },
+                    Heading::new(2, "Now a heading 2"),
                     TableOfContents(vec![(
-                        Heading {
-                            level: 3,
-                            text: String::from("Now a heading 3"),
-                            slug: String::from("now-a-heading-3"),
-                        },
+                        Heading::new(3, "Now a heading 3"),
                         TableOfContents(vec![(
-                            Heading {
-                                level: 4,
-                                text: String::from("Let's go even deeper"),
-                                slug: String::from("let-s-go-even-deeper"),
-                            },
-                            TableOfContents(vec![])
+                            Heading::new(4, "Let's go even deeper"),
+                            TableOfContents::empty()
                         )])
                     )])
                 ),
                 (
-                    Heading {
-                        level: 2,
-                        text: String::from("And now back to a heading 2"),
-                        slug: String::from("and-now-back-to-a-heading-2"),
-                    },
-                    TableOfContents(vec![])
+                    Heading::new(2, "And now back to a heading 2"),
+                    TableOfContents(vec![(
+                        Heading::new(3, "Another heading 3"),
+                        TableOfContents::empty()
+                    )])
                 ),
                 (
-                    Heading {
-                        level: 2,
-                        text: String::from("And yet another heading 2"),
-                        slug: String::from("and-yet-another-heading-2"),
-                    },
-                    TableOfContents(vec![])
+                    Heading::new(2, "And yet another heading 2"),
+                    TableOfContents::empty()
                 ),
             ])
         );
