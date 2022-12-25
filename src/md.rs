@@ -2,11 +2,12 @@ use markdown_it::{
     parser::{core::CoreRule, inline::Text},
     plugins::{
         cmark::{
-            block::{code::CodeBlock, fence::CodeFence, heading::ATXHeading},
+            block::{code::CodeBlock, fence::CodeFence, heading::ATXHeading, paragraph::Paragraph},
             inline::{
                 backticks::CodeInline,
                 emphasis::{Em, Strong},
                 link::Link,
+                newline::{Hardbreak, Softbreak},
             },
         },
         extra::strikethrough::Strikethrough,
@@ -19,6 +20,7 @@ use crate::highlight::Highlighter;
 fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
     for sub in node.children.iter() {
+        println!("{:?}", sub);
         if let Some(txt) = sub.cast::<Text>() {
             text.push_str(&txt.content);
         } else if sub.is::<CodeInline>()
@@ -26,10 +28,13 @@ fn node_to_string(node: &Node) -> String {
             || sub.is::<Strong>()
             || sub.is::<Em>()
             || sub.is::<Strikethrough>()
+            || sub.is::<Paragraph>()
         {
             text.push_str(&node_to_string(sub));
-        } else if let Some(n) = sub.children.get(0) {
-            if let Some(t) = n.cast::<Text>() {
+        } else if sub.is::<Hardbreak>() || sub.is::<Softbreak>() {
+            text.push_str(" ");
+        } else if let Some(h) = sub.children.get(0) {
+            if let Some(t) = h.cast::<Text>() {
                 text.push_str(&t.content);
             }
         }
@@ -143,5 +148,41 @@ impl CoreRule for FancyCodeBlocks {
                 })
             }
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use indoc::indoc;
+
+    use super::{ast, node_to_string};
+
+    #[test]
+    fn node_to_string_fn() {
+        let cases: Vec<(&str, &str)> = vec![
+            ("", ""),
+            (
+                r#"Some `code` and some **bold** and some *italics*"#,
+                "Some code and some bold and some italics",
+            ),
+            (
+                r#"A link to [Google](https://google.com)"#,
+                "A link to Google",
+            ),
+            (
+                indoc! {"
+                    Some normal text.
+
+                    ## And then a header
+                "},
+                "Some normal text. And then a header.",
+            ),
+        ];
+
+        for (md, expected) in cases {
+            let tree = ast(md);
+            let output = &node_to_string(&tree);
+            assert_eq!(output, expected);
+        }
     }
 }
