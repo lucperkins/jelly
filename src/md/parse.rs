@@ -15,10 +15,10 @@ use markdown_it::{
     MarkdownIt, Node, NodeValue, Renderer,
 };
 
-use crate::highlight::Highlighter;
+use super::highlight::Highlighter;
 
 // TODO: make this less kludgey
-fn node_to_string(node: &Node) -> String {
+pub fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
     for sub in node.children.iter() {
         println!("{:?}", sub);
@@ -42,23 +42,6 @@ fn node_to_string(node: &Node) -> String {
         }
     }
     text.trim().to_owned()
-}
-
-pub fn get_document_title(body: &str) -> Option<String> {
-    let ast = ast(body);
-    let mut num_headers = 0;
-
-    for node in ast.children.iter() {
-        if let Some(heading) = node.cast::<ATXHeading>() {
-            num_headers += 1;
-
-            if num_headers == 1 && heading.level == 1 {
-                return Some(node_to_string(node));
-            }
-        }
-    }
-
-    None
 }
 
 pub fn render(md: &str) -> String {

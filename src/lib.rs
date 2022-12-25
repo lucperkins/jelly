@@ -12,7 +12,6 @@ pub mod cmd;
 pub mod config;
 pub mod content;
 pub mod error;
-pub mod highlight;
 pub mod md;
 pub mod page;
 pub mod site;
