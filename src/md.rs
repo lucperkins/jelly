@@ -35,7 +35,7 @@ fn node_to_string(node: &Node) -> String {
         {
             text.push_str(&node_to_string(sub));
         } else if sub.is::<Hardbreak>() || sub.is::<Softbreak>() {
-            text.push_str(" ");
+            text.push(' ');
         } else if sub.is::<Paragraph>() {
             text.push_str(&format!(" {} ", &node_to_string(sub)));
         } else if let Some(h) = sub.children.get(0) {
