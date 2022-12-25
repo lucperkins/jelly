@@ -55,7 +55,7 @@ fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
 mod tests {
     use indoc::indoc;
 
-    use crate::{md::ast, toc::Heading};
+    use crate::md::{parse::ast, toc::Heading};
 
     use super::TableOfContents;
 

@@ -1,5 +1,4 @@
-use crate::md::{ast, render};
-use crate::toc::TableOfContents;
+use crate::md::{ast, render, TableOfContents};
 
 use super::config::{SiteConfig, TitleConfig};
 use super::error::Error;

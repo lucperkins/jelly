@@ -2,11 +2,12 @@ use markdown_it::{
     parser::{core::CoreRule, inline::Text},
     plugins::{
         cmark::{
-            block::{code::CodeBlock, fence::CodeFence, heading::ATXHeading},
+            block::{code::CodeBlock, fence::CodeFence, heading::ATXHeading, paragraph::Paragraph},
             inline::{
                 backticks::CodeInline,
                 emphasis::{Em, Strong},
                 link::Link,
+                newline::{Hardbreak, Softbreak},
             },
         },
         extra::strikethrough::Strikethrough,
@@ -14,44 +15,33 @@ use markdown_it::{
     MarkdownIt, Node, NodeValue, Renderer,
 };
 
-use crate::highlight::Highlighter;
+use super::highlight::Highlighter;
 
+// TODO: make this less kludgey
 pub fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
     for sub in node.children.iter() {
+        println!("{:?}", sub);
         if let Some(txt) = sub.cast::<Text>() {
             text.push_str(&txt.content);
+        } else if sub.is::<Paragraph>() {
+            // Surround paragraphs with spaces to keep sentences from getting smushed together
+            text.push_str(&format!(" {} ", &node_to_string(sub)));
+        } else if let Some(code) = sub.cast::<FancyCodeBlock>() {
+            text.push_str(&code.content);
+        } else if sub.is::<Hardbreak>() || sub.is::<Softbreak>() {
+            text.push(' ');
         } else if sub.is::<CodeInline>()
             || sub.is::<Link>()
             || sub.is::<Strong>()
             || sub.is::<Em>()
             || sub.is::<Strikethrough>()
+            || sub.is::<ATXHeading>()
         {
             text.push_str(&node_to_string(sub));
-        } else if let Some(n) = sub.children.get(0) {
-            if let Some(t) = n.cast::<Text>() {
-                text.push_str(&t.content);
-            }
         }
     }
-    text
-}
-
-pub fn get_document_title(body: &str) -> Option<String> {
-    let ast = ast(body);
-    let mut num_headers = 0;
-
-    for node in ast.children.iter() {
-        if let Some(heading) = node.cast::<ATXHeading>() {
-            num_headers += 1;
-
-            if num_headers == 1 && heading.level == 1 {
-                return Some(node_to_string(node));
-            }
-        }
-    }
-
-    None
+    text.trim().to_owned()
 }
 
 pub fn render(md: &str) -> String {
@@ -143,5 +133,59 @@ impl CoreRule for FancyCodeBlocks {
                 })
             }
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use indoc::indoc;
+
+    use super::{ast, node_to_string};
+
+    #[test]
+    fn node_to_string_fn() {
+        let cases: Vec<(&str, &str)> = vec![
+            ("", ""),
+            (
+                r#"## Some `code` and some **bold** and some *italics*"#,
+                "Some code and some bold and some italics",
+            ),
+            (
+                r#"A link to [Google](https://google.com)"#,
+                "A link to Google",
+            ),
+            (
+                indoc! {"
+                    Some normal text.
+
+                    ## And then a header
+                "},
+                "Some normal text. And then a header",
+            ),
+            (
+                indoc! {"
+                    Some text.
+
+                    ## And then a header with `code`
+                "},
+                "Some text. And then a header with code",
+            ),
+            (
+                indoc! {"
+                    Some text plus **bold**.
+
+                    ```python
+                    x = 5
+                    ```
+                "},
+                "Some text plus bold. x = 5",
+            ),
+        ];
+
+        for (md, expected) in cases {
+            let tree = ast(md);
+            let output = &node_to_string(&tree);
+            assert_eq!(output, expected);
+        }
     }
 }
