@@ -17,29 +17,34 @@ use markdown_it::{
 
 use crate::highlight::Highlighter;
 
+// TODO: make this less kludgey
 fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
     for sub in node.children.iter() {
         println!("{:?}", sub);
         if let Some(txt) = sub.cast::<Text>() {
             text.push_str(&txt.content);
+        } else if let Some(code) = sub.cast::<FancyCodeBlock>() {
+            text.push_str(&code.content);
         } else if sub.is::<CodeInline>()
             || sub.is::<Link>()
             || sub.is::<Strong>()
             || sub.is::<Em>()
             || sub.is::<Strikethrough>()
-            || sub.is::<Paragraph>()
+            || sub.is::<ATXHeading>()
         {
             text.push_str(&node_to_string(sub));
         } else if sub.is::<Hardbreak>() || sub.is::<Softbreak>() {
             text.push_str(" ");
+        } else if sub.is::<Paragraph>() {
+            text.push_str(&format!(" {} ", &node_to_string(sub)));
         } else if let Some(h) = sub.children.get(0) {
             if let Some(t) = h.cast::<Text>() {
                 text.push_str(&t.content);
             }
         }
     }
-    text
+    text.trim().to_owned()
 }
 
 pub fn get_document_title(body: &str) -> Option<String> {
@@ -162,7 +167,7 @@ mod tests {
         let cases: Vec<(&str, &str)> = vec![
             ("", ""),
             (
-                r#"Some `code` and some **bold** and some *italics*"#,
+                r#"## Some `code` and some **bold** and some *italics*"#,
                 "Some code and some bold and some italics",
             ),
             (
@@ -175,7 +180,25 @@ mod tests {
 
                     ## And then a header
                 "},
-                "Some normal text. And then a header.",
+                "Some normal text. And then a header",
+            ),
+            (
+                indoc! {"
+                    Some text.
+
+                    ## And then a header with `code`
+                "},
+                "Some text. And then a header with code",
+            ),
+            (
+                indoc! {"
+                    Some text plus **bold**.
+
+                    ```python
+                    x = 5
+                    ```
+                "},
+                "Some text plus bold. x = 5",
             ),
         ];
 
