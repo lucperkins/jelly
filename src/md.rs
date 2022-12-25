@@ -24,8 +24,13 @@ fn node_to_string(node: &Node) -> String {
         println!("{:?}", sub);
         if let Some(txt) = sub.cast::<Text>() {
             text.push_str(&txt.content);
+        } else if sub.is::<Paragraph>() {
+            // Surround paragraphs with spaces to keep sentences from getting smushed together
+            text.push_str(&format!(" {} ", &node_to_string(sub)));
         } else if let Some(code) = sub.cast::<FancyCodeBlock>() {
             text.push_str(&code.content);
+        } else if sub.is::<Hardbreak>() || sub.is::<Softbreak>() {
+            text.push(' ');
         } else if sub.is::<CodeInline>()
             || sub.is::<Link>()
             || sub.is::<Strong>()
@@ -34,14 +39,6 @@ fn node_to_string(node: &Node) -> String {
             || sub.is::<ATXHeading>()
         {
             text.push_str(&node_to_string(sub));
-        } else if sub.is::<Hardbreak>() || sub.is::<Softbreak>() {
-            text.push(' ');
-        } else if sub.is::<Paragraph>() {
-            text.push_str(&format!(" {} ", &node_to_string(sub)));
-        } else if let Some(h) = sub.children.get(0) {
-            if let Some(t) = h.cast::<Text>() {
-                text.push_str(&t.content);
-            }
         }
     }
     text.trim().to_owned()
