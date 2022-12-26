@@ -1,4 +1,8 @@
-use crate::{front::FrontMatter, md::render, title::infer_page_title};
+use crate::{
+    front::FrontMatter,
+    md::{ast, render},
+    title::infer_page_title,
+};
 
 use super::config::SiteConfig;
 use super::error::Error;
@@ -44,7 +48,8 @@ impl Page {
 
         let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
 
-        let html = render(&result.content);
+        let tree = ast(&result.content);
+        let html = render(&tree);
 
         Ok(Page {
             path: String::from(path.to_string_lossy()),

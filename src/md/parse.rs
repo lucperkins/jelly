@@ -44,8 +44,8 @@ pub fn node_to_string(node: &Node) -> String {
     text.trim().to_owned()
 }
 
-pub fn render(md: &str) -> String {
-    ast(md).render()
+pub fn render(ast: &Node) -> String {
+    ast.render()
 }
 
 pub fn ast(input: &str) -> Node {
