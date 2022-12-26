@@ -1,10 +1,7 @@
-use std::vec::IntoIter;
-
-use markdown_it::{plugins::cmark::block::heading::ATXHeading, Node};
+use markdown_it::Node;
 use serde::Serialize;
-use slug::slugify;
 
-use crate::md::node_to_string;
+use super::headings::{Heading, Headings};
 
 #[derive(Debug, PartialEq, Serialize)]
 pub struct TableOfContents(Vec<(Heading, TableOfContents)>);
@@ -31,45 +28,9 @@ fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
     TableOfContents(toc)
 }
 
-#[derive(Debug, PartialEq, Serialize)]
-struct Heading {
-    level: u8,
-    text: String,
-    slug: String,
-}
-
-impl Heading {
-    fn new(level: u8, text: &str) -> Self {
-        Self {
-            level,
-            text: String::from(text),
-            slug: slugify(text),
-        }
-    }
-}
-
-struct Headings<'a>(&'a [Node]);
-
-impl<'a> IntoIterator for Headings<'a> {
-    type Item = (usize, Heading);
-    type IntoIter = IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        let mut headings: Vec<(usize, Heading)> = Vec::new();
-
-        for (idx, node) in self.0.iter().enumerate() {
-            if let Some(heading) = node.cast::<ATXHeading>() {
-                headings.push((idx, Heading::new(heading.level, &node_to_string(node))));
-            }
-        }
-
-        headings.into_iter()
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::md::{parse::ast, toc::Heading};
+    use crate::md::{headings::Heading, parse::ast};
     use indoc::indoc;
 
     use super::TableOfContents;
