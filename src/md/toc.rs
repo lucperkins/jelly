@@ -25,8 +25,8 @@ impl Heading {
 pub struct TableOfContents(Vec<(Heading, TableOfContents)>);
 
 impl TableOfContents {
-    pub fn new(document: &Node, level: u8) -> Self {
-        toc_for_level(&document.children, level)
+    pub fn new(document: &Node) -> Self {
+        toc_for_level(&document.children, 2)
     }
 
     #[cfg(test)]

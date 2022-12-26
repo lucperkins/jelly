@@ -1,3 +1,4 @@
+mod code;
 mod highlight;
 mod parse;
 mod title;

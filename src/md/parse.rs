@@ -1,8 +1,8 @@
 use markdown_it::{
-    parser::{core::CoreRule, inline::Text},
+    parser::inline::Text,
     plugins::{
         cmark::{
-            block::{code::CodeBlock, fence::CodeFence, heading::ATXHeading, paragraph::Paragraph},
+            block::{heading::ATXHeading, paragraph::Paragraph},
             inline::{
                 backticks::CodeInline,
                 emphasis::{Em, Strong},
@@ -12,10 +12,10 @@ use markdown_it::{
         },
         extra::strikethrough::Strikethrough,
     },
-    MarkdownIt, Node, NodeValue, Renderer,
+    Node,
 };
 
-use super::highlight::Highlighter;
+use crate::md::code::{add_code_block_rule, FancyCodeBlock};
 
 // TODO: make this less kludgey
 pub fn node_to_string(node: &Node) -> String {
@@ -44,8 +44,8 @@ pub fn node_to_string(node: &Node) -> String {
     text.trim().to_owned()
 }
 
-pub fn render(md: &str) -> String {
-    ast(md).render()
+pub fn render(ast: &Node) -> String {
+    ast.render()
 }
 
 pub fn ast(input: &str) -> Node {
@@ -71,69 +71,12 @@ pub fn ast(input: &str) -> Node {
     block::lheading::add(md);
     block::paragraph::add(md);
 
-    md.add_rule::<FancyCodeBlocks>();
+    // Replaces block::code::add
+    add_code_block_rule(md);
 
     markdown_it::plugins::extra::add(md);
 
     md.parse(input)
-}
-
-#[derive(Debug)]
-struct FancyCodeBlock {
-    meta: Option<String>,
-    content: String,
-}
-
-impl NodeValue for FancyCodeBlock {
-    fn render(&self, _: &Node, fmt: &mut dyn Renderer) {
-        let default_lang = String::from("text");
-        let lang = self.meta.as_ref().unwrap_or(&default_lang);
-        let language = format!("language-{}", lang);
-        let pre_attrs = vec![("class", language)];
-
-        let higlighter = Highlighter::default();
-
-        let code = match higlighter.highlight(lang, &self.content) {
-            Ok(html) => html,
-            Err(e) => e.to_string(),
-        };
-
-        fmt.cr();
-        fmt.open("pre", &pre_attrs);
-        fmt.open("code", &[]);
-        fmt.cr();
-        fmt.text_raw(&code);
-        fmt.cr();
-        fmt.close("code");
-        fmt.close("pre");
-        fmt.cr()
-    }
-}
-
-struct FancyCodeBlocks;
-
-impl CoreRule for FancyCodeBlocks {
-    fn run(root: &mut Node, _: &MarkdownIt) {
-        root.walk_post_mut(|node, _| {
-            let mut meta: Option<&String> = None;
-            let mut content: Option<&String> = None;
-
-            if let Some(code) = node.cast::<CodeBlock>() {
-                content = Some(&code.content);
-            }
-            if let Some(code) = node.cast::<CodeFence>() {
-                meta = Some(&code.info);
-                content = Some(&code.content);
-            }
-
-            if let Some(content) = content {
-                node.replace(FancyCodeBlock {
-                    meta: meta.map(String::from),
-                    content: String::from(content),
-                })
-            }
-        })
-    }
 }
 
 #[cfg(test)]

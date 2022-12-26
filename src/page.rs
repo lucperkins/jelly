@@ -1,12 +1,15 @@
-use crate::md::{ast, render, TableOfContents};
+use crate::{
+    front::FrontMatter,
+    md::{ast, render, TableOfContents},
+    title::infer_page_title,
+};
 
-use super::config::{SiteConfig, TitleConfig};
+use super::config::SiteConfig;
 use super::error::Error;
-use super::md::get_document_title;
-use super::utils::{get_file, name_from_path};
+use super::utils::get_file;
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Serialize)]
@@ -48,9 +51,8 @@ impl Page {
 
         let tree = ast(&result.content);
 
-        let table_of_contents = TableOfContents::new(&tree, 2);
-
-        let html = render(&result.content);
+        let table_of_contents = TableOfContents::new(&tree);
+        let html = render(&tree);
 
         Ok(Page {
             path: String::from(path.to_string_lossy()),
@@ -69,20 +71,4 @@ impl Page {
             table_of_contents,
         })
     }
-}
-
-#[derive(Default, Deserialize)]
-struct FrontMatter {
-    title: Option<String>,
-}
-
-fn infer_page_title(
-    front: FrontMatter,
-    path: &Path,
-    file: String,
-    title_config: &TitleConfig,
-) -> String {
-    front.title.unwrap_or_else(|| {
-        get_document_title(&file).unwrap_or_else(|| name_from_path(path, title_config))
-    })
 }

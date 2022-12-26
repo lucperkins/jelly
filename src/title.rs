@@ -4,12 +4,24 @@ use std::{
 };
 
 use crate::{
-    config::SiteConfig,
+    config::{SiteConfig, TitleConfig},
     content::SectionConfig,
     error::Error,
+    front::FrontMatter,
     md::get_document_title,
     utils::{get_file, name_from_path},
 };
+
+pub fn infer_page_title(
+    front: FrontMatter,
+    path: &Path,
+    file: String,
+    title_config: &TitleConfig,
+) -> String {
+    front.title.unwrap_or_else(|| {
+        get_document_title(&file).unwrap_or_else(|| name_from_path(path, title_config))
+    })
+}
 
 fn title_from_index_page(path: &Path) -> Result<Option<String>, Error> {
     let index_path = Path::new(&path).join("index.md");
