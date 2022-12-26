@@ -53,9 +53,8 @@ fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
 
 #[cfg(test)]
 mod tests {
-    use indoc::indoc;
-
     use crate::md::{parse::ast, toc::Heading};
+    use indoc::indoc;
 
     use super::TableOfContents;
 
@@ -87,7 +86,7 @@ mod tests {
 
         let tree = ast(md);
 
-        let toc = TableOfContents::new(&tree, 2);
+        let toc = TableOfContents::new(&tree);
 
         assert_eq!(
             toc,
