@@ -21,7 +21,6 @@ use crate::md::code::{add_code_block_rule, FancyCodeBlock};
 pub fn node_to_string(node: &Node) -> String {
     let mut text = String::new();
     for sub in node.children.iter() {
-        println!("{:?}", sub);
         if let Some(txt) = sub.cast::<Text>() {
             text.push_str(&txt.content);
         } else if sub.is::<Paragraph>() {

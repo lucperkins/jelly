@@ -1,8 +1,35 @@
+use std::vec::IntoIter;
+
 use markdown_it::{plugins::cmark::block::heading::ATXHeading, Node};
 use serde::Serialize;
 use slug::slugify;
 
 use crate::md::node_to_string;
+
+#[derive(Debug, PartialEq, Serialize)]
+pub struct TableOfContents(Vec<(Heading, TableOfContents)>);
+
+impl TableOfContents {
+    pub fn new(document: &Node) -> Self {
+        toc_for_level(&document.children, 2)
+    }
+
+    #[cfg(test)]
+    fn empty() -> Self {
+        Self(vec![])
+    }
+}
+
+fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
+    let mut toc: Vec<(Heading, TableOfContents)> = Vec::new();
+    for (idx, heading) in Headings(nodes) {
+        if heading.level == level {
+            toc.push((heading, toc_for_level(&nodes[idx..], level + 1)));
+        }
+    }
+
+    TableOfContents(toc)
+}
 
 #[derive(Debug, PartialEq, Serialize)]
 struct Heading {
@@ -21,34 +48,23 @@ impl Heading {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize)]
-pub struct TableOfContents(Vec<(Heading, TableOfContents)>);
+struct Headings<'a>(&'a [Node]);
 
-impl TableOfContents {
-    pub fn new(document: &Node) -> Self {
-        toc_for_level(&document.children, 2)
-    }
+impl<'a> IntoIterator for Headings<'a> {
+    type Item = (usize, Heading);
+    type IntoIter = IntoIter<Self::Item>;
 
-    #[cfg(test)]
-    fn empty() -> Self {
-        Self(vec![])
-    }
-}
+    fn into_iter(self) -> Self::IntoIter {
+        let mut headings: Vec<(usize, Heading)> = Vec::new();
 
-fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
-    let mut toc: Vec<(Heading, TableOfContents)> = Vec::new();
-
-    for (idx, node) in nodes.iter().enumerate() {
-        if let Some(h) = node.cast::<ATXHeading>() {
-            if h.level == level {
-                let text = &node_to_string(node);
-                let heading = Heading::new(level, text);
-                toc.push((heading, toc_for_level(&nodes[idx..], level + 1)));
+        for (idx, node) in self.0.iter().enumerate() {
+            if let Some(heading) = node.cast::<ATXHeading>() {
+                headings.push((idx, Heading::new(heading.level, &node_to_string(node))));
             }
         }
-    }
 
-    TableOfContents(toc)
+        headings.into_iter()
+    }
 }
 
 #[cfg(test)]
