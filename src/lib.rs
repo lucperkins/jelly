@@ -9,16 +9,16 @@ use std::{
 };
 
 pub mod cmd;
-pub mod config;
-pub mod content;
+mod config;
+mod content;
 pub mod error;
-pub mod highlight;
-pub mod md;
-pub mod page;
-pub mod search;
-pub mod site;
-pub mod title;
-pub mod utils;
+mod front;
+mod md;
+mod page;
+mod search;
+mod site;
+mod title;
+mod utils;
 
 #[allow(dead_code)]
 fn render_page(page: &Page) -> Result<String, Error> {
