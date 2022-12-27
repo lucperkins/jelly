@@ -6,24 +6,25 @@ use slug::slugify;
 
 use super::node_to_string;
 
+pub struct Headings<'a>(pub &'a [Node]);
+
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct Heading {
-    pub level: u8,
+    level: u8,
     text: String,
     slug: String,
 }
 
 impl Heading {
     pub fn new(level: u8, text: &str) -> Self {
+        let slug = slugify(text);
         Self {
             level,
             text: String::from(text),
-            slug: slugify(text),
+            slug,
         }
     }
 }
-
-pub struct Headings<'a>(pub &'a [Node]);
 
 impl<'a> IntoIterator for Headings<'a> {
     type Item = Heading;
@@ -39,5 +40,84 @@ impl<'a> IntoIterator for Headings<'a> {
         }
 
         headings.into_iter()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use indoc::indoc;
+
+    use crate::md::ast;
+
+    use super::{Heading, Headings};
+
+    #[test]
+    fn md_to_headings() {
+        let cases: Vec<(&str, Vec<Heading>)> = vec![
+            (indoc! {""}, vec![]),
+            (
+                indoc! {"
+                    Some text.
+
+                    ## Heading 2
+
+                    Other text.
+
+                    ### Heading 3
+
+                    More text.
+
+                    ## Back to heading 2
+                "},
+                vec![
+                    Heading::new(2, "Heading 2"),
+                    Heading::new(3, "Heading 3"),
+                    Heading::new(2, "Back to heading 2"),
+                ],
+            ),
+            (
+                indoc! {"
+                    # h1
+
+                    ## h2 with `bold`
+
+                    ### h3 with `italics`
+
+                    # h1
+
+                    ## h2 has a `code sample`
+
+                    #### h4
+
+                    ##### h5
+
+                    ## h2
+
+                    ###### h6 has a [link with `code in it`](https://example.com)
+
+                    ####### This won't show up
+                "},
+                vec![
+                    Heading::new(1, "h1"),
+                    Heading::new(2, "h2 with bold"),
+                    Heading::new(3, "h3 with italics"),
+                    Heading::new(1, "h1"),
+                    Heading::new(2, "h2 has a code sample"),
+                    Heading::new(4, "h4"),
+                    Heading::new(5, "h5"),
+                    Heading::new(2, "h2"),
+                    Heading::new(6, "h6 has a link with code in it"),
+                ],
+            ),
+        ];
+
+        for (md, expected_headings) in cases {
+            let tree = ast(md);
+            let headings: Vec<Heading> = Headings(&tree.children).into_iter().collect();
+
+            for (idx, heading) in headings.iter().enumerate() {
+                assert_eq!(heading, &expected_headings[idx]);
+            }
+        }
     }
 }
