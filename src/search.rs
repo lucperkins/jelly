@@ -47,7 +47,5 @@ pub fn build_search_index_for_page(page: &Page) -> Index {
         }
     }
 
-    println!("{:?}", documents);
-
     Index
 }
