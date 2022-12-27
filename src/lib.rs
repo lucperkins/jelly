@@ -15,6 +15,7 @@ pub mod error;
 mod front;
 mod md;
 mod page;
+mod search;
 mod site;
 mod title;
 mod utils;
