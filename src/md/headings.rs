@@ -36,7 +36,9 @@ impl<'a> IntoIterator for Headings<'a> {
 
         for node in self.0.iter() {
             if let Some(heading) = node.cast::<ATXHeading>() {
-                headings.push(Heading::new(heading.level, &node_to_string(node)));
+                if heading.level > 1 {
+                    headings.push(Heading::new(heading.level, &node_to_string(node)));
+                }
             }
         }
 
@@ -53,7 +55,9 @@ impl<'a> IntoIterator for HeadingsWithIdx<'a> {
 
         for (idx, node) in self.0.iter().enumerate() {
             if let Some(heading) = node.cast::<ATXHeading>() {
-                headings.push((idx, Heading::new(heading.level, &node_to_string(node))));
+                if heading.level > 1 {
+                    headings.push((idx, Heading::new(heading.level, &node_to_string(node))));
+                }
             }
         }
 

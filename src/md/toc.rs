@@ -1,7 +1,7 @@
 use markdown_it::Node;
 use serde::Serialize;
 
-use super::headings::Heading;
+use super::headings::{Heading, HeadingsWithIdx};
 
 #[derive(Debug, PartialEq, Serialize)]
 struct TocEntry {
@@ -9,7 +9,6 @@ struct TocEntry {
     children: Option<Vec<TocEntry>>,
 }
 
-#[cfg(test)]
 impl TocEntry {
     fn new(heading: Heading, children: Option<Vec<TocEntry>>) -> Self {
         Self { heading, children }
@@ -31,9 +30,7 @@ impl TableOfContents {
 }
 
 fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
-    let entries: Vec<TocEntry> = Vec::new();
-
-    TableOfContents(entries)
+    TableOfContents(vec![])
 }
 
 #[cfg(test)]
