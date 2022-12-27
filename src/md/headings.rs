@@ -26,15 +26,15 @@ impl Heading {
 pub struct Headings<'a>(pub &'a [Node]);
 
 impl<'a> IntoIterator for Headings<'a> {
-    type Item = (usize, Heading);
+    type Item = Heading;
     type IntoIter = IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let mut headings: Vec<(usize, Heading)> = Vec::new();
+        let mut headings: Vec<Heading> = Vec::new();
 
-        for (idx, node) in self.0.iter().enumerate() {
+        for node in self.0.iter() {
             if let Some(heading) = node.cast::<ATXHeading>() {
-                headings.push((idx, Heading::new(heading.level, &node_to_string(node))));
+                headings.push(Heading::new(heading.level, &node_to_string(node)));
             }
         }
 

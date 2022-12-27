@@ -17,15 +17,12 @@ impl TableOfContents {
     }
 }
 
-fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
-    let mut toc: Vec<(Heading, TableOfContents)> = Vec::new();
+fn toc_for_level(nodes: &[Node], _level: u8) -> TableOfContents {
+    let toc: Vec<(Heading, TableOfContents)> = Vec::new();
 
-    Headings(nodes)
-        .into_iter()
-        .filter(|(_, heading)| heading.level == level)
-        .for_each(|(idx, heading)| {
-            toc.push((heading, toc_for_level(&nodes[idx..], level + 1)));
-        });
+    for _heading in Headings(nodes) {
+        // TODO
+    }
 
     TableOfContents(toc)
 }
