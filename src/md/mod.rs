@@ -2,6 +2,7 @@ mod code;
 mod headings;
 mod highlight;
 mod parse;
+mod search;
 mod title;
 mod toc;
 

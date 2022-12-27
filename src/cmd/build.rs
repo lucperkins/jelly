@@ -9,7 +9,6 @@ use crate::{
     content::Section,
     error::Error,
     render_page,
-    search::build_search_index_for_page,
     site::Site,
 };
 
@@ -26,8 +25,6 @@ pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {
     for page in site.pages() {
         let html = render_page(page)?;
         let mut path = out.join(&page.relative_path);
-
-        let _ = build_search_index_for_page(page);
 
         path.set_extension("html");
 

@@ -7,11 +7,12 @@ use slug::slugify;
 use super::node_to_string;
 
 pub struct Headings<'a>(pub &'a [Node]);
+pub struct HeadingsWithIdx<'a>(pub &'a [Node]);
 
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Heading {
-    level: u8,
-    text: String,
+    pub level: u8,
+    pub text: String,
     slug: String,
 }
 
@@ -36,6 +37,23 @@ impl<'a> IntoIterator for Headings<'a> {
         for node in self.0.iter() {
             if let Some(heading) = node.cast::<ATXHeading>() {
                 headings.push(Heading::new(heading.level, &node_to_string(node)));
+            }
+        }
+
+        headings.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for HeadingsWithIdx<'a> {
+    type Item = (usize, Heading);
+    type IntoIter = IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut headings: Vec<(usize, Heading)> = Vec::new();
+
+        for (idx, node) in self.0.iter().enumerate() {
+            if let Some(heading) = node.cast::<ATXHeading>() {
+                headings.push((idx, Heading::new(heading.level, &node_to_string(node))));
             }
         }
 

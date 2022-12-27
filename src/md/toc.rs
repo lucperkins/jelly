@@ -1,10 +1,23 @@
-use markdown_it::Node;
+use markdown_it::{plugins::cmark::block::heading::ATXHeading, Node};
 use serde::Serialize;
 
-use super::headings::{Heading, Headings};
+use super::headings::{Heading, HeadingsWithIdx};
 
 #[derive(Debug, PartialEq, Serialize)]
-pub struct TableOfContents(Vec<(Heading, TableOfContents)>);
+struct TocEntry {
+    heading: Heading,
+    children: Option<Vec<TocEntry>>,
+}
+
+#[cfg(test)]
+impl TocEntry {
+    fn new(heading: Heading, children: Option<Vec<TocEntry>>) -> Self {
+        Self { heading, children }
+    }
+}
+
+#[derive(Debug, PartialEq, Serialize)]
+pub struct TableOfContents(Vec<TocEntry>);
 
 impl TableOfContents {
     pub fn new(document: &Node) -> Self {
@@ -17,19 +30,15 @@ impl TableOfContents {
     }
 }
 
-fn toc_for_level(nodes: &[Node], _level: u8) -> TableOfContents {
-    let toc: Vec<(Heading, TableOfContents)> = Vec::new();
+fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
+    let entries: Vec<TocEntry> = Vec::new();
 
-    for _heading in Headings(nodes) {
-        // TODO
-    }
-
-    TableOfContents(toc)
+    TableOfContents(entries)
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::md::{headings::Heading, parse::ast};
+    use crate::md::{headings::Heading, parse::ast, toc::TocEntry};
     use indoc::indoc;
 
     use super::TableOfContents;
@@ -67,27 +76,24 @@ mod tests {
         assert_eq!(
             toc,
             TableOfContents(vec![
-                (
+                TocEntry::new(
                     Heading::new(2, "Now a heading 2"),
-                    TableOfContents(vec![(
+                    Some(vec![TocEntry::new(
                         Heading::new(3, "Now a heading 3"),
-                        TableOfContents(vec![(
-                            Heading::new(4, "Let's go even deeper"),
-                            TableOfContents::empty()
+                        Some(vec![TocEntry::new(
+                            Heading::new(4, "Let's go even deeper",),
+                            None
                         )])
                     )])
                 ),
-                (
+                TocEntry::new(
                     Heading::new(2, "And now back to a heading 2"),
-                    TableOfContents(vec![(
+                    Some(vec![TocEntry::new(
                         Heading::new(3, "Another heading 3"),
-                        TableOfContents::empty()
+                        None
                     )])
                 ),
-                (
-                    Heading::new(2, "And yet another heading 2"),
-                    TableOfContents::empty()
-                ),
+                TocEntry::new(Heading::new(2, "Anod yet another heading 2"), None)
             ])
         );
     }
