@@ -2,7 +2,7 @@ use crate::config::SiteConfig;
 use crate::error::Error;
 use crate::get_pages_in_dir;
 use crate::utils::get_or_none;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::fs::{metadata, read_dir};
 use std::path::PathBuf;
 
@@ -10,11 +10,6 @@ use super::page::Page;
 use super::title::get_section_title;
 
 pub type Content = Section;
-
-#[derive(Deserialize)]
-pub struct SectionConfig {
-    pub title: Option<String>,
-}
 
 #[derive(Debug, Serialize)]
 pub struct Section {
