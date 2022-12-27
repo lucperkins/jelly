@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use super::{content::Content, page::Page};
+use super::{page::Page, section::Content};
 
 #[derive(Serialize)]
 pub struct Site {

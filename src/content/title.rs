@@ -10,7 +10,7 @@ use crate::{
     utils::{get_file, name_from_path},
 };
 
-use super::{content::SectionConfig, front::FrontMatter};
+use super::{front::FrontMatter, section::SectionConfig};
 
 pub fn infer_page_title(
     front: FrontMatter,
