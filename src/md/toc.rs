@@ -1,7 +1,7 @@
 use markdown_it::Node;
 use serde::Serialize;
 
-use super::headings::{Heading, HeadingsWithIdx};
+use super::headings::Heading;
 
 #[derive(Debug, PartialEq, Serialize)]
 struct TocEntry {

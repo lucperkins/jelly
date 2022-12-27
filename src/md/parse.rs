@@ -7,7 +7,6 @@ use markdown_it::{
                 backticks::CodeInline,
                 emphasis::{Em, Strong},
                 link::Link,
-                newline::{Hardbreak, Softbreak},
             },
         },
         extra::strikethrough::Strikethrough,
@@ -19,17 +18,15 @@ use crate::md::code::{add_code_block_rule, FancyCodeBlock};
 
 // TODO: make this less kludgey
 pub fn node_to_string(node: &Node) -> String {
-    let mut text = String::new();
+    let mut pieces: Vec<String> = Vec::new();
+
     for sub in node.children.iter() {
         if let Some(txt) = sub.cast::<Text>() {
-            text.push_str(&txt.content);
+            pieces.push(txt.content.clone());
         } else if sub.is::<Paragraph>() {
-            // Surround paragraphs with spaces to keep sentences from getting smushed together
-            text.push_str(&format!(" {} ", &node_to_string(sub)));
+            pieces.push(format!(" {} ", node_to_string(sub)));
         } else if let Some(code) = sub.cast::<FancyCodeBlock>() {
-            text.push_str(&code.content);
-        } else if sub.is::<Hardbreak>() || sub.is::<Softbreak>() {
-            text.push(' ');
+            pieces.push(code.content.clone());
         } else if sub.is::<CodeInline>()
             || sub.is::<Link>()
             || sub.is::<Strong>()
@@ -37,10 +34,13 @@ pub fn node_to_string(node: &Node) -> String {
             || sub.is::<Strikethrough>()
             || sub.is::<ATXHeading>()
         {
-            text.push_str(&node_to_string(sub));
+            pieces.push(node_to_string(sub));
+        } else {
+            pieces.push(node.render());
         }
     }
-    text.trim().to_owned()
+
+    pieces.join("").trim().to_owned()
 }
 
 pub fn render(ast: &Node) -> String {

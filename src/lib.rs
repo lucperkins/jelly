@@ -1,7 +1,7 @@
 use crate::config::SiteConfig;
 use crate::error::Error;
+use content::Page;
 use handlebars::Handlebars;
-use page::Page;
 use serde_json::json;
 use std::{
     fs::{metadata, read_dir},
@@ -12,11 +12,7 @@ pub mod cmd;
 mod config;
 mod content;
 pub mod error;
-mod front;
 mod md;
-mod page;
-mod site;
-mod title;
 mod utils;
 
 #[allow(dead_code)]

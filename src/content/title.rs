@@ -5,12 +5,12 @@ use std::{
 
 use crate::{
     config::{SiteConfig, TitleConfig},
-    content::SectionConfig,
     error::Error,
-    front::FrontMatter,
     md::get_document_title,
     utils::{get_file, name_from_path},
 };
+
+use super::{front::FrontMatter, section::SectionConfig};
 
 pub fn infer_page_title(
     front: FrontMatter,

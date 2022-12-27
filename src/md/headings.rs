@@ -99,13 +99,13 @@ mod tests {
             ),
             (
                 indoc! {"
-                    # h1
+                    # h1 gets ignored
 
                     ## h2 with `bold`
 
                     ### h3 with `italics`
 
-                    # h1
+                    # h1 gets ignored
 
                     ## h2 has a `code sample`
 
@@ -120,10 +120,8 @@ mod tests {
                     ####### This won't show up
                 "},
                 vec![
-                    Heading::new(1, "h1"),
                     Heading::new(2, "h2 with bold"),
                     Heading::new(3, "h3 with italics"),
-                    Heading::new(1, "h1"),
                     Heading::new(2, "h2 has a code sample"),
                     Heading::new(4, "h4"),
                     Heading::new(5, "h5"),
