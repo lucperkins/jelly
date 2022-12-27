@@ -9,7 +9,7 @@ use super::node_to_string;
 pub struct Headings<'a>(pub &'a [Node]);
 pub struct HeadingsWithIdx<'a>(pub &'a [Node]);
 
-#[derive(Clone, Debug, PartialEq, Serialize)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct Heading {
     pub level: u8,
     pub text: String,

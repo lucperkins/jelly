@@ -51,7 +51,7 @@ impl Page {
 
         let tree = ast(&result.content);
 
-        let table_of_contents = TableOfContents::new(&tree);
+        let table_of_contents = TableOfContents::parse(&tree);
         let html = render(&tree);
 
         Ok(Page {
