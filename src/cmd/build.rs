@@ -6,10 +6,9 @@ use std::{
 
 use crate::{
     config::{SiteConfig, TitleConfig},
-    content::Section,
+    content::{Section, Site},
     error::Error,
     render_page,
-    site::Site,
 };
 
 pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {

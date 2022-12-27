@@ -1,12 +1,11 @@
 use crate::{
-    front::FrontMatter,
+    config::SiteConfig,
+    error::Error,
     md::{ast, render},
-    title::infer_page_title,
+    utils::get_file,
 };
 
-use super::config::SiteConfig;
-use super::error::Error;
-use super::utils::get_file;
+use super::{front::FrontMatter, title::infer_page_title};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use serde::Serialize;

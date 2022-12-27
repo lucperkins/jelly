@@ -1,6 +1,6 @@
-use crate::content::Content;
-use crate::page::Page;
 use serde::Serialize;
+
+use super::{content::Content, page::Page};
 
 #[derive(Serialize)]
 pub struct Site {

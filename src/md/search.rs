@@ -6,7 +6,7 @@ use crate::md::node_to_string;
 use super::headings::HeadingsWithIdx;
 
 #[derive(Debug, PartialEq, Serialize)]
-pub struct Document {
+struct Document {
     level: u8,
     page_title: String,
     title: String,
@@ -24,6 +24,7 @@ impl Document {
     }
 }
 
+#[allow(dead_code)]
 pub struct Index(Vec<Document>);
 
 #[cfg(test)]
@@ -33,6 +34,7 @@ impl Index {
     }
 }
 
+#[allow(dead_code)]
 pub fn build_search_index_for_page(page_title: &str, document: &Node) -> Index {
     let nodes = &document.children;
 
