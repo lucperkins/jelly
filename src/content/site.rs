@@ -1,10 +1,10 @@
 use serde::Serialize;
 
-use super::{page::Page, section::Content};
+use super::{page::Page, Section};
 
-#[derive(Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Site {
-    pub content: Content,
+    pub content: Section,
 }
 
 impl Site {

@@ -9,9 +9,7 @@ use std::path::PathBuf;
 use super::page::Page;
 use super::title::get_section_title;
 
-pub type Content = Section;
-
-#[derive(Debug, Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Section {
     pub title: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -72,12 +70,10 @@ impl Section {
             }
         }
 
-        let root_section = Section {
+        Ok(Section {
             title: String::from(section_title),
             pages: get_or_none(pages),
             sections: get_or_none(sections),
-        };
-
-        Ok(root_section)
+        })
     }
 }

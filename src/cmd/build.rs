@@ -2,6 +2,7 @@ use std::{
     fs::{create_dir_all, File},
     io::Write,
     path::PathBuf,
+    process::ExitCode,
 };
 
 use crate::{
@@ -11,7 +12,7 @@ use crate::{
     render_page,
 };
 
-pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {
+fn build_site(source: PathBuf) -> Result<Site, Error> {
     let config = SiteConfig {
         root: source,
         title_config: TitleConfig::default(),
@@ -19,7 +20,11 @@ pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {
 
     let content = Section::from_path(&config.root, None, &config)?;
 
-    let site = Site { content };
+    Ok(Site { content })
+}
+
+pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
+    let site = build_site(source)?;
 
     for page in site.pages() {
         let html = render_page(page)?;
@@ -34,5 +39,43 @@ pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {
         file.write_all(html.as_bytes())?;
     }
 
-    Ok(())
+    Ok(ExitCode::SUCCESS)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use crate::content::{Link, Page, Section, Site};
+
+    use super::build_site;
+
+    #[test]
+    fn build_real_site() {
+        let cases: Vec<(&str, Site)> = vec![(
+            "tests/basic",
+            Site {
+                content: Section {
+                    title: String::from("The Jelly documentation"),
+                    pages: Some(vec![Page {
+                        path: String::from("tests/basic/index.md"),
+                        relative_path: String::from("index.md"),
+                        title: String::from("Welcome"),
+                        body: String::from("# Welcome\n\nWelcome to the site."),
+                        html: String::from("<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n"),
+                        breadcrumb: vec![Link {
+                            path: PathBuf::from("tests/basic"),
+                            title: String::from("The Jelly documentation"),
+                        }],
+                    }]),
+                    sections: None,
+                },
+            },
+        )];
+
+        for (dir, expected_site) in cases {
+            let site = build_site(PathBuf::from(dir)).unwrap();
+            assert_eq!(site, expected_site);
+        }
+    }
 }

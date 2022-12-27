@@ -11,13 +11,13 @@ use gray_matter::Matter;
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Link {
-    path: PathBuf,
-    title: String,
+    pub path: PathBuf,
+    pub title: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Page {
     pub path: String,
     pub relative_path: String,
