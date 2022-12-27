@@ -56,7 +56,7 @@ mod tests {
             "tests/basic",
             Site {
                 content: Section {
-                    title: String::from("The Jelly documentation"),
+                    title: String::from("Welcome"),
                     pages: Some(vec![Page {
                         path: String::from("tests/basic/index.md"),
                         relative_path: String::from("index.md"),
@@ -65,7 +65,7 @@ mod tests {
                         html: String::from("<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n"),
                         breadcrumb: vec![Link {
                             path: PathBuf::from("tests/basic"),
-                            title: String::from("The Jelly documentation"),
+                            title: String::from("Welcome"),
                         }],
                     }]),
                     sections: None,

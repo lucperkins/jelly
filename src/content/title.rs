@@ -26,7 +26,7 @@ pub fn infer_page_title(
 fn title_from_index_page(path: &Path) -> Result<Option<String>, Error> {
     let index_path = Path::new(&path).join("index.md");
     if index_path.exists() {
-        let file = get_file(path)?;
+        let file = get_file(&index_path)?;
         match get_document_title(&file) {
             Some(t) => Ok(Some(t)),
             None => Ok(None),
