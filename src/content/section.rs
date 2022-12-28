@@ -1,6 +1,5 @@
 use crate::config::SiteConfig;
 use crate::error::Error;
-use crate::get_pages_in_dir;
 use crate::utils::get_or_none;
 use serde::Serialize;
 use std::fs::{metadata, read_dir};
@@ -76,4 +75,32 @@ impl Section {
             sections: get_or_none(sections),
         })
     }
+}
+
+fn get_pages_in_dir(
+    dir: &PathBuf,
+    breadcrumb: &[(&PathBuf, &str)],
+    config: &SiteConfig,
+) -> Result<Vec<Page>, Error> {
+    let mut pages: Vec<Page> = Vec::new();
+
+    for entry in read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        let meta = metadata(&path)?;
+        if meta.is_file() {
+            let ext = path.extension();
+
+            if ext.is_some() && ext.unwrap().to_string_lossy().ends_with("md") {
+                let page = Page::from_path(&path, breadcrumb, config)?;
+                pages.push(page);
+            }
+        }
+    }
+
+    if pages.is_empty() {
+        return Err(Error::NoPages(String::from(dir.to_string_lossy())));
+    }
+
+    Ok(pages)
 }

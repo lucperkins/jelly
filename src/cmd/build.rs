@@ -9,7 +9,7 @@ use crate::{
     config::{SiteConfig, TitleConfig},
     content::{Section, Site},
     error::Error,
-    render_page,
+    md::render_page,
 };
 
 fn build_site(source: PathBuf) -> Result<Site, Error> {
