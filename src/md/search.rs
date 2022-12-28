@@ -29,7 +29,7 @@ pub struct SearchIndex(pub Vec<SearchDocument>);
 
 #[cfg(test)]
 impl SearchIndex {
-    fn empty() -> Self {
+    pub fn empty() -> Self {
         Self(vec![])
     }
 }

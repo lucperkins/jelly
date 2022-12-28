@@ -75,6 +75,15 @@ impl Section {
             sections: get_or_none(sections),
         })
     }
+
+    #[cfg(test)]
+    pub fn new(title: &str, pages: Option<Vec<Page>>, sections: Option<Vec<Section>>) -> Self {
+        Self {
+            title: String::from(title),
+            pages,
+            sections,
+        }
+    }
 }
 
 fn get_pages_in_dir(

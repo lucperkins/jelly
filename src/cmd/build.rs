@@ -20,7 +20,7 @@ fn build_site(source: PathBuf) -> Result<Site, Error> {
 
     let content = Section::from_path(&config.root, None, &config)?;
 
-    Ok(Site { content })
+    Ok(Site(content))
 }
 
 pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
@@ -52,35 +52,123 @@ mod tests {
     };
 
     use super::build_site;
+    use indoc::indoc;
 
     #[test]
     fn build_real_site() {
-        let cases: Vec<(&str, Site)> = vec![(
-            "tests/basic",
-            Site {
-                content: Section {
-                    title: String::from("Welcome"),
-                    pages: Some(vec![Page {
-                        path: String::from("tests/basic/index.md"),
-                        relative_path: String::from("index.md"),
-                        title: String::from("Welcome"),
-                        body: String::from("# Welcome\n\nWelcome to the site.\n\n## About this site\n\nSome info here."),
-                        html: String::from("<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n<h2>About this site</h2>\n<p>Some info here.</p>\n"),
-                        breadcrumb: vec![Link {
-                            path: PathBuf::from("tests/basic"),
-                            title: String::from("Welcome"),
-                        }],
-                        table_of_contents: TableOfContents(vec![TocEntry::new(2, "About this site", TableOfContents::empty())]),
-                        search_index: SearchIndex(vec![SearchDocument::new(2, "Welcome", "About this site", "Some info here.")]),
-                    }]),
-                    sections: None,
-                },
-            },
-        )];
+        let cases: Vec<(&str, Site)> = vec![
+            (
+                "basic",
+                Site(Section::new(
+                    "Welcome",
+                    Some(vec![Page::new(
+                        "tests/full/basic/index.md",
+                        "index.md",
+                        "Welcome",
+                        indoc! {"
+                            # Welcome
+
+                            Welcome to the site.
+
+                            ## About this site
+
+                            Some info here."
+                        },
+                        indoc! {"
+                            <h1>Welcome</h1>
+                            <p>Welcome to the site.</p>
+                            <h2>About this site</h2>
+                            <p>Some info here.</p>
+                        "},
+                        vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
+                        TableOfContents(vec![TocEntry::new(
+                            2,
+                            "About this site",
+                            TableOfContents::empty(),
+                        )]),
+                        SearchIndex(vec![SearchDocument::new(
+                            2,
+                            "Welcome",
+                            "About this site",
+                            "Some info here.",
+                        )]),
+                    )]),
+                    None,
+                )),
+            ),
+            (
+                "medium",
+                Site(Section::new(
+                    "Documentation",
+                    Some(vec![Page::new(
+                        "tests/full/medium/index.md",
+                        "index.md",
+                        "Welcome",
+                        indoc! {"
+                            # Welcome
+
+                            Welcome to the site.
+
+                            ## About this site
+
+                            Some info here."
+                        },
+                        indoc! {"
+                            <h1>Welcome</h1>
+                            <p>Welcome to the site.</p>
+                            <h2>About this site</h2>
+                            <p>Some info here.</p>
+                        "},
+                        vec![Link::new(
+                            &PathBuf::from("tests/full/medium"),
+                            "Documentation",
+                        )],
+                        TableOfContents(vec![TocEntry::new(
+                            2,
+                            "About this site",
+                            TableOfContents::empty(),
+                        )]),
+                        SearchIndex(vec![SearchDocument::new(
+                            2,
+                            "Welcome",
+                            "About this site",
+                            "Some info here.",
+                        )]),
+                    )]),
+                    Some(vec![Section::new(
+                        "Setup",
+                        Some(vec![Page::new(
+                            "tests/full/medium/setup/index.md",
+                            "setup/index.md",
+                            "Setup",
+                            indoc! {"
+                                # Setup
+
+                                Here is how to set things up."
+                            },
+                            indoc! {"
+                                <h1>Setup</h1>
+                                <p>Here is how to set things up.</p>
+                            "},
+                            vec![
+                                Link::new(&PathBuf::from("tests/full/medium"), "Documentation"),
+                                Link::new(&PathBuf::from("tests/full/medium/setup"), "Setup"),
+                            ],
+                            TableOfContents::empty(),
+                            SearchIndex::empty(),
+                        )]),
+                        None,
+                    )]),
+                )),
+            ),
+        ];
 
         for (dir, expected_site) in cases {
-            let site = build_site(PathBuf::from(dir)).unwrap();
-            assert_eq!(site, expected_site);
+            let project_dir = format!("tests/full/{}", dir);
+            let content = build_site(PathBuf::from(project_dir)).unwrap().0;
+            let expected_content = expected_site.0;
+
+            assert_eq!(content, expected_content);
         }
     }
 }
