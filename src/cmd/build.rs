@@ -20,7 +20,7 @@ fn build_site(source: PathBuf) -> Result<Site, Error> {
 
     let content = Section::from_path(&config.root, None, &config)?;
 
-    Ok(Site { content })
+    Ok(Site(content))
 }
 
 pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
@@ -56,29 +56,36 @@ mod tests {
     #[test]
     fn build_real_site() {
         let cases: Vec<(&str, Site)> = vec![(
-            "tests/basic",
-            Site {
-                content: Section {
+            "basic",
+            Site(Section::new("Welcome", Some(vec![Page {
+                path: String::from("tests/full/basic/index.md"),
+                relative_path: String::from("index.md"),
+                title: String::from("Welcome"),
+                body: String::from("# Welcome\n\nWelcome to the site.\n\n## About this site\n\nSome info here."),
+                html: String::from("<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n<h2>About this site</h2>\n<p>Some info here.</p>\n"),
+                breadcrumb: vec![Link {
+                    path: PathBuf::from("tests/full/basic"),
                     title: String::from("Welcome"),
-                    pages: Some(vec![Page {
-                        path: String::from("tests/basic/index.md"),
-                        relative_path: String::from("index.md"),
-                        title: String::from("Welcome"),
-                        body: String::from("# Welcome\n\nWelcome to the site.\n\n## About this site\n\nSome info here."),
-                        html: String::from("<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n<h2>About this site</h2>\n<p>Some info here.</p>\n"),
-                        breadcrumb: vec![Link {
-                            path: PathBuf::from("tests/basic"),
-                            title: String::from("Welcome"),
-                        }],
-                        table_of_contents: TableOfContents(vec![TocEntry::new(2, "About this site", TableOfContents::empty())]),
-                    }]),
-                    sections: None,
-                },
-            },
-        )];
+                }],
+                table_of_contents: TableOfContents(vec![TocEntry::new(2, "About this site", TableOfContents::empty())]),
+            }]), None)),
+        ),
+        ("medium", Site(Section::new("Welcome", Some(vec![Page {
+            path: String::from("tests/full/medium/index.md"),
+            relative_path: String::from("index.md"),
+            title: String::from("Welcome"),
+            body: String::from("# Welcome\n\nWelcome to the site.\n\n## About this site\n\nSome info here."),
+            html: String::from("<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n<h2>About this site</h2>\n<p>Some info here.</p>\n"),
+            breadcrumb: vec![Link {
+                path: PathBuf::from("tests/full/medium"),
+                title: String::from("Welcome"),
+            }],
+            table_of_contents: TableOfContents(vec![TocEntry::new(2, "About this site", TableOfContents::empty())]),
+        }]), None)))];
 
         for (dir, expected_site) in cases {
-            let site = build_site(PathBuf::from(dir)).unwrap();
+            let project_dir = format!("tests/full/{}", dir);
+            let site = build_site(PathBuf::from(project_dir)).unwrap();
             assert_eq!(site, expected_site);
         }
     }
