@@ -1,7 +1,9 @@
 use markdown_it::Node;
 use serde::Serialize;
 
-use super::headings::Heading;
+use crate::utils::get_or_none;
+
+use super::headings::{Heading, HeadingsWithIdx};
 
 #[derive(Debug, PartialEq, Serialize)]
 struct TocEntry {
@@ -20,7 +22,7 @@ pub struct TableOfContents(Vec<TocEntry>);
 
 impl TableOfContents {
     pub fn parse(document: &Node) -> Self {
-        toc_for_level(&document.children, 2)
+        Self(toc_for_level(&document.children, 2))
     }
 
     #[cfg(test)]
@@ -29,8 +31,19 @@ impl TableOfContents {
     }
 }
 
-fn toc_for_level(nodes: &[Node], level: u8) -> TableOfContents {
-    TableOfContents(vec![])
+fn toc_for_level(nodes: &[Node], level: u8) -> Vec<TocEntry> {
+    let mut entries: Vec<TocEntry> = Vec::new();
+
+    for (idx, heading) in HeadingsWithIdx(nodes) {
+        if heading.level == level {
+            entries.push(TocEntry::new(
+                heading,
+                get_or_none(toc_for_level(&nodes[idx + 1..], level + 1)),
+            ));
+        }
+    }
+
+    entries
 }
 
 #[cfg(test)]
