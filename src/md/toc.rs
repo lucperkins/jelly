@@ -1,114 +1,179 @@
+// This approach is deeply indebted to how rustdoc does it. See the code here:
+// https://doc.rust-lang.org/stable/nightly-rustc/src/rustdoc/html/toc.rs.html#1-191
+// In particular, the `fold_until` approach offered me a way out of a thorny nested
+// recursion problem.
+
 use markdown_it::Node;
 use serde::Serialize;
+use slug::slugify;
 
-use crate::utils::get_or_none;
-
-use super::headings::{Heading, HeadingsWithIdx};
-
-#[derive(Debug, PartialEq, Serialize)]
-struct TocEntry {
-    heading: Heading,
-    children: Option<Vec<TocEntry>>,
-}
-
-impl TocEntry {
-    fn new(heading: Heading, children: Option<Vec<TocEntry>>) -> Self {
-        Self { heading, children }
-    }
-}
+use super::headings::Headings;
 
 #[derive(Debug, PartialEq, Serialize)]
 pub struct TableOfContents(Vec<TocEntry>);
 
 impl TableOfContents {
     pub fn parse(document: &Node) -> Self {
-        Self(toc_for_level(&document.children, 2))
+        let mut builder = TocBuilder::new();
+
+        for heading in Headings(&document.children) {
+            builder.push(heading.level, heading.text);
+        }
+
+        builder.into_toc()
     }
 
-    #[cfg(test)]
     fn empty() -> Self {
         Self(vec![])
     }
 }
 
-fn toc_for_level(nodes: &[Node], level: u8) -> Vec<TocEntry> {
-    let mut entries: Vec<TocEntry> = Vec::new();
+#[derive(Debug, PartialEq, Serialize)]
+struct TocEntry {
+    level: u8,
+    text: String,
+    slug: String,
+    children: TableOfContents,
+}
 
-    for (idx, heading) in HeadingsWithIdx(nodes) {
-        if heading.level == level {
-            entries.push(TocEntry::new(
-                heading,
-                get_or_none(toc_for_level(&nodes[idx + 1..], level + 1)),
-            ));
+impl TocEntry {
+    fn new(level: u8, text: &str, children: TableOfContents) -> Self {
+        let slug = slugify(text);
+        Self {
+            level,
+            text: String::from(text),
+            slug,
+            children,
+        }
+    }
+}
+
+#[derive(PartialEq)]
+struct TocBuilder {
+    top_level: TableOfContents,
+    chain: Vec<TocEntry>,
+}
+
+impl TocBuilder {
+    fn new() -> Self {
+        Self {
+            top_level: TableOfContents(Vec::new()),
+            chain: Vec::new(),
         }
     }
 
-    entries
+    fn into_toc(mut self) -> TableOfContents {
+        self.fold_until(1); // Don't include h1
+        self.top_level
+    }
+
+    fn fold_until(&mut self, level: u8) {
+        let mut this = None;
+        loop {
+            match self.chain.pop() {
+                Some(mut next) => {
+                    next.children.0.extend(this);
+                    if next.level < level {
+                        self.chain.push(next);
+                        return;
+                    } else {
+                        this = Some(next);
+                    }
+                }
+                None => {
+                    self.top_level.0.extend(this);
+                    return;
+                }
+            }
+        }
+    }
+
+    fn push(&mut self, level: u8, text: String) {
+        assert!(level >= 2);
+
+        self.fold_until(level);
+
+        self.chain
+            .push(TocEntry::new(level, &text, TableOfContents::empty()));
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::md::{headings::Heading, parse::ast, toc::TocEntry};
     use indoc::indoc;
 
-    use super::TableOfContents;
+    use crate::md::ast;
+
+    use super::{TableOfContents, TocEntry};
 
     #[test]
-    fn build_toc() {
-        // (input Markdown, expected TOC)
-        let cases: Vec<(&str, TableOfContents)> = vec![
-            ("", TableOfContents::empty()),
-            (
-                indoc! {"
-                    Here is some text.
+    fn create_toc() {
+        let cases: Vec<(&str, TableOfContents)> = vec![(
+            indoc! {"
+                # This gets ignored
 
-                    ## Now a heading 2
+                Here is some text.
 
-                    More text.
+                ## Now a heading 2
 
-                    ### Now a heading 3
+                More text.
 
-                    More text.
+                ### Now a heading 3
 
-                    #### Let's go even deeper
+                More text.
 
-                    Filler here.
+                #### Let's go even deeper
 
-                    ## And now back to a heading 2
+                Filler here.
 
-                    More text.
+                ## And now back to a heading 2
 
-                    ### Another heading 3
+                More text.
 
-                    ## And yet another heading 2
-                "},
-                TableOfContents(vec![
-                    TocEntry::new(
-                        Heading::new(2, "Now a heading 2"),
-                        Some(vec![TocEntry::new(
-                            Heading::new(3, "Now a heading 3"),
-                            Some(vec![TocEntry::new(
-                                Heading::new(4, "Let's go even deeper"),
-                                None,
-                            )]),
+                ### Another heading 3
+
+                ## And yet another heading 2
+
+                #### Let's skip a level
+            "},
+            TableOfContents(vec![
+                TocEntry::new(
+                    2,
+                    "Now a heading 2",
+                    TableOfContents(vec![TocEntry::new(
+                        3,
+                        "Now a heading 3",
+                        TableOfContents(vec![TocEntry::new(
+                            4,
+                            "Let's go even deeper",
+                            TableOfContents::empty(),
                         )]),
-                    ),
-                    TocEntry::new(
-                        Heading::new(2, "And now back to a heading 2"),
-                        Some(vec![TocEntry::new(
-                            Heading::new(3, "Another heading 3"),
-                            None,
-                        )]),
-                    ),
-                    TocEntry::new(Heading::new(2, "And yet another heading 2"), None),
-                ]),
-            ),
-        ];
+                    )]),
+                ),
+                TocEntry::new(
+                    2,
+                    "And now back to a heading 2",
+                    TableOfContents(vec![TocEntry::new(
+                        3,
+                        "Another heading 3",
+                        TableOfContents::empty(),
+                    )]),
+                ),
+                TocEntry::new(
+                    2,
+                    "And yet another heading 2",
+                    TableOfContents(vec![TocEntry::new(
+                        4,
+                        "Let's skip a level",
+                        TableOfContents::empty(),
+                    )]),
+                ),
+            ]),
+        )];
 
         for (md, expected_toc) in cases {
             let tree = ast(md);
             let toc = TableOfContents::parse(&tree);
-
             assert_eq!(toc, expected_toc);
         }
     }
