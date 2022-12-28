@@ -70,4 +70,25 @@ impl Page {
             table_of_contents,
         })
     }
+
+    #[cfg(test)]
+    pub fn new(
+        path: &str,
+        relative_path: &str,
+        title: &str,
+        body: &str,
+        html: &str,
+        breadcrumb: Vec<Link>,
+        table_of_contents: TableOfContents,
+    ) -> Self {
+        Self {
+            path: String::from(path),
+            relative_path: String::from(relative_path),
+            title: String::from(title),
+            body: String::from(body),
+            html: String::from(html),
+            breadcrumb,
+            table_of_contents,
+        }
+    }
 }
