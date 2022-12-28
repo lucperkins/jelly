@@ -1,3 +1,3 @@
 mod build;
 
-pub use build::build_site as build;
+pub use build::build;

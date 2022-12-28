@@ -2,21 +2,14 @@ use crate::config::SiteConfig;
 use crate::error::Error;
 use crate::get_pages_in_dir;
 use crate::utils::get_or_none;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::fs::{metadata, read_dir};
 use std::path::PathBuf;
 
 use super::page::Page;
 use super::title::get_section_title;
 
-pub type Content = Section;
-
-#[derive(Deserialize)]
-pub struct SectionConfig {
-    pub title: Option<String>,
-}
-
-#[derive(Debug, Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Section {
     pub title: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -77,12 +70,10 @@ impl Section {
             }
         }
 
-        let root_section = Section {
+        Ok(Section {
             title: String::from(section_title),
             pages: get_or_none(pages),
             sections: get_or_none(sections),
-        };
-
-        Ok(root_section)
+        })
     }
 }
