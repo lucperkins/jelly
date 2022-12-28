@@ -17,6 +17,15 @@ pub struct Link {
     pub title: String,
 }
 
+impl Link {
+    pub fn new(path: &PathBuf, title: &str) -> Self {
+        Self {
+            path: PathBuf::from(path),
+            title: String::from(title),
+        }
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct Page {
     pub path: String,
@@ -62,10 +71,7 @@ impl Page {
             breadcrumb: breadcrumb
                 .iter()
                 .copied()
-                .map(|(a, b)| Link {
-                    path: PathBuf::from(a),
-                    title: String::from(b),
-                })
+                .map(|(a, b)| Link::new(a, b))
                 .collect(),
             table_of_contents,
         })

@@ -52,36 +52,81 @@ mod tests {
     };
 
     use super::build_site;
+    use indoc::indoc;
 
     #[test]
     fn build_real_site() {
-        let cases: Vec<(&str, Site)> = vec![(
-            "basic",
-            Site(Section::new("Welcome", Some(vec![Page::new(
-                "tests/full/basic/index.md",
-                "index.md",
-                "Welcome",
-                "# Welcome\n\nWelcome to the site.\n\n## About this site\n\nSome info here.",
-                "<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n<h2>About this site</h2>\n<p>Some info here.</p>\n",
-                vec![Link {
-                    path: PathBuf::from("tests/full/basic"),
-                    title: String::from("Welcome"),
-                }],
-                TableOfContents(vec![TocEntry::new(2, "About this site", TableOfContents::empty())]),
-            )]), None)),
-        ),
-        ("medium", Site(Section::new("Welcome", Some(vec![Page::new(
-            "tests/full/medium/index.md",
-            "index.md",
-            "Welcome",
-            "# Welcome\n\nWelcome to the site.\n\n## About this site\n\nSome info here.",
-            "<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n<h2>About this site</h2>\n<p>Some info here.</p>\n",
-            vec![Link {
-                path: PathBuf::from("tests/full/medium"),
-                title: String::from("Welcome"),
-            }],
-            TableOfContents(vec![TocEntry::new(2, "About this site", TableOfContents::empty())]),
-        )]), None)))];
+        let cases: Vec<(&str, Site)> = vec![
+            (
+                "basic",
+                Site(Section::new(
+                    "Welcome",
+                    Some(vec![Page::new(
+                        "tests/full/basic/index.md",
+                        "index.md",
+                        "Welcome",
+                        indoc! {"
+                            # Welcome
+
+                            Welcome to the site.
+
+                            ## About this site
+
+                            Some info here."
+                        },
+                        indoc! {"
+                            <h1>Welcome</h1>
+                            <p>Welcome to the site.</p>
+                            <h2>About this site</h2>
+                            <p>Some info here.</p>
+                        "},
+                        vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
+                        TableOfContents(vec![TocEntry::new(
+                            2,
+                            "About this site",
+                            TableOfContents::empty(),
+                        )]),
+                    )]),
+                    None,
+                )),
+            ),
+            (
+                "medium",
+                Site(Section::new(
+                    "Documentation",
+                    Some(vec![Page::new(
+                        "tests/full/medium/index.md",
+                        "index.md",
+                        "Welcome",
+                        indoc! {"
+                            # Welcome
+
+                            Welcome to the site.
+
+                            ## About this site
+
+                            Some info here."
+                        },
+                        indoc! {"
+                            <h1>Welcome</h1>
+                            <p>Welcome to the site.</p>
+                            <h2>About this site</h2>
+                            <p>Some info here.</p>
+                        "},
+                        vec![Link::new(
+                            &PathBuf::from("tests/full/medium"),
+                            "Documentation",
+                        )],
+                        TableOfContents(vec![TocEntry::new(
+                            2,
+                            "About this site",
+                            TableOfContents::empty(),
+                        )]),
+                    )]),
+                    None,
+                )),
+            ),
+        ];
 
         for (dir, expected_site) in cases {
             let project_dir = format!("tests/full/{}", dir);
