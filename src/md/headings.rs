@@ -1,6 +1,7 @@
 use std::vec::IntoIter;
 
 use markdown_it::{plugins::cmark::block::heading::ATXHeading, Node};
+use serde::Serialize;
 use slug::slugify;
 
 use super::node_to_string;
@@ -8,7 +9,7 @@ use super::node_to_string;
 pub struct Headings<'a>(pub &'a [Node]);
 pub struct HeadingsWithIdx<'a>(pub &'a [Node]);
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct Heading {
     pub level: u8,
     pub text: String,
@@ -16,7 +17,7 @@ pub struct Heading {
 }
 
 impl Heading {
-    fn new(level: u8, text: &str) -> Self {
+    pub fn new(level: u8, text: &str) -> Self {
         let slug = slugify(text);
         Self {
             level,
@@ -35,7 +36,9 @@ impl<'a> IntoIterator for Headings<'a> {
 
         for node in self.0.iter() {
             if let Some(heading) = node.cast::<ATXHeading>() {
-                headings.push(Heading::new(heading.level, &node_to_string(node)));
+                if heading.level > 1 {
+                    headings.push(Heading::new(heading.level, &node_to_string(node)));
+                }
             }
         }
 
@@ -52,7 +55,9 @@ impl<'a> IntoIterator for HeadingsWithIdx<'a> {
 
         for (idx, node) in self.0.iter().enumerate() {
             if let Some(heading) = node.cast::<ATXHeading>() {
-                headings.push((idx, Heading::new(heading.level, &node_to_string(node))));
+                if heading.level > 1 {
+                    headings.push((idx, Heading::new(heading.level, &node_to_string(node))));
+                }
             }
         }
 
@@ -94,13 +99,13 @@ mod tests {
             ),
             (
                 indoc! {"
-                    # h1
+                    # h1 gets ignored
 
                     ## h2 with `bold`
 
                     ### h3 with `italics`
 
-                    # h1
+                    # h1 gets ignored
 
                     ## h2 has a `code sample`
 
@@ -115,10 +120,8 @@ mod tests {
                     ####### This won't show up
                 "},
                 vec![
-                    Heading::new(1, "h1"),
                     Heading::new(2, "h2 with bold"),
                     Heading::new(3, "h3 with italics"),
-                    Heading::new(1, "h1"),
                     Heading::new(2, "h2 has a code sample"),
                     Heading::new(4, "h4"),
                     Heading::new(5, "h5"),

@@ -1,7 +1,7 @@
 use crate::{
     config::SiteConfig,
     error::Error,
-    md::{ast, render},
+    md::{ast, render, TableOfContents},
     utils::get_file,
 };
 
@@ -25,6 +25,7 @@ pub struct Page {
     pub body: String,
     pub html: String,
     pub breadcrumb: Vec<Link>,
+    pub table_of_contents: TableOfContents,
 }
 
 impl Page {
@@ -48,6 +49,8 @@ impl Page {
         let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
 
         let tree = ast(&result.content);
+
+        let table_of_contents = TableOfContents::parse(&tree);
         let html = render(&tree);
 
         Ok(Page {
@@ -64,6 +67,7 @@ impl Page {
                     title: String::from(b),
                 })
                 .collect(),
+            table_of_contents,
         })
     }
 }

@@ -5,8 +5,8 @@ use crate::md::node_to_string;
 
 use super::headings::HeadingsWithIdx;
 
-#[derive(Debug, PartialEq, Serialize)]
-struct Document {
+#[derive(Debug, Eq, PartialEq, Serialize)]
+pub struct Document {
     level: u8,
     page_title: String,
     title: String,
