@@ -48,7 +48,7 @@ mod tests {
 
     use crate::{
         content::{Link, Page, Section, Site},
-        md::{TableOfContents, TocEntry},
+        md::{SearchDocument, SearchIndex, TableOfContents, TocEntry},
     };
 
     use super::build_site;
@@ -86,6 +86,12 @@ mod tests {
                             "About this site",
                             TableOfContents::empty(),
                         )]),
+                        SearchIndex(vec![SearchDocument::new(
+                            2,
+                            "Welcome",
+                            "About this site",
+                            "Some info here.",
+                        )]),
                     )]),
                     None,
                 )),
@@ -122,6 +128,12 @@ mod tests {
                             "About this site",
                             TableOfContents::empty(),
                         )]),
+                        SearchIndex(vec![SearchDocument::new(
+                            2,
+                            "Welcome",
+                            "About this site",
+                            "Some info here.",
+                        )]),
                     )]),
                     Some(vec![Section::new(
                         "Setup",
@@ -143,6 +155,7 @@ mod tests {
                                 Link::new(&PathBuf::from("tests/full/medium/setup"), "Setup"),
                             ],
                             TableOfContents::empty(),
+                            SearchIndex::empty(),
                         )]),
                         None,
                     )]),

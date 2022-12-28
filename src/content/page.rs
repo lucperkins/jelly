@@ -1,7 +1,7 @@
 use crate::{
     config::SiteConfig,
     error::Error,
-    md::{ast, render, TableOfContents},
+    md::{ast, build_search_index_for_page, render, SearchIndex, TableOfContents},
     utils::get_file,
 };
 
@@ -35,6 +35,7 @@ pub struct Page {
     pub html: String,
     pub breadcrumb: Vec<Link>,
     pub table_of_contents: TableOfContents,
+    pub search_index: SearchIndex,
 }
 
 impl Page {
@@ -62,6 +63,8 @@ impl Page {
         let table_of_contents = TableOfContents::parse(&tree);
         let html = render(&tree);
 
+        let search_index = build_search_index_for_page(&title, &tree);
+
         Ok(Page {
             path: String::from(path.to_string_lossy()),
             relative_path: String::from(relative_path),
@@ -74,6 +77,7 @@ impl Page {
                 .map(|(a, b)| Link::new(a, b))
                 .collect(),
             table_of_contents,
+            search_index,
         })
     }
 
@@ -86,6 +90,7 @@ impl Page {
         html: &str,
         breadcrumb: Vec<Link>,
         table_of_contents: TableOfContents,
+        search_index: SearchIndex,
     ) -> Self {
         Self {
             path: String::from(path),
@@ -95,6 +100,7 @@ impl Page {
             html: String::from(html),
             breadcrumb,
             table_of_contents,
+            search_index,
         }
     }
 }
