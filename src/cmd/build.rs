@@ -48,7 +48,7 @@ mod tests {
 
     use crate::{
         content::{Link, Page, Section, Site},
-        md::{TableOfContents, TocEntry},
+        md::{SearchDocument, SearchIndex, TableOfContents, TocEntry},
     };
 
     use super::build_site;
@@ -71,6 +71,7 @@ mod tests {
                             title: String::from("Welcome"),
                         }],
                         table_of_contents: TableOfContents(vec![TocEntry::new(2, "About this site", TableOfContents::empty())]),
+                        search_index: SearchIndex(vec![SearchDocument::new(2, "Welcome", "About this site", "Some info here.")]),
                     }]),
                     sections: None,
                 },

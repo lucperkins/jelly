@@ -6,15 +6,15 @@ use crate::md::node_to_string;
 use super::headings::HeadingsWithIdx;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
-pub struct Document {
+pub struct SearchDocument {
     level: u8,
     page_title: String,
     title: String,
     content: String,
 }
 
-impl Document {
-    fn new(level: u8, page_title: &str, title: &str, content: &str) -> Self {
+impl SearchDocument {
+    pub fn new(level: u8, page_title: &str, title: &str, content: &str) -> Self {
         Self {
             level,
             page_title: String::from(page_title),
@@ -24,21 +24,20 @@ impl Document {
     }
 }
 
-#[allow(dead_code)]
-pub struct Index(Vec<Document>);
+#[derive(Debug, Eq, PartialEq, Serialize)]
+pub struct SearchIndex(pub Vec<SearchDocument>);
 
 #[cfg(test)]
-impl Index {
+impl SearchIndex {
     fn empty() -> Self {
         Self(vec![])
     }
 }
 
-#[allow(dead_code)]
-pub fn build_search_index_for_page(page_title: &str, document: &Node) -> Index {
+pub fn build_search_index_for_page(page_title: &str, document: &Node) -> SearchIndex {
     let nodes = &document.children;
 
-    let mut documents: Vec<Document> = Vec::new();
+    let mut documents: Vec<SearchDocument> = Vec::new();
 
     for (idx, heading) in HeadingsWithIdx(nodes) {
         let mut here = idx;
@@ -62,7 +61,7 @@ pub fn build_search_index_for_page(page_title: &str, document: &Node) -> Index {
 
         let content = pieces.join(" ");
         let final_content = content.trim();
-        documents.push(Document::new(
+        documents.push(SearchDocument::new(
             heading.level,
             page_title,
             &heading.text,
@@ -70,7 +69,7 @@ pub fn build_search_index_for_page(page_title: &str, document: &Node) -> Index {
         ))
     }
 
-    Index(documents)
+    SearchIndex(documents)
 }
 
 #[cfg(test)]
@@ -79,12 +78,12 @@ mod tests {
 
     use crate::md::ast;
 
-    use super::{build_search_index_for_page, Document, Index};
+    use super::{build_search_index_for_page, SearchDocument, SearchIndex};
 
     #[test]
     fn search_index() {
-        let cases: Vec<(&str, &str, Index)> = vec![
-            ("First page", "", Index::empty()),
+        let cases: Vec<(&str, &str, SearchIndex)> = vec![
+            ("First page", "", SearchIndex::empty()),
             (
                 "Second page",
                 indoc! {"
@@ -100,9 +99,9 @@ mod tests {
 
                     And some text from another paragraph.
                 "},
-                Index(vec![
-                    Document::new(2, "Second page", "h2", "Some text content."),
-                    Document::new(
+                SearchIndex(vec![
+                    SearchDocument::new(2, "Second page", "h2", "Some text content."),
+                    SearchDocument::new(
                         3,
                         "Second page",
                         "h3",
