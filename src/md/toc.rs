@@ -1,5 +1,5 @@
 // This approach is deeply indebted to how rustdoc does it. See the code here:
-// https://doc.rust-lang.org/stable/nightly-rustc/src/rustdoc/html/toc.rs.html#1-191
+// https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/toc.rs
 // In particular, the `fold_until` approach offered me a way out of a thorny nested
 // recursion problem.
 
