@@ -9,8 +9,8 @@ use slug::slugify;
 
 use super::headings::Headings;
 
-#[derive(Debug, PartialEq, Serialize)]
-pub struct TableOfContents(Vec<TocEntry>);
+#[derive(Debug, Eq, PartialEq, Serialize)]
+pub struct TableOfContents(pub Vec<TocEntry>);
 
 impl TableOfContents {
     pub fn parse(document: &Node) -> Self {
@@ -23,13 +23,13 @@ impl TableOfContents {
         builder.into_toc()
     }
 
-    fn empty() -> Self {
+    pub fn empty() -> Self {
         Self(vec![])
     }
 }
 
-#[derive(Debug, PartialEq, Serialize)]
-struct TocEntry {
+#[derive(Debug, Eq, PartialEq, Serialize)]
+pub struct TocEntry {
     level: u8,
     text: String,
     slug: String,
@@ -37,7 +37,7 @@ struct TocEntry {
 }
 
 impl TocEntry {
-    fn new(level: u8, text: &str, children: TableOfContents) -> Self {
+    pub fn new(level: u8, text: &str, children: TableOfContents) -> Self {
         let slug = slugify(text);
         Self {
             level,

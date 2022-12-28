@@ -46,7 +46,10 @@ pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
 mod tests {
     use std::path::PathBuf;
 
-    use crate::content::{Link, Page, Section, Site};
+    use crate::{
+        content::{Link, Page, Section, Site},
+        md::{TableOfContents, TocEntry},
+    };
 
     use super::build_site;
 
@@ -61,12 +64,13 @@ mod tests {
                         path: String::from("tests/basic/index.md"),
                         relative_path: String::from("index.md"),
                         title: String::from("Welcome"),
-                        body: String::from("# Welcome\n\nWelcome to the site."),
-                        html: String::from("<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n"),
+                        body: String::from("# Welcome\n\nWelcome to the site.\n\n## About this site\n\nSome info here."),
+                        html: String::from("<h1>Welcome</h1>\n<p>Welcome to the site.</p>\n<h2>About this site</h2>\n<p>Some info here.</p>\n"),
                         breadcrumb: vec![Link {
                             path: PathBuf::from("tests/basic"),
                             title: String::from("Welcome"),
                         }],
+                        table_of_contents: TableOfContents(vec![TocEntry::new(2, "About this site", TableOfContents::empty())]),
                     }]),
                     sections: None,
                 },
