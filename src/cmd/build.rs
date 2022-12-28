@@ -123,15 +123,39 @@ mod tests {
                             TableOfContents::empty(),
                         )]),
                     )]),
-                    None,
+                    Some(vec![Section::new(
+                        "Setup",
+                        Some(vec![Page::new(
+                            "tests/full/medium/setup/index.md",
+                            "setup/index.md",
+                            "Setup",
+                            indoc! {"
+                                # Setup
+
+                                Here is how to set things up."
+                            },
+                            indoc! {"
+                                <h1>Setup</h1>
+                                <p>Here is how to set things up.</p>
+                            "},
+                            vec![
+                                Link::new(&PathBuf::from("tests/full/medium"), "Documentation"),
+                                Link::new(&PathBuf::from("tests/full/medium/setup"), "Setup"),
+                            ],
+                            TableOfContents::empty(),
+                        )]),
+                        None,
+                    )]),
                 )),
             ),
         ];
 
         for (dir, expected_site) in cases {
             let project_dir = format!("tests/full/{}", dir);
-            let site = build_site(PathBuf::from(project_dir)).unwrap();
-            assert_eq!(site, expected_site);
+            let content = build_site(PathBuf::from(project_dir)).unwrap().0;
+            let expected_content = expected_site.0;
+
+            assert_eq!(content, expected_content);
         }
     }
 }
