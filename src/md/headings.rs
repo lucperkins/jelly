@@ -18,15 +18,14 @@ pub struct FancyHeading {
 }
 
 fn h_attrs<'a>(slug: &str) -> Vec<(&'a str, String)> {
-    vec![("id", String::from(slug))]
+    vec![
+        ("id", String::from(slug)),
+        ("class", String::from("heading")),
+    ]
 }
 
 fn a_attrs<'a>(slug: &str) -> Vec<(&'a str, String)> {
-    vec![
-        ("class", String::from("heading-anchor")),
-        ("href", format!("#{}", slug)),
-        ("tabindex", String::from("-1")),
-    ]
+    vec![("href", format!("#{}", slug))]
 }
 
 impl NodeValue for FancyHeading {
@@ -41,9 +40,8 @@ impl NodeValue for FancyHeading {
 
         fmt.cr();
         fmt.open(TAG[self.level as usize - 1], &h_attrs);
-        fmt.contents(&node.children);
         fmt.open("a", &a_attrs);
-        fmt.text("#");
+        fmt.contents(&node.children);
         fmt.close("a");
         fmt.close(TAG[self.level as usize - 1]);
         fmt.cr();
@@ -194,10 +192,10 @@ mod tests {
     fn fancy_headings() {
         let cases: Vec<(&str, &str)> = vec![(
             "## Hello world",
-            "<h2 id=\"hello-world\">Hello world<a class=\"heading-anchor\" href=\"#hello-world\" tabindex=\"-1\">#</a></h2>\n",
+            "<h2 id=\"hello-world\" class=\"heading\"><a href=\"#hello-world\">Hello world</a></h2>\n",
         ), (
             "### A heading with some `code`",
-            "<h3 id=\"a-heading-with-some-code\">A heading with some <code>code</code><a class=\"heading-anchor\" href=\"#a-heading-with-some-code\" tabindex=\"-1\">#</a></h3>\n",
+            "<h3 id=\"a-heading-with-some-code\" class=\"heading\"><a href=\"#a-heading-with-some-code\">A heading with some <code>code</code></a></h3>\n",
         )];
 
         for (md, expected_html) in cases {
