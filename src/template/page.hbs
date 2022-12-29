@@ -1,14 +1,38 @@
 <html>
   <head>
     <title>{{title}}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --primary: purple;
+      }
+    </style>
+    <script
+      src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"
+    >
+    </script>
+    <script type="text/javascript">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "var(--primary)",
+            },
+          },
+        },
+      };
+    </script>
   </head>
-  <body>
+  <body class="font-sans antialiased">
     <header>
-      {{#each breadcrumb}}
-        <a href="{{path}}">{{title}}</a>
-      {{/each}}
+      <div class="flex items-center space-x-2">
+        {{#each breadcrumb}}
+          <a href="{{path}}" class="text-lg text-primary">{{title}}</a>
+        {{/each}}
+      </div>
     </header>
-    <div id="content">
+    <div id="content" class="prose">
       {{{content}}}
     </div>
   </body>
