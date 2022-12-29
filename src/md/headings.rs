@@ -20,12 +20,19 @@ pub struct FancyHeading {
 fn h_attrs<'a>(slug: &str) -> Vec<(&'a str, String)> {
     vec![
         ("id", String::from(slug)),
-        ("class", String::from("heading")),
+        // For AlpineJS
+        ("x-data", String::from("{ open: false }")),
+        ("@mouseover", String::from("open = true")),
+        ("@mouseout", String::from("open = false")),
     ]
 }
 
 fn a_attrs<'a>(slug: &str) -> Vec<(&'a str, String)> {
-    vec![("href", format!("#{}", slug))]
+    vec![
+        ("href", format!("#{}", slug)),
+        ("x-show", String::from("open")),
+        ("class", String::from("ml-2")),
+    ]
 }
 
 impl NodeValue for FancyHeading {
@@ -40,8 +47,9 @@ impl NodeValue for FancyHeading {
 
         fmt.cr();
         fmt.open(TAG[self.level as usize - 1], &h_attrs);
-        fmt.open("a", &a_attrs);
         fmt.contents(&node.children);
+        fmt.open("a", &a_attrs);
+        fmt.text("#");
         fmt.close("a");
         fmt.close(TAG[self.level as usize - 1]);
         fmt.cr();
@@ -190,13 +198,16 @@ mod tests {
 
     #[test]
     fn fancy_headings() {
-        let cases: Vec<(&str, &str)> = vec![(
-            "## Hello world",
-            "<h2 id=\"hello-world\" class=\"heading\"><a href=\"#hello-world\">Hello world</a></h2>\n",
-        ), (
-            "### A heading with some `code`",
-            "<h3 id=\"a-heading-with-some-code\" class=\"heading\"><a href=\"#a-heading-with-some-code\">A heading with some <code>code</code></a></h3>\n",
-        )];
+        let cases: Vec<(&str, &str)> = vec![
+            (
+                "## Hello world",
+                "<h2 id=\"hello-world\" x-data=\"{ open: false }\" @mouseover=\"open = true\" @mouseout=\"open = false\">Hello world<a href=\"#hello-world\" x-show=\"open\" class=\"ml-2\">#</a></h2>\n",
+            ),
+            (
+                "### A heading with some `code`",
+                "<h3 id=\"a-heading-with-some-code\" x-data=\"{ open: false }\" @mouseover=\"open = true\" @mouseout=\"open = false\">A heading with some <code>code</code><a href=\"#a-heading-with-some-code\" x-show=\"open\" class=\"ml-2\">#</a></h3>\n",
+            ),
+        ];
 
         for (md, expected_html) in cases {
             let html = render(&ast(md));
