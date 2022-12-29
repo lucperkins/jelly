@@ -1,9 +1,5 @@
 use markdown_it::{
-    parser::{
-        block::{BlockRule, BlockState},
-        inline::InlineRoot,
-    },
-    plugins::cmark::block::fence::CodeFence,
+    parser::block::{BlockRule, BlockState},
     MarkdownIt, Node, NodeValue, Renderer,
 };
 
@@ -13,6 +9,26 @@ enum AdmonitionKind {
     Info,
     Success,
     Warning,
+}
+
+impl Default for AdmonitionKind {
+    fn default() -> Self {
+        Self::Info
+    }
+}
+
+impl From<&str> for AdmonitionKind {
+    fn from(s: &str) -> Self {
+        use AdmonitionKind::*;
+
+        match s {
+            "danger" => Danger,
+            "info" => Info,
+            "success" => Success,
+            "warning" => Warning,
+            _ => Self::default(),
+        }
+    }
 }
 
 impl ToString for AdmonitionKind {
@@ -25,12 +41,6 @@ impl ToString for AdmonitionKind {
             Success => "success",
             Warning => "warning",
         })
-    }
-}
-
-impl Default for AdmonitionKind {
-    fn default() -> Self {
-        Self::Info
     }
 }
 
@@ -56,8 +66,9 @@ struct AdmonitionScanner;
 impl BlockRule for AdmonitionScanner {
     fn run(state: &mut BlockState) -> Option<(Node, usize)> {
         let line = state.get_line(state.line);
+        let last_line = state.get_line(state.line_max - 1);
 
-        if line.starts_with("::") {
+        if line.starts_with("::") && last_line == "::" {
             Some((
                 Node::new(Admonition {
                     kind: AdmonitionKind::Info,
