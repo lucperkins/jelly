@@ -50,12 +50,12 @@ impl NodeValue for FancyHeading {
         let a_attrs = a_attrs(&slug);
 
         fmt.cr();
-        fmt.open(TAG[self.level as usize - 1], &h_attrs);
+        fmt.open(TAG[self.level as usize - 2], &h_attrs);
         fmt.contents(&node.children);
         fmt.open("a", &a_attrs);
         fmt.text("#");
         fmt.close("a");
-        fmt.close(TAG[self.level as usize - 1]);
+        fmt.close(TAG[self.level as usize - 2]);
         fmt.cr();
     }
 }
