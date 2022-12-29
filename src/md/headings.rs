@@ -41,10 +41,10 @@ impl NodeValue for FancyHeading {
 
         fmt.cr();
         fmt.open(TAG[self.level as usize - 1], &h_attrs);
-        fmt.open("a", &a_attrs);
-        fmt.close("a");
-
         fmt.contents(&node.children);
+        fmt.open("a", &a_attrs);
+        fmt.text("#");
+        fmt.close("a");
         fmt.close(TAG[self.level as usize - 1]);
         fmt.cr();
     }
@@ -194,10 +194,10 @@ mod tests {
     fn fancy_headings() {
         let cases: Vec<(&str, &str)> = vec![(
             "## Hello world",
-            "<h2 id=\"hello-world\"><a class=\"heading-anchor\" href=\"#hello-world\" tabindex=\"-1\"></a>Hello world</h2>\n",
+            "<h2 id=\"hello-world\">Hello world<a class=\"heading-anchor\" href=\"#hello-world\" tabindex=\"-1\">#</a></h2>\n",
         ), (
             "### A heading with some `code`",
-            "<h3 id=\"a-heading-with-some-code\"><a class=\"heading-anchor\" href=\"#a-heading-with-some-code\" tabindex=\"-1\"></a>A heading with some <code>code</code></h3>\n",
+            "<h3 id=\"a-heading-with-some-code\">A heading with some <code>code</code><a class=\"heading-anchor\" href=\"#a-heading-with-some-code\" tabindex=\"-1\">#</a></h3>\n",
         )];
 
         for (md, expected_html) in cases {
