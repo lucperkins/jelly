@@ -30,8 +30,12 @@ fn a_attrs<'a>(slug: &str) -> Vec<(&'a str, String)> {
 
 impl NodeValue for FancyHeading {
     fn render(&self, node: &Node, fmt: &mut dyn Renderer) {
-        static TAG: [&str; 6] = ["h1", "h2", "h3", "h4", "h5", "h6"];
-        debug_assert!(self.level >= 1 && self.level <= 6);
+        if self.level == 1 {
+            return;
+        }
+
+        static TAG: [&str; 5] = ["h2", "h3", "h4", "h5", "h6"];
+        debug_assert!(self.level >= 2 && self.level <= 6);
 
         // Add slug to attributes
         let slug = slugify(node_to_string(node));
