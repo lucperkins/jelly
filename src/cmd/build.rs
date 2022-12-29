@@ -74,12 +74,12 @@ mod tests {
 
                             Some info here."
                         },
-                        indoc! {"
-                            <h1>Welcome</h1>
+                        indoc! {r#"
+                            <h1 id="welcome">Welcome</h1>
                             <p>Welcome to the site.</p>
-                            <h2>About this site</h2>
+                            <h2 id="about-this-site">About this site</h2>
                             <p>Some info here.</p>
-                        "},
+                        "#},
                         vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
                         TableOfContents(vec![TocEntry::new(
                             2,
@@ -113,12 +113,12 @@ mod tests {
 
                             Some info here."
                         },
-                        indoc! {"
-                            <h1>Welcome</h1>
+                        indoc! {r#"
+                            <h1 id="welcome">Welcome</h1>
                             <p>Welcome to the site.</p>
-                            <h2>About this site</h2>
+                            <h2 id="about-this-site">About this site</h2>
                             <p>Some info here.</p>
-                        "},
+                        "#},
                         vec![Link::new(
                             &PathBuf::from("tests/full/medium"),
                             "Documentation",
@@ -146,10 +146,10 @@ mod tests {
 
                                 Here is how to set things up."
                             },
-                            indoc! {"
-                                <h1>Setup</h1>
+                            indoc! {r#"
+                                <h1 id="setup">Setup</h1>
                                 <p>Here is how to set things up.</p>
-                            "},
+                            "#},
                             vec![
                                 Link::new(&PathBuf::from("tests/full/medium"), "Documentation"),
                                 Link::new(&PathBuf::from("tests/full/medium/setup"), "Setup"),

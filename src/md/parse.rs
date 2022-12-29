@@ -2,7 +2,7 @@ use markdown_it::{
     parser::inline::Text,
     plugins::{
         cmark::{
-            block::{heading::ATXHeading, paragraph::Paragraph},
+            block::paragraph::Paragraph,
             inline::{
                 backticks::CodeInline,
                 emphasis::{Em, Strong},
@@ -14,7 +14,12 @@ use markdown_it::{
     Node,
 };
 
-use crate::md::code::{add_code_block_rule, FancyCodeBlock};
+use crate::md::{
+    code::{add_code_block_rule, FancyCodeBlock},
+    headings::add_heading_rule,
+};
+
+use super::headings::FancyHeading;
 
 // TODO: make this less kludgey
 pub fn node_to_string(node: &Node) -> String {
@@ -32,7 +37,7 @@ pub fn node_to_string(node: &Node) -> String {
             || sub.is::<Strong>()
             || sub.is::<Em>()
             || sub.is::<Strikethrough>()
-            || sub.is::<ATXHeading>()
+            || sub.is::<FancyHeading>()
         {
             pieces.push(node_to_string(sub));
         } else {
@@ -48,10 +53,11 @@ pub fn render(ast: &Node) -> String {
 }
 
 pub fn ast(input: &str) -> Node {
+    use markdown_it::plugins::cmark::*;
+
     let md = &mut markdown_it::MarkdownIt::new();
 
     // cmark except code blocks
-    use markdown_it::plugins::cmark::*;
     inline::newline::add(md);
     inline::escape::add(md);
     inline::backticks::add(md);
@@ -70,7 +76,10 @@ pub fn ast(input: &str) -> Node {
     block::lheading::add(md);
     block::paragraph::add(md);
 
-    // Replaces block::code::add
+    // Replaces block::heading::add(md);
+    add_heading_rule(md);
+
+    // Replaces block::code::add(md);
     add_code_block_rule(md);
 
     markdown_it::plugins::extra::add(md);

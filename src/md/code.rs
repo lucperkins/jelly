@@ -34,7 +34,7 @@ impl NodeValue for FancyCodeBlock {
         fmt.cr();
         fmt.close("code");
         fmt.close("pre");
-        fmt.cr()
+        fmt.cr();
     }
 }
 

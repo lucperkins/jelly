@@ -1,9 +1,9 @@
-use markdown_it::{plugins::cmark::block::heading::ATXHeading, Node};
+use markdown_it::Node;
 use serde::Serialize;
 
 use crate::md::node_to_string;
 
-use super::headings::HeadingsWithIdx;
+use super::headings::{FancyHeading, HeadingsWithIdx};
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct SearchDocument {
@@ -51,7 +51,7 @@ pub fn build_search_index_for_page(page_title: &str, document: &Node) -> SearchI
             }
 
             if let Some(n) = &nodes.get(here) {
-                if n.is::<ATXHeading>() {
+                if n.is::<FancyHeading>() {
                     break;
                 }
 
