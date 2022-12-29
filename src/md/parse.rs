@@ -15,6 +15,7 @@ use markdown_it::{
 };
 
 use crate::md::{
+    admonition::add_admonition_rule,
     code::{add_code_block_rule, FancyCodeBlock},
     headings::add_heading_rule,
 };
@@ -81,6 +82,9 @@ pub fn ast(input: &str) -> Node {
 
     // Replaces block::code::add(md);
     add_code_block_rule(md);
+
+    // Fully custom rules
+    add_admonition_rule(md);
 
     markdown_it::plugins::extra::add(md);
 
