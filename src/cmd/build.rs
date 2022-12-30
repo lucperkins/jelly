@@ -1,5 +1,4 @@
 use std::{
-    cmp::Ordering,
     fs::{create_dir_all, File},
     io::Write,
     path::PathBuf,
@@ -8,7 +7,7 @@ use std::{
 
 use crate::{
     config::{SiteConfig, TitleConfig},
-    content::{Page, Section, Site},
+    content::{Section, Site},
     error::Error,
     md::render_page,
 };
@@ -24,18 +23,10 @@ fn build_site(source: PathBuf) -> Result<Site, Error> {
     Ok(Site(content))
 }
 
-fn pages_by_title(a: &&Page, b: &&Page) -> Ordering {
-    a.title.cmp(&b.title).reverse()
-}
-
 pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
     let site = build_site(source)?;
 
-    let mut pages = site.pages();
-    pages.sort(); // Sort by order parameter
-    pages.sort_by(pages_by_title);
-
-    for page in pages {
+    for page in site.pages() {
         let html = render_page(page)?;
         let mut path = out.join(&page.relative_path);
 

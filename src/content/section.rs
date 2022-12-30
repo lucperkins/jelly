@@ -5,8 +5,9 @@ use serde::Serialize;
 use std::fs::{metadata, read_dir};
 use std::path::PathBuf;
 
+use super::by_title;
 use super::page::Page;
-use super::title::get_section_title;
+use super::title::{get_section_title, WithTitle};
 
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Section {
@@ -35,6 +36,9 @@ impl Section {
                 }
             }
         }
+
+        pages.sort();
+        pages.sort_by(by_title);
 
         pages
     }
@@ -83,6 +87,12 @@ impl Section {
             pages,
             sections,
         }
+    }
+}
+
+impl WithTitle for Section {
+    fn title(&self) -> String {
+        self.title.to_owned()
     }
 }
 

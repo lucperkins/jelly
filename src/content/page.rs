@@ -5,7 +5,11 @@ use crate::{
     utils::get_file,
 };
 
-use super::{breadcrumb::Link, front::FrontMatter, title::infer_page_title};
+use super::{
+    breadcrumb::Link,
+    front::FrontMatter,
+    title::{infer_page_title, WithTitle},
+};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use serde::Serialize;
@@ -127,5 +131,11 @@ impl Ord for Page {
 impl PartialOrd for Page {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+impl WithTitle for Page {
+    fn title(&self) -> String {
+        self.title.to_owned()
     }
 }

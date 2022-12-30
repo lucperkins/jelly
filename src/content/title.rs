@@ -12,6 +12,10 @@ use crate::{
 
 use super::front::FrontMatter;
 
+pub trait WithTitle {
+    fn title(&self) -> String;
+}
+
 pub fn infer_page_title(
     front: FrontMatter,
     path: &Path,
