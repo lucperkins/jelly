@@ -17,6 +17,7 @@ use markdown_it::{
 use crate::md::{
     code::{add_code_block_rule, FancyCodeBlock},
     headings::add_heading_rule,
+    image::add_image_rule,
 };
 
 use super::headings::FancyHeading;
@@ -76,11 +77,9 @@ pub fn ast(input: &str) -> Node {
     block::lheading::add(md);
     block::paragraph::add(md);
 
-    // Replaces block::heading::add(md);
     add_heading_rule(md);
-
-    // Replaces block::code::add(md);
     add_code_block_rule(md);
+    add_image_rule(md);
 
     markdown_it::plugins::extra::add(md);
 

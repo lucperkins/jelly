@@ -1,6 +1,7 @@
 mod code;
 mod headings;
 mod highlight;
+mod image;
 mod parse;
 mod render;
 mod search;
