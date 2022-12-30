@@ -42,15 +42,9 @@ impl Page {
         config: &SiteConfig,
     ) -> Result<Self, Error> {
         let file = get_file(path)?;
-
         let matter = Matter::<YAML>::new();
         let result = matter.parse(&file);
-
-        let front: FrontMatter = match result.data {
-            Some(f) => f.deserialize()?,
-            None => FrontMatter::default(),
-        };
-
+        let front = FrontMatter::parse(result.data)?;
         let order = front.order;
 
         if order.is_some() && order.unwrap() == 0 {
@@ -58,14 +52,10 @@ impl Page {
         }
 
         let title: String = infer_page_title(front, path, file, &config.title_config);
-
         let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
-
         let tree = ast(&result.content);
-
         let table_of_contents = TableOfContents::parse(&tree);
         let html = render(&tree);
-
         let search_index = build_search_index_for_page(&title, &tree);
 
         Ok(Page {
