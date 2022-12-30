@@ -22,7 +22,9 @@ impl NodeValue for FancyImage {
                 alt.push_str(text.content.as_str());
             }
         });
-        img_attrs.push(("alt", alt));
+        if !alt.is_empty() {
+            img_attrs.push(("alt", alt));
+        }
 
         fmt.open("figure", &[]);
         fmt.open("a", &a_attrs);
@@ -48,6 +50,9 @@ mod tests {
     #[test]
     fn image_render() {
         let cases: Vec<(&str, &str)> = vec![(
+            "![](https://example.com/foo.png)",
+            "<p><figure><a href=\"https://example.com/foo.png\"><img src=\"https://example.com/foo.png\"></a></figure></p>\n",
+        ), (
             "![Some title](https://example.com/foo.png \"bar\")",
             "<p><figure><a href=\"https://example.com/foo.png\"><img src=\"https://example.com/foo.png\" title=\"bar\" alt=\"Some title\"></a></figure></p>\n",
         )];
