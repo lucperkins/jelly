@@ -45,7 +45,7 @@ pub fn add_image_rule(md: &mut MarkdownIt) {
 
 #[cfg(test)]
 mod tests {
-    use crate::md::{ast, render};
+    use crate::tests::test_markdown_produces_expected_html;
 
     #[test]
     fn image_render() {
@@ -57,9 +57,6 @@ mod tests {
             "<p><figure><a href=\"https://example.com/foo.png\"><img src=\"https://example.com/foo.png\" title=\"bar\" alt=\"Some title\"></a></figure></p>\n",
         )];
 
-        for (md, expected_html) in cases {
-            let html = render(&&ast(md));
-            assert_eq!(html, expected_html);
-        }
+        test_markdown_produces_expected_html(cases);
     }
 }
