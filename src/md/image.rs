@@ -1,7 +1,5 @@
 use markdown_it::{
-    parser::{core::CoreRule, inline::Text},
-    plugins::cmark::inline::image::Image,
-    MarkdownIt, Node, NodeValue, Renderer,
+    generics::inline::full_link, parser::inline::Text, MarkdownIt, Node, NodeValue, Renderer,
 };
 
 #[derive(Debug)]
@@ -26,35 +24,21 @@ impl NodeValue for FancyImage {
         });
         img_attrs.push(("alt", alt));
 
-        fmt.cr();
         fmt.open("figure", &[]);
         fmt.open("a", &a_attrs);
         fmt.self_close("img", &img_attrs);
         fmt.close("a");
         fmt.close("figure");
-        fmt.cr();
-    }
-}
-
-struct FancyImageScanner;
-
-impl CoreRule for FancyImageScanner {
-    fn run(node: &mut Node, _: &MarkdownIt) {
-        node.walk_mut(|node, _| {
-            if let Some(image) = node.cast::<Image>() {
-                let img_node = FancyImage {
-                    title: image.title.clone(),
-                    url: image.url.clone(),
-                };
-
-                node.replace(img_node);
-            }
-        });
     }
 }
 
 pub fn add_image_rule(md: &mut MarkdownIt) {
-    md.add_rule::<FancyImageScanner>();
+    full_link::add_prefix::<'!', true>(md, |href, title| {
+        Node::new(FancyImage {
+            url: href.unwrap_or_default(),
+            title,
+        })
+    });
 }
 
 #[cfg(test)]
@@ -64,8 +48,8 @@ mod tests {
     #[test]
     fn image_render() {
         let cases: Vec<(&str, &str)> = vec![(
-            r#"![Some title](https://example.com/foo.png "Something else")"#,
-            r#"<figure><a href="https://example.com/foo.png"><img src="https://example.com/foo.png" /></a></figure>"#,
+            "![Some title](https://example.com/foo.png \"bar\")",
+            "<p><figure><a href=\"https://example.com/foo.png\"><img src=\"https://example.com/foo.png\" title=\"bar\" alt=\"Some title\"></a></figure></p>\n",
         )];
 
         for (md, expected_html) in cases {
