@@ -25,13 +25,7 @@ fn build_site(source: PathBuf) -> Result<Site, Error> {
 }
 
 fn pages_by_title(a: &&Page, b: &&Page) -> Ordering {
-    if a.title < b.title {
-        Ordering::Greater
-    } else if a.title == b.title {
-        Ordering::Equal
-    } else {
-        Ordering::Less
-    }
+    a.title.cmp(&b.title).reverse()
 }
 
 pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {

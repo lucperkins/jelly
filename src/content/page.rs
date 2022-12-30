@@ -120,13 +120,7 @@ impl Ord for Page {
             other.order.unwrap_or(1)
         };
 
-        if a_ord < b_ord {
-            Ordering::Greater
-        } else if a_ord == b_ord {
-            Ordering::Equal
-        } else {
-            Ordering::Less
-        }
+        a_ord.cmp(&b_ord).reverse()
     }
 }
 
