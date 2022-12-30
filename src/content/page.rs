@@ -28,6 +28,10 @@ pub struct Page {
 }
 
 impl Page {
+    pub fn is_index(&self) -> bool {
+        self.relative_path == "index.md"
+    }
+
     pub fn from_path(
         path: &Path,
         breadcrumb: &[(&PathBuf, &str)],
@@ -44,6 +48,10 @@ impl Page {
         };
 
         let order = front.order;
+
+        if order.is_some() && order.unwrap() == 0 {
+            return Err(Error::ZeroOrder(path.to_path_buf()));
+        }
 
         let title: String = infer_page_title(front, path, file, &config.title_config);
 
@@ -101,8 +109,16 @@ impl Page {
 
 impl Ord for Page {
     fn cmp(&self, other: &Self) -> Ordering {
-        let a_ord = self.order.unwrap_or(1);
-        let b_ord = other.order.unwrap_or(1);
+        let a_ord = if self.is_index() {
+            0
+        } else {
+            self.order.unwrap_or(1)
+        };
+        let b_ord = if other.is_index() {
+            0
+        } else {
+            other.order.unwrap_or(1)
+        };
 
         if a_ord < b_ord {
             Ordering::Greater

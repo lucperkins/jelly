@@ -38,7 +38,7 @@ pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
     let site = build_site(source)?;
 
     let mut pages = site.pages();
-    pages.sort();
+    pages.sort(); // Sort by order parameter
     pages.sort_by(pages_by_title);
 
     for page in pages {
@@ -105,7 +105,7 @@ mod tests {
                                 "About this site",
                                 "Some info here.",
                             )]),
-                            None,
+                            Some(5),
                         ),
                         Page::new(
                             "tests/full/basic/about.md",
