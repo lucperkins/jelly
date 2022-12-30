@@ -5,26 +5,14 @@ use crate::{
     utils::get_file,
 };
 
-use super::{front::FrontMatter, title::infer_page_title};
+use super::{breadcrumb::Link, front::FrontMatter, title::infer_page_title};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use serde::Serialize;
-use std::path::{Path, PathBuf};
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
-pub struct Link {
-    pub path: PathBuf,
-    pub title: String,
-}
-
-impl Link {
-    pub fn new(path: &PathBuf, title: &str) -> Self {
-        Self {
-            path: PathBuf::from(path),
-            title: String::from(title),
-        }
-    }
-}
+use std::{
+    cmp::Ordering,
+    path::{Path, PathBuf},
+};
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct Page {
@@ -36,6 +24,7 @@ pub struct Page {
     pub breadcrumb: Vec<Link>,
     pub table_of_contents: TableOfContents,
     pub search_index: SearchIndex,
+    pub order: Option<usize>,
 }
 
 impl Page {
@@ -53,6 +42,8 @@ impl Page {
             Some(f) => f.deserialize()?,
             None => FrontMatter::default(),
         };
+
+        let order = front.order;
 
         let title: String = infer_page_title(front, path, file, &config.title_config);
 
@@ -78,6 +69,7 @@ impl Page {
                 .collect(),
             table_of_contents,
             search_index,
+            order,
         })
     }
 
@@ -91,6 +83,7 @@ impl Page {
         breadcrumb: Vec<Link>,
         table_of_contents: TableOfContents,
         search_index: SearchIndex,
+        order: Option<usize>,
     ) -> Self {
         Self {
             path: String::from(path),
@@ -101,6 +94,28 @@ impl Page {
             breadcrumb,
             table_of_contents,
             search_index,
+            order,
         }
+    }
+}
+
+impl Ord for Page {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let a_ord = self.order.unwrap_or(1);
+        let b_ord = other.order.unwrap_or(1);
+
+        if a_ord < b_ord {
+            Ordering::Greater
+        } else if a_ord == b_ord {
+            Ordering::Equal
+        } else {
+            Ordering::Less
+        }
+    }
+}
+
+impl PartialOrd for Page {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }

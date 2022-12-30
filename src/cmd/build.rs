@@ -1,4 +1,5 @@
 use std::{
+    cmp::Ordering,
     fs::{create_dir_all, File},
     io::Write,
     path::PathBuf,
@@ -7,7 +8,7 @@ use std::{
 
 use crate::{
     config::{SiteConfig, TitleConfig},
-    content::{Section, Site},
+    content::{Page, Section, Site},
     error::Error,
     md::render_page,
 };
@@ -23,10 +24,24 @@ fn build_site(source: PathBuf) -> Result<Site, Error> {
     Ok(Site(content))
 }
 
+fn pages_by_title(a: &&Page, b: &&Page) -> Ordering {
+    if a.title < b.title {
+        Ordering::Greater
+    } else if a.title == b.title {
+        Ordering::Equal
+    } else {
+        Ordering::Less
+    }
+}
+
 pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
     let site = build_site(source)?;
 
-    for page in site.pages() {
+    let mut pages = site.pages();
+    pages.sort();
+    pages.sort_by(pages_by_title);
+
+    for page in pages {
         let html = render_page(page)?;
         let mut path = out.join(&page.relative_path);
 
@@ -60,25 +75,50 @@ mod tests {
                 "basic",
                 Site(Section::new(
                     "Welcome",
-                    Some(vec![Page::new(
-                        "tests/full/basic/index.md",
-                        "index.md",
-                        "Welcome",
-                        "", // Omit for testing
-                        "", // Omit for testing
-                        vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
-                        TableOfContents(vec![TocEntry::new(
-                            2,
-                            "About this site",
-                            TableOfContents::empty(),
-                        )]),
-                        SearchIndex(vec![SearchDocument::new(
-                            2,
+                    Some(vec![
+                        Page::new(
+                            "tests/full/basic/contact.md",
+                            "contact.md",
+                            "Contact us",
+                            "", // Omit for testing
+                            "", // Omit for testing
+                            vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
+                            TableOfContents(vec![]),
+                            SearchIndex(vec![]),
+                            Some(1),
+                        ),
+                        Page::new(
+                            "tests/full/basic/index.md",
+                            "index.md",
                             "Welcome",
-                            "About this site",
-                            "Some info here.",
-                        )]),
-                    )]),
+                            "", // Omit for testing
+                            "", // Omit for testing
+                            vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
+                            TableOfContents(vec![TocEntry::new(
+                                2,
+                                "About this site",
+                                TableOfContents::empty(),
+                            )]),
+                            SearchIndex(vec![SearchDocument::new(
+                                2,
+                                "Welcome",
+                                "About this site",
+                                "Some info here.",
+                            )]),
+                            None,
+                        ),
+                        Page::new(
+                            "tests/full/basic/about.md",
+                            "about.md",
+                            "About",
+                            "", // Omit for testing
+                            "", // Omit for testing
+                            vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
+                            TableOfContents(vec![]),
+                            SearchIndex(vec![]),
+                            Some(2),
+                        ),
+                    ]),
                     None,
                 )),
             ),
@@ -107,6 +147,7 @@ mod tests {
                             "About this site",
                             "Some info here.",
                         )]),
+                        None,
                     )]),
                     Some(vec![Section::new(
                         "Setup",
@@ -122,6 +163,7 @@ mod tests {
                             ],
                             TableOfContents::empty(),
                             SearchIndex::empty(),
+                            None,
                         )]),
                         None,
                     )]),
@@ -142,6 +184,7 @@ mod tests {
                 assert_eq!(page.breadcrumb, expected.breadcrumb);
                 assert_eq!(page.table_of_contents, expected.table_of_contents);
                 assert_eq!(page.search_index, expected.search_index);
+                assert_eq!(page.order, expected.order);
             }
         }
     }
