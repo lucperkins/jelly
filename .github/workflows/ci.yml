@@ -23,13 +23,13 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: jelly-${{ hashFiles('**/Cargo.lock') }}
-
       - uses: DeterminateSystems/nix-installer@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           extra-conf: |
             binary-caches = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
             trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
+            trusted-public-keys = ${{ secrets.CACHIX_TRUSTED_PUBLIC_KEYS }}
             trusted-users = root runner
       - name: Cachix setup
         run: |
@@ -41,4 +41,4 @@ jobs:
       - run: nix develop --command cargo test
       - run: |
           nix develop --profile jelly-dev-env
-          cachix push ${{ secrets.CACHIX_CACHE }} jelly-dev-env
+          nix develop --command cachix push ${{ secrets.CACHIX_CACHE }} jelly-dev-env
