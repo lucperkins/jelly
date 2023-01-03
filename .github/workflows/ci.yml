@@ -29,7 +29,7 @@ jobs:
           extra-conf: |
             binary-caches = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
             trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
-            trusted-public-keys = ${{ secrets.CACHIX_TRUSTED_PUBLIC_KEYS }}
+            trusted-public-keys = ${{ secrets.CACHIX_TRUSTED_PUBLIC_KEY }} ${{ secrets.NIXOS_PUBLIC_KEY }}
             trusted-users = root runner
       - name: Cachix setup
         run: |
