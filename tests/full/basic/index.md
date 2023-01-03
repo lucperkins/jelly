@@ -1,3 +1,7 @@
+---
+order: 5
+---
+
 # Welcome
 
 Welcome to the site.

@@ -5,8 +5,9 @@ use serde::Serialize;
 use std::fs::{metadata, read_dir};
 use std::path::PathBuf;
 
+use super::by_title;
 use super::page::Page;
-use super::title::get_section_title;
+use super::title::{get_section_config, WithTitle};
 
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Section {
@@ -36,6 +37,9 @@ impl Section {
             }
         }
 
+        pages.sort();
+        pages.sort_by(by_title);
+
         pages
     }
 
@@ -44,7 +48,9 @@ impl Section {
         breadcrumb: Option<&Vec<(&PathBuf, &str)>>,
         config: &SiteConfig,
     ) -> Result<Self, Error> {
-        let section_title = &get_section_title(path, config)?;
+        let section_config = &get_section_config(path, config)?;
+        let title = section_config.title.clone();
+
         let mut breadcrumb_acc: Vec<(&PathBuf, &str)> = Vec::new();
 
         if let Some(bc) = breadcrumb {
@@ -53,7 +59,7 @@ impl Section {
             }
         }
 
-        breadcrumb_acc.push((path, section_title));
+        breadcrumb_acc.push((path, &section_config.title));
 
         let pages: Vec<Page> = get_pages_in_dir(path, &breadcrumb_acc, config)?;
         let mut sections: Vec<Section> = Vec::new();
@@ -70,7 +76,7 @@ impl Section {
         }
 
         Ok(Section {
-            title: String::from(section_title),
+            title,
             pages: get_or_none(pages),
             sections: get_or_none(sections),
         })
@@ -83,6 +89,12 @@ impl Section {
             pages,
             sections,
         }
+    }
+}
+
+impl WithTitle for Section {
+    fn title(&self) -> String {
+        self.title.to_owned()
     }
 }
 

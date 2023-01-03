@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("glob error: {0}")]
@@ -38,4 +40,7 @@ pub enum Error {
 
     #[error("yaml parse error: {0}")]
     Yaml(#[from] serde_yaml::Error),
+
+    #[error("order parameter on page {0} is set to zero")]
+    ZeroOrder(PathBuf),
 }
