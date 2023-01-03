@@ -30,6 +30,7 @@ jobs:
           extra-conf: |
             binary-caches = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
             trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
+            trusted-users = root runner
       - name: Cachix setup
         run: |
           nix develop --command cachix authtoken ${{ secrets.CACHIX_AUTH_TOKEN }}
