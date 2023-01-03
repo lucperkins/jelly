@@ -2,17 +2,17 @@ use std::{
     fs::{create_dir_all, File},
     io::Write,
     path::PathBuf,
+    process::ExitCode,
 };
 
 use crate::{
     config::{SiteConfig, TitleConfig},
-    content::Section,
+    content::{Section, Site},
     error::Error,
-    render_page,
-    site::Site,
+    md::render_page,
 };
 
-pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {
+fn build_site(source: PathBuf) -> Result<Site, Error> {
     let config = SiteConfig {
         root: source,
         title_config: TitleConfig::default(),
@@ -20,7 +20,11 @@ pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {
 
     let content = Section::from_path(&config.root, None, &config)?;
 
-    let site = Site { content };
+    Ok(Site(content))
+}
+
+pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
+    let site = build_site(source)?;
 
     for page in site.pages() {
         let html = render_page(page)?;
@@ -35,5 +39,110 @@ pub fn build_site(source: PathBuf, out: PathBuf) -> Result<(), Error> {
         file.write_all(html.as_bytes())?;
     }
 
-    Ok(())
+    Ok(ExitCode::SUCCESS)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use crate::{
+        content::{Link, Page, Section, Site},
+        md::{SearchDocument, SearchIndex, TableOfContents, TocEntry},
+    };
+
+    use super::build_site;
+
+    #[test]
+    fn build_real_site() {
+        let cases: Vec<(&str, Site)> = vec![
+            (
+                "basic",
+                Site(Section::new(
+                    "Welcome",
+                    Some(vec![Page::new(
+                        "tests/full/basic/index.md",
+                        "index.md",
+                        "Welcome",
+                        "", // Omit for testing
+                        "", // Omit for testing
+                        vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
+                        TableOfContents(vec![TocEntry::new(
+                            2,
+                            "About this site",
+                            TableOfContents::empty(),
+                        )]),
+                        SearchIndex(vec![SearchDocument::new(
+                            2,
+                            "Welcome",
+                            "About this site",
+                            "Some info here.",
+                        )]),
+                    )]),
+                    None,
+                )),
+            ),
+            (
+                "medium",
+                Site(Section::new(
+                    "Documentation",
+                    Some(vec![Page::new(
+                        "tests/full/medium/index.md",
+                        "index.md",
+                        "Welcome",
+                        "", // Omit for testing
+                        "", // Omit for testing
+                        vec![Link::new(
+                            &PathBuf::from("tests/full/medium"),
+                            "Documentation",
+                        )],
+                        TableOfContents(vec![TocEntry::new(
+                            2,
+                            "About this site",
+                            TableOfContents::empty(),
+                        )]),
+                        SearchIndex(vec![SearchDocument::new(
+                            2,
+                            "Welcome",
+                            "About this site",
+                            "Some info here.",
+                        )]),
+                    )]),
+                    Some(vec![Section::new(
+                        "Setup",
+                        Some(vec![Page::new(
+                            "tests/full/medium/setup/index.md",
+                            "setup/index.md",
+                            "Setup",
+                            "", // Omit for testing
+                            "", // Omit for testing
+                            vec![
+                                Link::new(&PathBuf::from("tests/full/medium"), "Documentation"),
+                                Link::new(&PathBuf::from("tests/full/medium/setup"), "Setup"),
+                            ],
+                            TableOfContents::empty(),
+                            SearchIndex::empty(),
+                        )]),
+                        None,
+                    )]),
+                )),
+            ),
+        ];
+
+        for (dir, expected_site) in cases {
+            let project_dir = format!("tests/full/{}", dir);
+            let content = build_site(PathBuf::from(project_dir)).unwrap().0;
+
+            for (idx, page) in content.pages().iter().enumerate() {
+                let expected = expected_site.pages()[idx];
+
+                assert_eq!(page.path, expected.path);
+                assert_eq!(page.relative_path, expected.relative_path);
+                assert_eq!(page.title, expected.title);
+                assert_eq!(page.breadcrumb, expected.breadcrumb);
+                assert_eq!(page.table_of_contents, expected.table_of_contents);
+                assert_eq!(page.search_index, expected.search_index);
+            }
+        }
+    }
 }

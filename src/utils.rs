@@ -6,8 +6,7 @@ use std::path::Path;
 use titlecase::titlecase;
 
 pub fn name_from_path(path: &Path, title_config: &TitleConfig) -> String {
-    let stem = path.file_stem().unwrap();
-    let stem_str = stem.to_string_lossy();
+    let stem_str = path.to_string_lossy();
 
     #[allow(clippy::single_char_pattern)]
     let deslugged = stem_str.replace("-", " ");

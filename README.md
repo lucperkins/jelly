@@ -1,5 +1,7 @@
 # Jelly 🍓
 
+[![GitHub Actions status](https://github.com/lucperkins/jelly/actions/workflows/ci.yml/badge.svg)](https://github.com/lucperkins/jelly/actions)
+
 > **Note**: Jelly is being built according to [README-driven development][rdd], whereby the README comes first and development follows.
 > Although I'm actively working on it, very little of what's described in the README has come to fruition.
 

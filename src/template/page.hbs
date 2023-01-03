@@ -1,15 +1,42 @@
 <html>
   <head>
     <title>{{title}}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <style>
+      :root {
+        --primary: purple;
+      }
+    </style>
+    <script type="text/javascript">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "var(--primary)",
+            },
+          },
+        },
+      };
+    </script>
   </head>
-  <body>
-    <header>
-      {{#each breadcrumb}}
-        <a href="{{path}}">{{title}}</a>
-      {{/each}}
-    </header>
-    <div id="content">
-      {{{content}}}
-    </div>
+  <body class="font-sans antialiased">
+    <main class="p-12">
+      <header>
+        <div class="flex items-center space-x-2">
+          {{#each breadcrumb}}
+            <a href="{{path}}" class="text-sm hover:text-primary">{{title}}</a>
+          {{/each}}
+        </div>
+
+        <h1 class="text-3xl font-semibold">{{title}}</h1>
+      </header>
+      <div id="content" class="prose">
+        {{{content}}}
+      </div>
+    </main>
+
+    <script src="https://unpkg.com/alpinejs" defer></script>
   </body>
 </html>
