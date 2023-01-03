@@ -1,3 +1,4 @@
+mod admonition;
 mod code;
 mod headings;
 mod highlight;
