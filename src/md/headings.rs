@@ -195,7 +195,7 @@ impl<'a> IntoIterator for HeadingsWithIdx<'a> {
 mod tests {
     use indoc::indoc;
 
-    use crate::md::{ast, render};
+    use crate::{md::ast, tests::test_markdown_produces_expected_html};
 
     use super::{Heading, Headings};
 
@@ -212,10 +212,7 @@ mod tests {
             ),
         ];
 
-        for (md, expected_html) in cases {
-            let html = render(&ast(md));
-            assert_eq!(html, expected_html);
-        }
+        test_markdown_produces_expected_html(cases);
     }
 
     #[test]

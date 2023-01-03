@@ -29,9 +29,7 @@ impl NodeValue for FancyCodeBlock {
         fmt.cr();
         fmt.open("pre", &pre_attrs);
         fmt.open("code", &[]);
-        fmt.cr();
         fmt.text_raw(&code);
-        fmt.cr();
         fmt.close("code");
         fmt.close("pre");
         fmt.cr();
