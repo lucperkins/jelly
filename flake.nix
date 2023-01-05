@@ -65,6 +65,7 @@
           cargo-watch
           rust-analyzer
           cachix
+          direnv
         ]) ++ scripts;
       };
     });
