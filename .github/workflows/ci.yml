@@ -23,7 +23,7 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: jelly-${{ hashFiles('**/Cargo.lock') }}
-      - uses: DeterminateSystems/nix-installer@main
+      - uses: DeterminateSystems/nix-installer-action@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           extra-conf: |
