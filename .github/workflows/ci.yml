@@ -31,15 +31,15 @@ jobs:
             trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
             trusted-public-keys = ${{ secrets.CACHIX_TRUSTED_PUBLIC_KEY }} ${{ secrets.NIXOS_PUBLIC_KEY }}
             trusted-users = root runner
+      - uses: cachix/cachix-action@v12
+        with:
+          name: ${{ secrets.CACHIX_CACHE }}
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: direnv setup
         run: |
           nix develop --command direnv allow
           eval "$(nix develop --command direnv export bash)"
           echo "$PATH" >> $GITHUB_PATH
-      - name: Cachix setup
-        run: |
-          cachix authtoken ${{ secrets.CACHIX_AUTH_TOKEN }}
-          cachix use ${{ secrets.CACHIX_CACHE }}
       #- run: nix develop --command cargo clippy
       - run: cargo fmt --check
       - run: cargo build --release
