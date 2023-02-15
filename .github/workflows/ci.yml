@@ -23,7 +23,7 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: jelly-${{ hashFiles('**/Cargo.lock') }}
-      - uses: DeterminateSystems/nix-installer@main
+      - uses: DeterminateSystems/nix-installer-action@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           extra-conf: |
@@ -31,14 +31,19 @@ jobs:
             trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
             trusted-public-keys = ${{ secrets.CACHIX_TRUSTED_PUBLIC_KEY }} ${{ secrets.NIXOS_PUBLIC_KEY }}
             trusted-users = root runner
-      - name: Cachix setup
+      - uses: cachix/cachix-action@v12
+        with:
+          name: ${{ secrets.CACHIX_CACHE }}
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - name: direnv setup
         run: |
-          nix develop --command cachix authtoken ${{ secrets.CACHIX_AUTH_TOKEN }}
-          nix develop --command cachix use ${{ secrets.CACHIX_CACHE }}
+          nix develop --command direnv allow
+          eval "$(nix develop --command direnv export bash)"
+          echo "$PATH" >> $GITHUB_PATH
       #- run: nix develop --command cargo clippy
-      - run: nix develop --command cargo fmt --check
-      - run: nix develop --command cargo build --release
-      - run: nix develop --command cargo test
+      - run: cargo fmt --check
+      - run: cargo build --release
+      - run: cargo test
       - run: |
           nix develop --profile jelly-dev-env
-          nix develop --command cachix push ${{ secrets.CACHIX_CACHE }} jelly-dev-env
+          cachix push ${{ secrets.CACHIX_CACHE }} jelly-dev-env
