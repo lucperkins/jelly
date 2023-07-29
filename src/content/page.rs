@@ -5,26 +5,18 @@ use crate::{
     utils::get_file,
 };
 
-use super::{front::FrontMatter, title::infer_page_title};
+use super::{
+    breadcrumb::Link,
+    front::FrontMatter,
+    title::{infer_page_title, WithTitle},
+};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use serde::Serialize;
-use std::path::{Path, PathBuf};
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
-pub struct Link {
-    pub path: PathBuf,
-    pub title: String,
-}
-
-impl Link {
-    pub fn new(path: &PathBuf, title: &str) -> Self {
-        Self {
-            path: PathBuf::from(path),
-            title: String::from(title),
-        }
-    }
-}
+use std::{
+    cmp::Ordering,
+    path::{Path, PathBuf},
+};
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct Page {
@@ -36,9 +28,14 @@ pub struct Page {
     pub breadcrumb: Vec<Link>,
     pub table_of_contents: TableOfContents,
     pub search_index: SearchIndex,
+    pub order: Option<usize>,
 }
 
 impl Page {
+    pub fn is_index(&self) -> bool {
+        self.relative_path == "index.md"
+    }
+
     pub fn from_path(
         path: &Path,
         breadcrumb: &[(&PathBuf, &str)],
@@ -48,6 +45,12 @@ impl Page {
         let matter = Matter::<YAML>::new();
         let result = matter.parse(&file);
         let front = FrontMatter::parse(result.data)?;
+        let order = front.order;
+
+        if order.is_some() && order.unwrap() == 0 {
+            return Err(Error::ZeroOrder(path.to_path_buf()));
+        }
+
         let title: String = infer_page_title(front, path, file, &config.title_config);
         let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
         let tree = ast(&result.content);
@@ -68,6 +71,7 @@ impl Page {
                 .collect(),
             table_of_contents,
             search_index,
+            order,
         })
     }
 
@@ -81,6 +85,7 @@ impl Page {
         breadcrumb: Vec<Link>,
         table_of_contents: TableOfContents,
         search_index: SearchIndex,
+        order: Option<usize>,
     ) -> Self {
         Self {
             path: String::from(path),
@@ -91,6 +96,36 @@ impl Page {
             breadcrumb,
             table_of_contents,
             search_index,
+            order,
         }
+    }
+}
+
+impl Ord for Page {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let a_ord = if self.is_index() {
+            0
+        } else {
+            self.order.unwrap_or(1)
+        };
+        let b_ord = if other.is_index() {
+            0
+        } else {
+            other.order.unwrap_or(1)
+        };
+
+        a_ord.cmp(&b_ord).reverse()
+    }
+}
+
+impl PartialOrd for Page {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl WithTitle for Page {
+    fn title(&self) -> String {
+        self.title.to_owned()
     }
 }
