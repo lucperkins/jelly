@@ -14,36 +14,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - uses: DeterminateSystems/flake-checker-action@v5
         with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: jelly-${{ hashFiles('**/Cargo.lock') }}
-      - uses: DeterminateSystems/nix-installer-action@1132ad038b0e82939e2bf3f9ec9383a91727b01e
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          extra-conf: |
-            binary-caches = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
-            trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
-            trusted-public-keys = ${{ secrets.CACHIX_TRUSTED_PUBLIC_KEY }} ${{ secrets.NIXOS_PUBLIC_KEY }}
-            trusted-users = root runner
-      - uses: cachix/cachix-action@v12
-        with:
-          name: ${{ secrets.CACHIX_CACHE }}
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-      - name: direnv setup
-        run: |
-          nix develop --command direnv allow
-          eval "$(nix develop --command direnv export bash)"
-          echo "$PATH" >> $GITHUB_PATH
-      #- run: nix develop --command cargo clippy
-      - run: cargo fmt --check
-      - run: cargo build --release
-      - run: cargo test
-      - run: |
-          nix develop --profile jelly-dev-env
-          cachix push ${{ secrets.CACHIX_CACHE }} jelly-dev-env
+          fail-mode: true
+      - uses: DeterminateSystems/nix-installer-action@v4
+      - uses: DeterminateSystems/magic-nix-cache-action@v2
+      - run: nix develop --command cargo fmt --check
+      - run: nix develop --command cargo build --release
+      - run: nix develop --command cargo test
