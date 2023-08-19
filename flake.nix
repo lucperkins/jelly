@@ -45,7 +45,7 @@
 
             scripts = [
               ci
-              (builtins.map (cmd: xFunc cmd) [ "build" "check" "run" "test" ])
+              (builtins.map (cmd: xFunc cmd) [ "build" "check" "clippy" "run" "test" ])
             ];
           in
           pkgs.mkShell {

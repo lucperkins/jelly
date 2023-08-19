@@ -1,5 +1,7 @@
-use std::{path::PathBuf, process::ExitCode};
+use std::path::PathBuf;
 
-pub fn serve(_: PathBuf) -> eyre::Result<ExitCode> {
-    Ok(ExitCode::SUCCESS)
+use crate::error::Error;
+
+pub fn serve(_: PathBuf) -> Result<(), Error> {
+    Ok(())
 }

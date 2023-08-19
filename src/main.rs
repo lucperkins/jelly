@@ -1,6 +1,10 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::cmd::{build, serve};
-use std::{path::PathBuf, process::ExitCode};
+
+use jelly::{
+    cmd::{build, serve},
+    error::Error,
+};
+use std::path::PathBuf;
 
 #[derive(Args)]
 #[command(about = "Build a Jelly docs project")]
@@ -41,18 +45,10 @@ struct Cli {
     command: Command,
 }
 
-fn main() -> color_eyre::Result<ExitCode> {
-    color_eyre::config::HookBuilder::default()
-        .theme(if !atty::is(atty::Stream::Stderr) {
-            color_eyre::config::Theme::new()
-        } else {
-            color_eyre::config::Theme::dark()
-        })
-        .install()?;
+fn main() -> Result<(), Error> {
+    let Cli { command } = Cli::parse();
 
-    let cli = Cli::parse();
-
-    match cli.command {
+    match command {
         Command::Build(Build { source, out }) => build(source, out),
         Command::Serve(Serve { source }) => serve(source),
     }

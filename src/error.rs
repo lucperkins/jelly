@@ -33,7 +33,7 @@ pub enum Error {
     Syntect(#[from] syntect::Error),
 
     #[error("template error: {0}")]
-    Template(#[from] handlebars::TemplateError),
+    Template(#[from] Box<handlebars::TemplateError>),
 
     #[error("UTF-8 error: {0}")]
     Utf8(#[from] std::string::FromUtf8Error),
