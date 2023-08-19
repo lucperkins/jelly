@@ -13,21 +13,21 @@
     }:
 
     let
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
-        pkgs = import nixpkgs { inherit system; overlays = self.overlays; };
-      });
-
-      meta = (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package;
-      inherit (meta) name version;
-    in
-    {
       overlays = [
         rust-overlay.overlays.default
         (self: super: {
           rustToolchain = super.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
         })
       ];
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
+        pkgs = import nixpkgs { inherit overlays system; };
+      });
+
+      meta = (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package;
+      inherit (meta) name version;
+    in
+    {
 
       devShells = forEachSupportedSystem ({ pkgs }: {
         default =
