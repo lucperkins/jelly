@@ -46,6 +46,8 @@ struct Cli {
 }
 
 fn main() -> Result<(), Error> {
+    tracing_subscriber::fmt::init();
+
     let Cli { command } = Cli::parse();
 
     match command {

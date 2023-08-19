@@ -53,8 +53,10 @@
               rustToolchain
               cargo-edit
               cargo-watch
-            ] ++ scripts;
+            ] ++ scripts ++ pkgs.lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk.frameworks; [ CoreServices ]);
           };
+
+        RUST_LOG = "trace";
       });
 
       packages = forEachSupportedSystem ({ pkgs }: {

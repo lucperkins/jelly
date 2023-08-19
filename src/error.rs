@@ -20,8 +20,14 @@ pub enum Error {
     #[error("no pages found in directory: {0}")]
     NoPages(String),
 
+    #[error("notify error: {0}")]
+    Notify(#[from] notify::Error),
+
     #[error("pattern error: {0}")]
     Pattern(#[from] glob::PatternError),
+
+    #[error("address not free: {0}")]
+    PortNotFree(String),
 
     #[error("prefix error: {0}")]
     Prefix(#[from] std::path::StripPrefixError),
