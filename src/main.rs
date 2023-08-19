@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::cmd::build;
+use jelly::cmd::{build, serve};
 use std::{path::PathBuf, process::ExitCode};
 
 #[derive(Args)]
@@ -17,9 +17,22 @@ struct Build {
     out: PathBuf,
 }
 
+#[derive(Args)]
+#[command(about = "Serve a Jelly docs project")]
+struct Serve {
+    #[arg(
+        short,
+        long,
+        help = "The root content directory",
+        default_value = "docs"
+    )]
+    source: PathBuf,
+}
+
 #[derive(Subcommand)]
 enum Command {
     Build(Build),
+    Serve(Serve),
 }
 
 #[derive(Parser)]
@@ -40,6 +53,7 @@ fn main() -> color_eyre::Result<ExitCode> {
     let cli = Cli::parse();
 
     match cli.command {
-        Command::Build(args) => build(args.source, args.out),
+        Command::Build(Build { source, out }) => build(source, out),
+        Command::Serve(Serve { source }) => serve(source),
     }
 }
