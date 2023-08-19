@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::mpsc::RecvError};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -31,6 +31,9 @@ pub enum Error {
 
     #[error("prefix error: {0}")]
     Prefix(#[from] std::path::StripPrefixError),
+
+    #[error("receive error: {0}")]
+    Recv(#[from] RecvError),
 
     #[error("render error: {0}")]
     Render(#[from] handlebars::RenderError),

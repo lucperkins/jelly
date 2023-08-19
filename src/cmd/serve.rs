@@ -1,5 +1,5 @@
-use notify::Watcher;
-use std::{path::PathBuf, net::{SocketAddr, IpAddr, Ipv4Addr, TcpListener}};
+use notify::{Watcher, Event};
+use std::{path::PathBuf, net::{SocketAddr, IpAddr, Ipv4Addr, TcpListener}, sync::mpsc::channel};
 
 use crate::error::Error;
 
@@ -24,10 +24,21 @@ pub fn serve(source: PathBuf) -> Result<(), Error> {
 
     tracing::debug!("setting up watcher on {:?}", source);
 
-    //let (rx, tx) = channel();
+    let (_tx, rx) = channel::<Event>();
     let mut watcher = notify::recommended_watcher(|res| {
         match res {
-            Ok(event) => println!("event: {:?}", event),
+            Ok(Event { kind, .. }) => {
+                use notify::EventKind::*;
+
+                match kind {
+                    Create(_) | Modify(_) | Remove(_) => {
+                        tracing::debug!("got a {:?} event", kind);
+                    },
+                    _ => {
+                        tracing::debug!("got some other kind of event: {:?}", kind);
+                    }
+                }
+            }
             Err(e) => println!("watch error: {:?}", e),
         }
     })?;
@@ -36,7 +47,16 @@ pub fn serve(source: PathBuf) -> Result<(), Error> {
 
     watcher.watch(source.as_path(), notify::RecursiveMode::Recursive)?; // Why doesn't this watch?
 
-    tracing::debug!("shut down file watcher");
+    loop {
+        match rx.recv() {
+            Err(e) => {
+                return Err(Error::Recv(e));
+            }
+            _ => {
+                break;
+            },
+        }
+    }
 
     tracing::debug!("quitting");
 
