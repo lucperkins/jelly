@@ -22,3 +22,5 @@ jobs:
       - run: nix develop --command cargo fmt --check
       - run: nix develop --command cargo build --release
       - run: nix develop --command cargo test
+      - run: nix flake check
+      - run: nix build
