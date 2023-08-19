@@ -1,5 +1,9 @@
-use notify::{Watcher, Event};
-use std::{path::PathBuf, net::{SocketAddr, IpAddr, Ipv4Addr, TcpListener}, sync::mpsc::channel};
+use notify::{Event, Watcher};
+use std::{
+    net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener},
+    path::PathBuf,
+    sync::mpsc::channel,
+};
 
 use crate::error::Error;
 
@@ -25,22 +29,20 @@ pub fn serve(source: PathBuf) -> Result<(), Error> {
     tracing::debug!("setting up watcher on {:?}", source);
 
     let (_tx, rx) = channel::<Event>();
-    let mut watcher = notify::recommended_watcher(|res| {
-        match res {
-            Ok(Event { kind, .. }) => {
-                use notify::EventKind::*;
+    let mut watcher = notify::recommended_watcher(|res| match res {
+        Ok(Event { kind, .. }) => {
+            use notify::EventKind::*;
 
-                match kind {
-                    Create(_) | Modify(_) | Remove(_) => {
-                        tracing::debug!("got a {:?} event", kind);
-                    },
-                    _ => {
-                        tracing::debug!("got some other kind of event: {:?}", kind);
-                    }
+            match kind {
+                Create(_) | Modify(_) | Remove(_) => {
+                    tracing::debug!("got a {:?} event", kind);
+                }
+                _ => {
+                    tracing::debug!("got some other kind of event: {:?}", kind);
                 }
             }
-            Err(e) => println!("watch error: {:?}", e),
         }
+        Err(e) => println!("watch error: {:?}", e),
     })?;
 
     tracing::debug!("set up watcher on {:?}", source);
@@ -54,7 +56,7 @@ pub fn serve(source: PathBuf) -> Result<(), Error> {
             }
             _ => {
                 break;
-            },
+            }
         }
     }
 
