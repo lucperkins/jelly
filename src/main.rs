@@ -31,6 +31,9 @@ struct Serve {
         default_value = "docs"
     )]
     source: PathBuf,
+
+    #[arg(short, long, help = "Open the browser to the running site")]
+    open: bool,
 }
 
 #[derive(Subcommand)]
@@ -52,6 +55,6 @@ fn main() -> Result<(), Error> {
 
     match command {
         Command::Build(Build { source, out }) => build(source, out),
-        Command::Serve(Serve { source }) => serve(source),
+        Command::Serve(Serve { source, open }) => serve(source, open),
     }
 }

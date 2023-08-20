@@ -7,6 +7,7 @@ use std::{
     process::exit,
     str::FromStr,
     sync::mpsc::channel,
+    thread,
 };
 use tempfile::TempDir;
 use tiny_http::Request;
@@ -37,6 +38,7 @@ impl FileServer {
         if let Some(position) = req_path.rfind('?') {
             req_path.truncate(position);
         }
+
         let path = self.root.to_path_buf().join(&req_path[1..]);
         let serve_path = if path.is_file() {
             path
@@ -70,7 +72,7 @@ impl FileServer {
     }
 }
 
-pub fn serve(source: PathBuf) -> Result<(), Error> {
+pub fn serve(source: PathBuf, open: bool) -> Result<(), Error> {
     let out = TempDir::new()?; // TODO: make this a temporary directory
     let out_path = out.as_ref();
 
@@ -100,7 +102,13 @@ pub fn serve(source: PathBuf) -> Result<(), Error> {
 
     tracing::debug!("starting file server");
 
-    file_server.serve()?;
+    thread::spawn(move || {
+        file_server.serve().expect("http server error");
+    });
+
+    if open {
+        open::that("http://localhost:8080")?;
+    }
 
     tracing::debug!("successfully built site");
 
