@@ -1,27 +1,33 @@
 use notify::{Event, Watcher};
-use tempfile::TempDir;
 use std::{
     net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener},
     path::PathBuf,
-    sync::mpsc::channel, process::exit,
+    process::exit,
+    sync::mpsc::channel,
 };
+use tempfile::TempDir;
 
 use crate::error::Error;
 
 use super::build;
 
 pub fn serve(source: PathBuf) -> Result<(), Error> {
+    let out = TempDir::new()?; // TODO: make this a temporary directory
+
+    tracing::debug!("adding Ctrl-C handler");
+
     ctrlc::set_handler(move || {
         tracing::debug!("detected Ctrl-C; exiting");
         exit(0);
-    }).expect("something went wrong while quitting");
+    })
+    .expect("something went wrong while quitting");
 
-    let out = TempDir::new()?; // TODO: make this a temporary directory
+    tracing::debug!("added Ctrl-C handler");
 
-    tracing::debug!("serving docs");
+    tracing::debug!("serving docs; writing output to {:?}", out.as_ref());
 
     // Initial site build
-    build(source.clone(), out.into_path())?;
+    build(source.clone(), out.as_ref().to_owned())?;
 
     tracing::debug!("successfully built site");
 
@@ -55,15 +61,10 @@ pub fn serve(source: PathBuf) -> Result<(), Error> {
 
     watcher.watch(source.as_path(), notify::RecursiveMode::Recursive)?; // Why doesn't this watch?
 
-    loop {
-        match rx.recv() {
-            Err(e) => {
-                return Err(Error::Recv(e));
-            }
-            _ => {
-                break;
-            }
-        }
+    if let Err(e) = rx.recv() {
+        out.close()?;
+        tracing::debug!("error encountered from listener: {}", e);
+        return Err(Error::Recv(e));
     }
 
     tracing::debug!("quitting");
