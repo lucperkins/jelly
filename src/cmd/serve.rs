@@ -1,16 +1,15 @@
+use super::build;
+use crate::error::Error;
 use notify::{Event, Watcher};
-use tiny_http::Request;
 use std::{
     net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener},
     path::PathBuf,
     process::exit,
-    sync::mpsc::channel, str::FromStr,
+    str::FromStr,
+    sync::mpsc::channel,
 };
 use tempfile::TempDir;
-
-use crate::error::Error;
-
-use super::build;
+use tiny_http::Request;
 
 struct FileServer {
     root: PathBuf,
@@ -26,9 +25,7 @@ impl FileServer {
         let server = tiny_http::Server::http(self.address).expect("couldn't start server"); // TODO: don't use expect here
 
         for req in server.incoming_requests() {
-            if let Err(e) = self.handle_files(req) {
-                return Err(e);
-            }
+            self.handle_files(req)?;
         }
 
         Ok(())
@@ -41,14 +38,19 @@ impl FileServer {
             req_path.truncate(position);
         }
         let path = self.root.to_path_buf().join(&req_path[1..]);
-        let serve_path = if path.is_file() { path } else { path.join("index.html") };
+        let serve_path = if path.is_file() {
+            path
+        } else {
+            path.join("index.html")
+        };
         if serve_path.exists() {
             let file = std::fs::File::open(&serve_path).expect("failed to find file");
             let mut response = tiny_http::Response::from_file(file);
             if let Some(mime) = mime_guess::MimeGuess::from_path(&serve_path).first_raw() {
                 let content_type = format!("Content-Type:{}", mime);
 
-                let content_type = tiny_http::Header::from_str(&content_type).expect("formatted correctly");
+                let content_type =
+                    tiny_http::Header::from_str(&content_type).expect("formatted correctly");
                 response.add_header(content_type);
             }
             req.respond(response).expect("can't respond");
@@ -60,13 +62,13 @@ impl FileServer {
                         tiny_http::Header::from_str("Content-Type: text/html")
                             .expect("formatted correctly"),
                     ),
-            ).expect("couldn't respond with 404");
+            )
+            .expect("couldn't respond with 404");
         }
 
         Ok(())
     }
 }
-
 
 pub fn serve(source: PathBuf) -> Result<(), Error> {
     let out = TempDir::new()?; // TODO: make this a temporary directory
