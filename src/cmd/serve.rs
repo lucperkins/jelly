@@ -1,8 +1,9 @@
 use notify::{Event, Watcher};
+use tempfile::TempDir;
 use std::{
     net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener},
     path::PathBuf,
-    sync::mpsc::channel,
+    sync::mpsc::channel, process::exit,
 };
 
 use crate::error::Error;
@@ -10,12 +11,17 @@ use crate::error::Error;
 use super::build;
 
 pub fn serve(source: PathBuf) -> Result<(), Error> {
-    let out = "dist"; // TODO: make this a temporary directory
+    ctrlc::set_handler(move || {
+        tracing::debug!("detected Ctrl-C; exiting");
+        exit(0);
+    }).expect("something went wrong while quitting");
+
+    let out = TempDir::new()?; // TODO: make this a temporary directory
 
     tracing::debug!("serving docs");
 
     // Initial site build
-    build(source.clone(), PathBuf::from(out))?;
+    build(source.clone(), out.into_path())?;
 
     tracing::debug!("successfully built site");
 
