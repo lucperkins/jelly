@@ -1,6 +1,10 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::cmd::build;
-use std::{path::PathBuf, process::ExitCode};
+
+use jelly::{
+    cmd::{build, serve},
+    error::Error,
+};
+use std::path::PathBuf;
 
 #[derive(Args)]
 #[command(about = "Build a Jelly docs project")]
@@ -17,9 +21,25 @@ struct Build {
     out: PathBuf,
 }
 
+#[derive(Args)]
+#[command(about = "Serve a Jelly docs project")]
+struct Serve {
+    #[arg(
+        short,
+        long,
+        help = "The root content directory",
+        default_value = "docs"
+    )]
+    source: PathBuf,
+
+    #[arg(short, long, help = "Open the browser to the running site")]
+    open: bool,
+}
+
 #[derive(Subcommand)]
 enum Command {
     Build(Build),
+    Serve(Serve),
 }
 
 #[derive(Parser)]
@@ -28,18 +48,13 @@ struct Cli {
     command: Command,
 }
 
-fn main() -> color_eyre::Result<ExitCode> {
-    color_eyre::config::HookBuilder::default()
-        .theme(if !atty::is(atty::Stream::Stderr) {
-            color_eyre::config::Theme::new()
-        } else {
-            color_eyre::config::Theme::dark()
-        })
-        .install()?;
+fn main() -> Result<(), Error> {
+    tracing_subscriber::fmt::init();
 
-    let cli = Cli::parse();
+    let Cli { command } = Cli::parse();
 
-    match cli.command {
-        Command::Build(args) => build(args.source, args.out),
+    match command {
+        Command::Build(Build { source, out }) => build(source, out),
+        Command::Serve(Serve { source, open }) => serve(source, open),
     }
 }

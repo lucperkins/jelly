@@ -2,7 +2,10 @@
 /target/
 
 # Nix artifacts
-result
+result*
 
 # Jelly artifacts
 /dist/
+
+# Example project
+/docs/
