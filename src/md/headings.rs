@@ -275,7 +275,7 @@ mod tests {
                 ("Heading 1", "Here is some text."),
                 ("Heading 2", ""),
                 ("Heading 3", "Here is some other text."),
-                ("Heading 4", "Bold, italics, and code.Some other info."),
+                ("Heading 4", "Bold, italics, and code. Some other info."),
             ],
         )];
 

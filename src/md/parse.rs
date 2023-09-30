@@ -23,7 +23,11 @@ use crate::md::{
 use super::headings::FancyHeading;
 
 pub(super) fn nodes_to_string(nodes: Vec<&Node>) -> String {
-    nodes.iter().map(|node| node_to_string(node)).collect()
+    nodes
+        .iter()
+        .map(|node| node_to_string(node))
+        .collect::<Vec<String>>()
+        .join(" ")
 }
 
 // Convert the text before any header to a string.

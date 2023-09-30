@@ -85,7 +85,7 @@ mod tests {
                         3,
                         "Second page",
                         "h3",
-                        "And some more.And some text from another paragraph.",
+                        "And some more. And some text from another paragraph.",
                     ),
                 ]),
             ),
