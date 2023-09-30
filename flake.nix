@@ -2,7 +2,7 @@
   description = "Jelly";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
