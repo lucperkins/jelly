@@ -1,6 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 use jelly::cmd::build;
-use std::{path::PathBuf, process::ExitCode};
+use std::{io::IsTerminal, path::PathBuf, process::ExitCode};
 
 #[derive(Args)]
 #[command(about = "Build a Jelly docs project")]
@@ -30,7 +30,7 @@ struct Cli {
 
 fn main() -> color_eyre::Result<ExitCode> {
     color_eyre::config::HookBuilder::default()
-        .theme(if !atty::is(atty::Stream::Stderr) {
+        .theme(if !std::io::stderr().is_terminal() {
             color_eyre::config::Theme::new()
         } else {
             color_eyre::config::Theme::dark()
