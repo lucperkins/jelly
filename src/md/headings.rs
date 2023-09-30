@@ -10,7 +10,7 @@ use markdown_it::{
 use serde::Serialize;
 use slug::slugify;
 
-use super::node_to_string;
+use super::{node_to_string, parse::nodes_to_string};
 
 #[derive(Debug)]
 pub struct FancyHeading {
@@ -61,6 +61,7 @@ impl NodeValue for FancyHeading {
 }
 
 pub struct FancyHeadingsRule;
+
 impl BlockRule for FancyHeadingsRule {
     fn run(state: &mut BlockState) -> Option<(Node, usize)> {
         // if it's indented more than 3 spaces, it should be a code block
@@ -133,9 +134,6 @@ pub fn add_heading_rule(md: &mut MarkdownIt) {
     md.block.add_rule::<FancyHeadingsRule>();
 }
 
-pub struct Headings<'a>(pub &'a [Node]);
-pub struct HeadingsWithIdx<'a>(pub &'a [Node]);
-
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct Heading {
     pub level: u8,
@@ -153,6 +151,8 @@ impl Heading {
         }
     }
 }
+
+pub struct Headings<'a>(pub &'a [Node]);
 
 impl<'a> IntoIterator for Headings<'a> {
     type Item = Heading;
@@ -173,6 +173,8 @@ impl<'a> IntoIterator for Headings<'a> {
     }
 }
 
+pub struct HeadingsWithIdx<'a>(pub &'a [Node]);
+
 impl<'a> IntoIterator for HeadingsWithIdx<'a> {
     type Item = (usize, Heading);
     type IntoIter = IntoIter<Self::Item>;
@@ -192,13 +194,103 @@ impl<'a> IntoIterator for HeadingsWithIdx<'a> {
     }
 }
 
+pub struct HeadingsWithTextAfter<'a>(pub &'a [Node]);
+
+impl<'a> IntoIterator for HeadingsWithTextAfter<'a> {
+    type Item = (Heading, String);
+    type IntoIter = IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut documents: Vec<(Heading, String)> = Vec::new();
+
+        for (idx, node) in self.0.iter().enumerate() {
+            if let Some(heading) = node.cast::<FancyHeading>() {
+                let next = idx + 1;
+
+                let heading = Heading::new(heading.level, &node_to_string(node));
+
+                match self.0.get(next) {
+                    Some(next_node) => {
+                        if next_node.cast::<FancyHeading>().is_some() {
+                            documents.push((heading, String::from("")));
+                        } else {
+                            let mut n = next;
+                            let mut nodes: Vec<&Node> = Vec::new();
+
+                            loop {
+                                if let Some(inner) = self.0.get(n) {
+                                    if inner.cast::<FancyHeading>().is_some() {
+                                        break;
+                                    } else {
+                                        nodes.push(inner);
+                                    }
+                                } else {
+                                    break;
+                                }
+                                n += 1;
+                            }
+                            documents.push((heading, nodes_to_string(nodes)));
+                        }
+                    }
+                    None => {
+                        documents.push((heading, String::from("")));
+                    }
+                }
+            }
+        }
+
+        documents.into_iter()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
 
     use crate::{md::ast, tests::test_markdown_produces_expected_html};
 
-    use super::{Heading, Headings};
+    use super::{Heading, Headings, HeadingsWithTextAfter};
+
+    #[test]
+    fn search_index() {
+        let cases: Vec<(&str, Vec<(&str, &str)>)> = vec![(
+            indoc! {"
+                ## Heading 1
+
+                Here is some text.
+
+                ### Heading 2
+
+                ## Heading 3
+
+                Here is some other text.
+
+                ### Heading 4
+
+                **Bold**, _italics_, and `code`.
+
+                Some other info.
+            "},
+            vec![
+                ("Heading 1", "Here is some text."),
+                ("Heading 2", ""),
+                ("Heading 3", "Here is some other text."),
+                ("Heading 4", "Bold, italics, and code.Some other info."),
+            ],
+        )];
+
+        for (md, documents) in cases {
+            let tree = ast(md);
+            let headings: Vec<(Heading, String)> =
+                HeadingsWithTextAfter(&tree.children).into_iter().collect();
+            let docs: Vec<(&str, &str)> = headings
+                .iter()
+                .map(|(heading, s)| (heading.text.as_str(), s.as_str()))
+                .collect();
+
+            assert_eq!(docs, documents);
+        }
+    }
 
     #[test]
     fn fancy_headings() {

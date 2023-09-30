@@ -22,6 +22,10 @@ use crate::md::{
 
 use super::headings::FancyHeading;
 
+pub fn nodes_to_string(nodes: Vec<&Node>) -> String {
+    nodes.iter().map(|node| node_to_string(node)).collect()
+}
+
 // TODO: make this less kludgey
 pub fn node_to_string(node: &Node) -> String {
     let mut pieces: Vec<String> = Vec::new();

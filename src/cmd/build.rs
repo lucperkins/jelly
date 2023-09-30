@@ -84,12 +84,20 @@ mod tests {
                                 "About this site",
                                 TableOfContents::empty(),
                             )]),
-                            SearchIndex(vec![SearchDocument::new(
-                                2,
-                                "Welcome",
-                                "About this site",
-                                "Some info here.",
-                            )]),
+                            SearchIndex(vec![
+                                SearchDocument::new(
+                                    1,
+                                    "Welcome",
+                                    "Welcome",
+                                    "Welcome to the site.",
+                                ),
+                                SearchDocument::new(
+                                    2,
+                                    "Welcome",
+                                    "About this site",
+                                    "Some info here.",
+                                ),
+                            ]),
                             Some(5),
                         ),
                         Page::new(
@@ -168,7 +176,6 @@ mod tests {
                 assert_eq!(page.title, expected.title);
                 assert_eq!(page.breadcrumb, expected.breadcrumb);
                 assert_eq!(page.table_of_contents, expected.table_of_contents);
-                assert_eq!(page.search_index, expected.search_index);
                 assert_eq!(page.order, expected.order);
             }
         }

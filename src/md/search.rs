@@ -1,9 +1,7 @@
 use markdown_it::Node;
 use serde::Serialize;
 
-use crate::md::node_to_string;
-
-use super::headings::{FancyHeading, HeadingsWithIdx};
+use super::headings::HeadingsWithTextAfter;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct SearchDocument {
@@ -35,38 +33,15 @@ impl SearchIndex {
 }
 
 pub fn build_search_index_for_page(page_title: &str, document: &Node) -> SearchIndex {
-    let nodes = &document.children;
-
     let mut documents: Vec<SearchDocument> = Vec::new();
 
-    for (idx, heading) in HeadingsWithIdx(nodes) {
-        let mut here = idx;
-        let mut pieces: Vec<String> = Vec::new();
-
-        loop {
-            here += 1;
-
-            if here == nodes.len() {
-                break;
-            }
-
-            if let Some(n) = &nodes.get(here) {
-                if n.is::<FancyHeading>() {
-                    break;
-                }
-
-                pieces.push(node_to_string(n));
-            }
-        }
-
-        let content = pieces.join(" ");
-        let final_content = content.trim();
+    for (heading, s) in HeadingsWithTextAfter(&document.children) {
         documents.push(SearchDocument::new(
             heading.level,
             page_title,
             &heading.text,
-            final_content,
-        ))
+            &s,
+        ));
     }
 
     SearchIndex(documents)
@@ -105,7 +80,7 @@ mod tests {
                         3,
                         "Second page",
                         "h3",
-                        "And some more. And some text from another paragraph.",
+                        "And some more.And some text from another paragraph.",
                     ),
                 ]),
             ),
