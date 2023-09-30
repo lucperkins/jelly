@@ -218,18 +218,16 @@ impl<'a> IntoIterator for HeadingsWithTextAfter<'a> {
                                 let mut n = next;
                                 let mut nodes: Vec<&Node> = Vec::new();
 
-                                loop {
-                                    if let Some(inner) = self.0.get(n) {
-                                        if inner.cast::<FancyHeading>().is_some() {
-                                            break;
-                                        } else {
-                                            nodes.push(inner);
-                                        }
-                                    } else {
+                                while let Some(inner) = self.0.get(n) {
+                                    if inner.cast::<FancyHeading>().is_some() {
                                         break;
+                                    } else {
+                                        nodes.push(inner);
                                     }
+
                                     n += 1;
                                 }
+
                                 documents.push((heading, nodes_to_string(nodes)));
                             }
                         }
