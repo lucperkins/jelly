@@ -12,7 +12,7 @@ use crate::{
     md::render_page,
 };
 
-fn build_site(source: PathBuf) -> Result<Site, Error> {
+pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
     let config = SiteConfig {
         root: source,
         title_config: TitleConfig::default(),

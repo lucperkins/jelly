@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use jelly::cmd::build;
+use jelly::cmd::{build, index};
 use std::{path::PathBuf, process::ExitCode};
 
 #[derive(Args)]
@@ -17,9 +17,25 @@ struct Build {
     out: PathBuf,
 }
 
+#[derive(Args)]
+#[command(about = "Generate a search index for a Jelly docs project")]
+struct Index {
+    #[arg(
+        short,
+        long,
+        help = "The root content directory",
+        default_value = "docs"
+    )]
+    source: PathBuf,
+
+    #[arg(short, long = "out", help = "Output path")]
+    out: Option<PathBuf>,
+}
+
 #[derive(Subcommand)]
 enum Command {
     Build(Build),
+    Index(Index),
 }
 
 #[derive(Parser)]
@@ -40,6 +56,7 @@ fn main() -> color_eyre::Result<ExitCode> {
     let cli = Cli::parse();
 
     match cli.command {
-        Command::Build(args) => build(args.source, args.out),
+        Command::Build(Build { source, out }) => build(source, out),
+        Command::Index(Index { source, out }) => index(source, out),
     }
 }

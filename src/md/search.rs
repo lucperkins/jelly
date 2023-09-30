@@ -3,7 +3,7 @@ use serde::Serialize;
 
 use super::{headings::HeadingsWithTextAfter, parse::preamble};
 
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct SearchDocument {
     level: u8,
     page_title: String,
