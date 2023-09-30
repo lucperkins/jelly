@@ -205,35 +205,37 @@ impl<'a> IntoIterator for HeadingsWithTextAfter<'a> {
 
         for (idx, node) in self.0.iter().enumerate() {
             if let Some(heading) = node.cast::<FancyHeading>() {
-                let next = idx + 1;
+                if heading.level > 1 {
+                    let next = idx + 1;
 
-                let heading = Heading::new(heading.level, &node_to_string(node));
+                    let heading = Heading::new(heading.level, &node_to_string(node));
 
-                match self.0.get(next) {
-                    Some(next_node) => {
-                        if next_node.cast::<FancyHeading>().is_some() {
-                            documents.push((heading, String::from("")));
-                        } else {
-                            let mut n = next;
-                            let mut nodes: Vec<&Node> = Vec::new();
+                    match self.0.get(next) {
+                        Some(next_node) => {
+                            if next_node.cast::<FancyHeading>().is_some() {
+                                documents.push((heading, String::from("")));
+                            } else {
+                                let mut n = next;
+                                let mut nodes: Vec<&Node> = Vec::new();
 
-                            loop {
-                                if let Some(inner) = self.0.get(n) {
-                                    if inner.cast::<FancyHeading>().is_some() {
-                                        break;
+                                loop {
+                                    if let Some(inner) = self.0.get(n) {
+                                        if inner.cast::<FancyHeading>().is_some() {
+                                            break;
+                                        } else {
+                                            nodes.push(inner);
+                                        }
                                     } else {
-                                        nodes.push(inner);
+                                        break;
                                     }
-                                } else {
-                                    break;
+                                    n += 1;
                                 }
-                                n += 1;
+                                documents.push((heading, nodes_to_string(nodes)));
                             }
-                            documents.push((heading, nodes_to_string(nodes)));
                         }
-                    }
-                    None => {
-                        documents.push((heading, String::from("")));
+                        None => {
+                            documents.push((heading, String::from("")));
+                        }
                     }
                 }
             }

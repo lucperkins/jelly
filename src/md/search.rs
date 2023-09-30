@@ -1,7 +1,7 @@
 use markdown_it::Node;
 use serde::Serialize;
 
-use super::headings::HeadingsWithTextAfter;
+use super::{headings::HeadingsWithTextAfter, parse::preamble};
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct SearchDocument {
@@ -35,6 +35,13 @@ impl SearchIndex {
 pub fn build_search_index_for_page(page_title: &str, document: &Node) -> SearchIndex {
     let mut documents: Vec<SearchDocument> = Vec::new();
 
+    documents.push(SearchDocument::new(
+        1,
+        page_title,
+        page_title,
+        &preamble(document),
+    ));
+
     for (heading, s) in HeadingsWithTextAfter(&document.children) {
         documents.push(SearchDocument::new(
             heading.level,
@@ -58,7 +65,11 @@ mod tests {
     #[test]
     fn search_index() {
         let cases: Vec<(&str, &str, SearchIndex)> = vec![
-            ("First page", "", SearchIndex::empty()),
+            (
+                "First page",
+                "",
+                SearchIndex(vec![SearchDocument::new(1, "First page", "First page", "")]),
+            ),
             (
                 "Second page",
                 indoc! {"
@@ -75,6 +86,7 @@ mod tests {
                     And some text from another paragraph.
                 "},
                 SearchIndex(vec![
+                    SearchDocument::new(1, "Second page", "Second page", "Some text."),
                     SearchDocument::new(2, "Second page", "h2", "Some text content."),
                     SearchDocument::new(
                         3,
