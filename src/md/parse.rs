@@ -31,8 +31,12 @@ pub(super) fn preamble(node: &Node) -> String {
     let mut nodes: Vec<&Node> = Vec::new();
 
     for node in node.children.iter() {
-        if node.cast::<FancyHeading>().is_some() {
-            break;
+        if let Some(heading) = node.cast::<FancyHeading>() {
+            if heading.level == 1 {
+                continue;
+            } else {
+                break;
+            }
         } else {
             nodes.push(node);
         }

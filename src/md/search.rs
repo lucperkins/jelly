@@ -25,13 +25,6 @@ impl SearchDocument {
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct SearchIndex(pub Vec<SearchDocument>);
 
-#[cfg(test)]
-impl SearchIndex {
-    pub fn empty() -> Self {
-        Self(vec![])
-    }
-}
-
 pub fn build_search_index_for_page(page_title: &str, document: &Node) -> SearchIndex {
     let mut documents: Vec<SearchDocument> = Vec::new();
 

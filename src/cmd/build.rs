@@ -69,7 +69,12 @@ mod tests {
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
                             TableOfContents(vec![]),
-                            SearchIndex(vec![]),
+                            SearchIndex(vec![SearchDocument::new(
+                                1,
+                                "Contact us",
+                                "Contact us",
+                                "Send us a fax.",
+                            )]),
                             Some(1),
                         ),
                         Page::new(
@@ -108,7 +113,12 @@ mod tests {
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
                             TableOfContents(vec![]),
-                            SearchIndex(vec![]),
+                            SearchIndex(vec![SearchDocument::new(
+                                1,
+                                "About",
+                                "About",
+                                "About this thing.",
+                            )]),
                             Some(2),
                         ),
                     ]),
@@ -134,12 +144,10 @@ mod tests {
                             "About this site",
                             TableOfContents::empty(),
                         )]),
-                        SearchIndex(vec![SearchDocument::new(
-                            2,
-                            "Welcome",
-                            "About this site",
-                            "Some info here.",
-                        )]),
+                        SearchIndex(vec![
+                            SearchDocument::new(1, "Welcome", "Welcome", "Welcome to the site."),
+                            SearchDocument::new(2, "Welcome", "About this site", "Some info here."),
+                        ]),
                         None,
                     )]),
                     Some(vec![Section::new(
@@ -155,7 +163,12 @@ mod tests {
                                 Link::new(&PathBuf::from("tests/full/medium/setup"), "Setup"),
                             ],
                             TableOfContents::empty(),
-                            SearchIndex::empty(),
+                            SearchIndex(vec![SearchDocument::new(
+                                1,
+                                "Setup",
+                                "Setup",
+                                "Here is how to set things up.",
+                            )]),
                             None,
                         )]),
                         None,
@@ -176,6 +189,7 @@ mod tests {
                 assert_eq!(page.title, expected.title);
                 assert_eq!(page.breadcrumb, expected.breadcrumb);
                 assert_eq!(page.table_of_contents, expected.table_of_contents);
+                assert_eq!(page.search_index, expected.search_index);
                 assert_eq!(page.order, expected.order);
             }
         }
