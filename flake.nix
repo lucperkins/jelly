@@ -3,31 +3,41 @@
 
   inputs = {
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
-    rust-overlay.url = "github:oxalica/rust-overlay";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    flake-schemas.url = "https://flakehub.com/f/DeterminateSystems/flake-schemas/0.1.1.tar.gz";
   };
 
   outputs =
     { self
     , nixpkgs
     , rust-overlay
+    , flake-schemas
     }:
 
     let
       supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
-        pkgs = import nixpkgs { inherit system; overlays = self.overlays; };
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            rust-overlay.overlays.default
+            self.overlays.default
+          ];
+        };
       });
 
       meta = (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package;
       inherit (meta) name version;
     in
     {
-      overlays = [
-        rust-overlay.overlays.default
-        (self: super: {
-          rustToolchain = super.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-        })
-      ];
+      inherit (flake-schemas) schemas;
+
+      overlays.default = final: prev: {
+        rustToolchain = prev.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+      };
 
       devShells = forEachSupportedSystem ({ pkgs }: {
         default =
