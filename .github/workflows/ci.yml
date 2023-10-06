@@ -19,6 +19,7 @@ jobs:
           fail-mode: true
       - uses: DeterminateSystems/nix-installer-action@v4
       - uses: DeterminateSystems/magic-nix-cache-action@v2
+      - run: nix flake check --all-systems
       - run: nix develop --command cargo fmt --check
       - run: nix develop --command cargo build --release
       - run: nix develop --command cargo test
