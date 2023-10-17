@@ -1,5 +1,5 @@
 {
-  description = "Jelly";
+  description = "A golden path static site generator for documentation";
 
   inputs = {
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2305.*.tar.gz";
