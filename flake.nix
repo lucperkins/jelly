@@ -68,14 +68,19 @@
       });
 
       packages = forEachSupportedSystem ({ pkgs }: {
-        default = pkgs.rustPlatform.buildRustPackage {
-          pname = name;
-          inherit version;
-          src = ./.;
-          cargoLock = {
-            lockFile = ./Cargo.lock;
+        default =
+          let
+            rustPlatform = pkgs.makeRustPlatform {
+              cargo = pkgs.rustToolchain;
+              rustc = pkgs.rustToolchain;
+            };
+          in
+          rustPlatform.buildRustPackage {
+            pname = name;
+            inherit version;
+            src = ./.;
+            cargoLock.lockFile = ./Cargo.lock;
           };
-        };
       });
     };
 }

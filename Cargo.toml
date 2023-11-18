@@ -5,7 +5,14 @@ edition = "2021"
 
 [dependencies]
 base64 = "0.13.1"
-clap = { version = "4.0.27", features = ["derive"] }
+clap = { version = "4.0.27", default-features = false, features = [
+  "color",
+  "derive",
+  "env",
+  "error-context",
+  "help",
+  "std",
+] }
 color-eyre = "0.6.2"
 eyre = "0.6.8"
 glob = "0.3.0"
