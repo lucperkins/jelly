@@ -75,6 +75,7 @@ impl Page {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     #[cfg(test)]
     pub fn new(
         path: &str,

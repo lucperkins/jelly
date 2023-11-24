@@ -2,33 +2,27 @@ use clap::{Args, Parser, Subcommand};
 use jelly::cmd::{build, index};
 use std::{io::IsTerminal, path::PathBuf, process::ExitCode};
 
+/// Build a Jelly docs project
 #[derive(Args)]
-#[command(about = "Build a Jelly docs project")]
 struct Build {
-    #[arg(
-        short,
-        long,
-        help = "The root content directory",
-        default_value = "docs"
-    )]
+    /// The root content directory
+    #[arg(short, long, default_value = "docs")]
     source: PathBuf,
 
-    #[arg(short, long = "out", help = "Output directory", default_value = "dist")]
+    /// Output directory
+    #[arg(short, long, default_value = "dist")]
     out: PathBuf,
 }
 
+/// Generate a search index for a Jelly docs project
 #[derive(Args)]
-#[command(about = "Generate a search index for a Jelly docs project")]
 struct Index {
-    #[arg(
-        short,
-        long,
-        help = "The root content directory",
-        default_value = "docs"
-    )]
+    /// The root content directory
+    #[arg(short, long, default_value = "docs")]
     source: PathBuf,
 
-    #[arg(short, long = "out", help = "Output path")]
+    /// Output path
+    #[arg(short, long = "out")]
     out: Option<PathBuf>,
 }
 
@@ -38,7 +32,9 @@ enum Command {
     Index(Index),
 }
 
+/// Jelly: golden path static site generator for documentation
 #[derive(Parser)]
+#[command(version)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
