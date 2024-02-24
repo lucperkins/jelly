@@ -36,6 +36,12 @@ You can install Jelly on macOS or Linux using [Homebrew]:
 brew install jelly
 ```
 
+You can also run Jelly using [Nix]:
+
+```shell
+nix run "https://flakehub.com/f/lucperkins/jelly/0.1.206.tar.gz"
+```
+
 ## Create a new project
 
 To fire up a starter project to experiment with:
@@ -176,6 +182,7 @@ In general, realms are intended largely for organizations with many documentatio
 [markdown]: https://markdownguide.org
 [mermaid]: https://mermaid-js.github.io
 [mdx]: https://mdxjs.com
+[nix]: https://zero-to-nix.com
 [openapi]: https://openapis.org
 [rdd]: https://tom.preston-werner.com/2010/08/23/readme-driven-development
 [rust]: https://rust-lang.org
