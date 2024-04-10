@@ -4,32 +4,32 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-base64 = { version = "0.13.1", default-features = false }
-clap = { version = "4.0.27", default-features = false, features = [
+base64 = { version = "0.22", default-features = false }
+clap = { version = "4.5", default-features = false, features = [
   "color",
   "derive",
   "env",
   "error-context",
   "help",
   "std",
+  "suggestions",
+  "usage",
 ] }
-color-eyre = { version = "0.6.2", default-features = false }
-eyre = { version = "0.6.8", default-features = false }
-glob = { version = "0.3.0", default-features = false }
-gray_matter = { version = "0.2.4", default-features = false, features = [
-  "yaml",
-] }
-handlebars = { version = "4.3.5", default-features = false }
-indoc = { version = "1.0.8", default-features = false }
-markdown-it = { version = "0.4.0", default-features = false }
-serde = { version = "1.0.147", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.88", default-features = false }
-serde_yaml = { version = "0.9.14", default-features = false }
-slug = { version = "0.1.4", default-features = false }
-syntect = { version = "5.0.0", default-features = false, features = [
+color-eyre = { version = "0.6", default-features = false }
+eyre = { version = "0.6", default-features = false }
+glob = { version = "0.3", default-features = false }
+gray_matter = { version = "0.2", default-features = false, features = ["yaml"] }
+handlebars = { version = "5.1", default-features = false }
+indoc = { version = "2.0", default-features = false }
+markdown-it = { version = "0.6", default-features = false }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0", default-features = false }
+serde_yaml = { version = "0", default-features = false }
+slug = { version = "0", default-features = false }
+syntect = { version = "5", default-features = false, features = [
   "default-syntaxes",
   "html",
   "regex-onig",
 ] }
-thiserror = { version = "1.0.37", default-features = false }
-titlecase = { version = "2.2.1", default-features = false }
+thiserror = { version = "1", default-features = false }
+titlecase = { version = "3", default-features = false }
