@@ -63,7 +63,19 @@ pub fn ast(input: &str) -> Node {
     block::lheading::add(md);
     block::paragraph::add(md);
 
-    markdown_it::plugins::extra::add(md);
+    // Plugins
+    use markdown_it::plugins::extra::{beautify_links, strikethrough, tables, typographer};
+
+    strikethrough::add(md);
+    beautify_links::add(md);
+    // Disabled
+    // linkify::add(md);
+    tables::add(md);
+    // Disabled
+    // syntect::add(md);
+    typographer::add(md);
+    // Disabled
+    // smartquotes::add(md);
 
     md.parse(input)
 }
