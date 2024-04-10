@@ -145,7 +145,7 @@ mod tests {
                         "Now a heading 3",
                         TableOfContents(vec![TocEntry::new(
                             4,
-                            "Let’s go even deeper",
+                            "Let's go even deeper",
                             TableOfContents::empty(),
                         )]),
                     )]),
@@ -164,7 +164,7 @@ mod tests {
                     "And yet another heading 2",
                     TableOfContents(vec![TocEntry::new(
                         4,
-                        "Let’s skip a level",
+                        "Let's skip a level",
                         TableOfContents::empty(),
                     )]),
                 ),

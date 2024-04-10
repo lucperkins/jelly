@@ -8,7 +8,7 @@ mod search;
 mod title;
 mod toc;
 
-pub use parse::{ast, node_to_string, render};
+pub use parse::{ast, render};
 pub use render::render_page;
 pub use search::{build_search_index_for_page, SearchDocument, SearchIndex};
 pub use title::get_document_title;

@@ -10,7 +10,7 @@ use markdown_it::{
 use serde::Serialize;
 use slug::slugify;
 
-use super::{node_to_string, parse::nodes_to_string};
+use super::parse::nodes_to_string;
 
 #[derive(Debug)]
 pub struct FancyHeading {
@@ -45,7 +45,7 @@ impl NodeValue for FancyHeading {
         debug_assert!(self.level >= 2 && self.level <= 6);
 
         // Add slug to attributes
-        let slug = slugify(node_to_string(node));
+        let slug = slugify(node.collect_text());
         let h_attrs = h_attrs(&slug);
         let a_attrs = a_attrs(&slug);
 
@@ -72,6 +72,7 @@ impl BlockRule for FancyHeadingsRule {
         let line = state.get_line(state.line);
 
         if let Some('#') = line.chars().next() {
+            // TODO
         } else {
             return None;
         }
@@ -164,7 +165,7 @@ impl<'a> IntoIterator for Headings<'a> {
         for node in self.0.iter() {
             if let Some(heading) = node.cast::<FancyHeading>() {
                 if heading.level > 1 {
-                    headings.push(Heading::new(heading.level, &node_to_string(node)));
+                    headings.push(Heading::new(heading.level, &node.collect_text()));
                 }
             }
         }
@@ -185,7 +186,7 @@ impl<'a> IntoIterator for HeadingsWithIdx<'a> {
         for (idx, node) in self.0.iter().enumerate() {
             if let Some(heading) = node.cast::<FancyHeading>() {
                 if heading.level > 1 {
-                    headings.push((idx, Heading::new(heading.level, &node_to_string(node))));
+                    headings.push((idx, Heading::new(heading.level, &node.collect_text())));
                 }
             }
         }
@@ -208,7 +209,7 @@ impl<'a> IntoIterator for HeadingsWithTextAfter<'a> {
                 if heading.level > 1 {
                     let next = idx + 1;
 
-                    let heading = Heading::new(heading.level, &node_to_string(node));
+                    let heading = Heading::new(heading.level, &node.collect_text());
 
                     match self.0.get(next) {
                         Some(next_node) => {
