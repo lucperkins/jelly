@@ -74,7 +74,7 @@ pub fn ast(input: &str) -> Node {
     // Disabled
     // syntect::add(md);
     typographer::add(md);
-    // Disabled
+    // Disabled (MAYBE: make this configurable?)
     // smartquotes::add(md);
 
     md.parse(input)
