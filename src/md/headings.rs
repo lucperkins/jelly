@@ -70,13 +70,6 @@ impl BlockRule for FancyHeadingsRule {
         }
 
         let line = state.get_line(state.line);
-
-        if let Some('#') = line.chars().next() {
-            // TODO
-        } else {
-            return None;
-        }
-
         let text_pos;
 
         // count heading level
@@ -103,7 +96,6 @@ impl BlockRule for FancyHeadingsRule {
         }
 
         // Let's cut tails like '    ###  ' from the end of string
-
         let mut chars_back = chars.rev().peekable();
         while let Some((_, ' ' | '\t')) = chars_back.peek() {
             chars_back.next();

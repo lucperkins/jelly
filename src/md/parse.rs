@@ -36,7 +36,7 @@ pub fn render(ast: &Node) -> String {
 }
 
 pub fn ast(input: &str) -> Node {
-    use markdown_it::plugins::cmark::*;
+    use markdown_it::plugins::cmark::{block, inline};
 
     let md = &mut markdown_it::MarkdownIt::new();
 
@@ -51,17 +51,17 @@ pub fn ast(input: &str) -> Node {
     inline::autolink::add(md);
     inline::entity::add(md);
 
+    // Replaces block::code::add(md)
+    add_code_block_rule(md);
     block::fence::add(md);
     block::blockquote::add(md);
     block::hr::add(md);
     block::list::add(md);
     block::reference::add(md);
-    block::heading::add(md);
+    // Replaces block::heading::add(md)
+    add_heading_rule(md);
     block::lheading::add(md);
     block::paragraph::add(md);
-
-    add_heading_rule(md);
-    add_code_block_rule(md);
 
     markdown_it::plugins::extra::add(md);
 
