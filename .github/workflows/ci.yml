@@ -2,8 +2,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*.*.*"
   pull_request:
     branches:
       - main
@@ -13,14 +11,14 @@ jobs:
     environment: build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@4
       - uses: DeterminateSystems/flake-checker-action@v5
         with:
           fail-mode: true
-      - uses: DeterminateSystems/nix-installer-action@v4
-      - uses: DeterminateSystems/magic-nix-cache-action@v2
+      - uses: DeterminateSystems/nix-installer-action@v10
+      - uses: DeterminateSystems/magic-nix-cache-action@v4
       - run: nix flake check --all-systems
-      - run: nix build
       - run: nix develop --command cargo fmt --check
       - run: nix develop --command cargo build --release
       - run: nix develop --command cargo test
+      - run: nix build
