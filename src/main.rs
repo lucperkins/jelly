@@ -1,12 +1,9 @@
 use clap::{Args, Parser, Subcommand};
 
 use jelly::cmd::{build, index};
-use jelly::{
-    cmd::{build, serve},
-    error::Error,
-};
+use jelly::{cmd::serve, error::Error};
+use std::io::IsTerminal;
 use std::path::PathBuf;
-use std::{io::IsTerminal, path::PathBuf, process::ExitCode};
 
 /// Build a Jelly docs project
 #[derive(Args)]
@@ -71,7 +68,8 @@ fn main() -> Result<(), Error> {
         } else {
             color_eyre::config::Theme::dark()
         })
-        .install()?;
+        .install()
+        .expect("couldn't initialize eyre");
 
     let Cli { command } = Cli::parse();
 
