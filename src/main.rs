@@ -1,30 +1,34 @@
-use clap::{Args, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 
-use jelly::cmd::{build, index};
-use jelly::{cmd::serve, error::Error};
+use jelly::{
+    cmd::{build, index, serve},
+    error::Error,
+};
 use std::io::IsTerminal;
 use std::path::PathBuf;
 
 /// Build a Jelly docs project
-#[derive(Args)]
+#[derive(Parser)]
+#[command(alias = "b", alias = "bld", alias = "bu")]
 struct Build {
     /// The root content directory
-    #[arg(short, long, default_value = "docs")]
+    #[arg(short, long, default_value = "./docs")]
     source: PathBuf,
 
     /// Output directory
-    #[arg(short, long, default_value = "dist")]
+    #[arg(short, long, default_value = "./dist")]
     out: PathBuf,
 }
 
-#[derive(Args)]
-#[command(about = "Serve a Jelly docs project")]
+/// Serve a Jelly docs project
+#[derive(Parser)]
+#[command(alias = "s", alias = "se", alias = "sr", alias = "srv")]
 struct Serve {
     #[arg(
         short,
         long,
         help = "The root content directory",
-        default_value = "docs"
+        default_value = "./docs"
     )]
     source: PathBuf,
 
@@ -33,10 +37,11 @@ struct Serve {
 }
 
 /// Generate a search index for a Jelly docs project
-#[derive(Args)]
+#[derive(Parser)]
+#[command(alias = "i", alias = "idx")]
 struct Index {
     /// The root content directory
-    #[arg(short, long, default_value = "docs")]
+    #[arg(short, long, default_value = "./docs")]
     source: PathBuf,
 
     /// Output path
