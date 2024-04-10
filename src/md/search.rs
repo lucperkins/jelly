@@ -1,11 +1,9 @@
 use markdown_it::Node;
 use serde::Serialize;
 
-use crate::md::node_to_string;
+use super::{headings::HeadingsWithTextAfter, parse::preamble};
 
-use super::headings::{FancyHeading, HeadingsWithIdx};
-
-#[derive(Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct SearchDocument {
     level: u8,
     page_title: String,
@@ -27,46 +25,23 @@ impl SearchDocument {
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct SearchIndex(pub Vec<SearchDocument>);
 
-#[cfg(test)]
-impl SearchIndex {
-    pub fn empty() -> Self {
-        Self(vec![])
-    }
-}
-
 pub fn build_search_index_for_page(page_title: &str, document: &Node) -> SearchIndex {
-    let nodes = &document.children;
-
     let mut documents: Vec<SearchDocument> = Vec::new();
 
-    for (idx, heading) in HeadingsWithIdx(nodes) {
-        let mut here = idx;
-        let mut pieces: Vec<String> = Vec::new();
+    documents.push(SearchDocument::new(
+        1,
+        page_title,
+        page_title,
+        &preamble(document),
+    ));
 
-        loop {
-            here += 1;
-
-            if here == nodes.len() {
-                break;
-            }
-
-            if let Some(n) = &nodes.get(here) {
-                if n.is::<FancyHeading>() {
-                    break;
-                }
-
-                pieces.push(node_to_string(n));
-            }
-        }
-
-        let content = pieces.join(" ");
-        let final_content = content.trim();
+    for (heading, s) in HeadingsWithTextAfter(&document.children) {
         documents.push(SearchDocument::new(
             heading.level,
             page_title,
             &heading.text,
-            final_content,
-        ))
+            &s,
+        ));
     }
 
     SearchIndex(documents)
@@ -83,7 +58,11 @@ mod tests {
     #[test]
     fn search_index() {
         let cases: Vec<(&str, &str, SearchIndex)> = vec![
-            ("First page", "", SearchIndex::empty()),
+            (
+                "First page",
+                "",
+                SearchIndex(vec![SearchDocument::new(1, "First page", "First page", "")]),
+            ),
             (
                 "Second page",
                 indoc! {"
@@ -100,6 +79,7 @@ mod tests {
                     And some text from another paragraph.
                 "},
                 SearchIndex(vec![
+                    SearchDocument::new(1, "Second page", "Second page", "Some text."),
                     SearchDocument::new(2, "Second page", "h2", "Some text content."),
                     SearchDocument::new(
                         3,

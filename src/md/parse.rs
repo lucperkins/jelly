@@ -22,6 +22,33 @@ use crate::md::{
 
 use super::headings::FancyHeading;
 
+pub(super) fn nodes_to_string(nodes: Vec<&Node>) -> String {
+    nodes
+        .iter()
+        .map(|node| node_to_string(node))
+        .collect::<Vec<String>>()
+        .join(" ")
+}
+
+// Convert the text before any header to a string.
+pub(super) fn preamble(node: &Node) -> String {
+    let mut nodes: Vec<&Node> = Vec::new();
+
+    for node in node.children.iter() {
+        if let Some(heading) = node.cast::<FancyHeading>() {
+            if heading.level == 1 {
+                continue;
+            } else {
+                break;
+            }
+        } else {
+            nodes.push(node);
+        }
+    }
+
+    nodes_to_string(nodes)
+}
+
 // TODO: make this less kludgey
 pub fn node_to_string(node: &Node) -> String {
     let mut pieces: Vec<String> = Vec::new();

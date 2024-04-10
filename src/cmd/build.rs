@@ -11,7 +11,7 @@ use crate::{
     md::render_page,
 };
 
-fn build_site(source: PathBuf) -> Result<Site, Error> {
+pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
     let config = SiteConfig {
         root: source,
         title_config: TitleConfig::default(),
@@ -68,7 +68,12 @@ mod tests {
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
                             TableOfContents(vec![]),
-                            SearchIndex(vec![]),
+                            SearchIndex(vec![SearchDocument::new(
+                                1,
+                                "Contact us",
+                                "Contact us",
+                                "Send us a fax.",
+                            )]),
                             Some(1),
                         ),
                         Page::new(
@@ -83,12 +88,20 @@ mod tests {
                                 "About this site",
                                 TableOfContents::empty(),
                             )]),
-                            SearchIndex(vec![SearchDocument::new(
-                                2,
-                                "Welcome",
-                                "About this site",
-                                "Some info here.",
-                            )]),
+                            SearchIndex(vec![
+                                SearchDocument::new(
+                                    1,
+                                    "Welcome",
+                                    "Welcome",
+                                    "Welcome to the site.",
+                                ),
+                                SearchDocument::new(
+                                    2,
+                                    "Welcome",
+                                    "About this site",
+                                    "Some info here.",
+                                ),
+                            ]),
                             Some(5),
                         ),
                         Page::new(
@@ -99,7 +112,12 @@ mod tests {
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
                             TableOfContents(vec![]),
-                            SearchIndex(vec![]),
+                            SearchIndex(vec![SearchDocument::new(
+                                1,
+                                "About",
+                                "About",
+                                "About this thing.",
+                            )]),
                             Some(2),
                         ),
                     ]),
@@ -125,12 +143,10 @@ mod tests {
                             "About this site",
                             TableOfContents::empty(),
                         )]),
-                        SearchIndex(vec![SearchDocument::new(
-                            2,
-                            "Welcome",
-                            "About this site",
-                            "Some info here.",
-                        )]),
+                        SearchIndex(vec![
+                            SearchDocument::new(1, "Welcome", "Welcome", "Welcome to the site."),
+                            SearchDocument::new(2, "Welcome", "About this site", "Some info here."),
+                        ]),
                         None,
                     )]),
                     Some(vec![Section::new(
@@ -146,7 +162,12 @@ mod tests {
                                 Link::new(&PathBuf::from("tests/full/medium/setup"), "Setup"),
                             ],
                             TableOfContents::empty(),
-                            SearchIndex::empty(),
+                            SearchIndex(vec![SearchDocument::new(
+                                1,
+                                "Setup",
+                                "Setup",
+                                "Here is how to set things up. Here is some other info.",
+                            )]),
                             None,
                         )]),
                         None,
