@@ -8,7 +8,7 @@ use markdown_it::{
     MarkdownIt, Node, NodeValue, Renderer,
 };
 use serde::Serialize;
-use slug::slugify;
+use slugify::slugify;
 
 use super::{node_to_string, parse::nodes_to_string};
 
@@ -45,7 +45,7 @@ impl NodeValue for FancyHeading {
         debug_assert!(self.level >= 2 && self.level <= 6);
 
         // Add slug to attributes
-        let slug = slugify(node_to_string(node));
+        let slug = slugify::slugify!(&node_to_string(node));
         let h_attrs = h_attrs(&slug);
         let a_attrs = a_attrs(&slug);
 
@@ -143,7 +143,7 @@ pub struct Heading {
 
 impl Heading {
     pub fn new(level: u8, text: &str) -> Self {
-        let slug = slugify(text);
+        let slug = slugify::slugify!(text);
         Self {
             level,
             text: String::from(text),
