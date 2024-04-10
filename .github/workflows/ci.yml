@@ -11,7 +11,7 @@ jobs:
     environment: build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@4
+      - uses: actions/checkout@v4
       - uses: DeterminateSystems/flake-checker-action@v5
         with:
           fail-mode: true
