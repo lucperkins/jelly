@@ -16,17 +16,6 @@ jobs:
         uses: DeterminateSystems/flake-checker-action@v5
         with:
           fail-mode: true
-<<<<<<< HEAD
-      - uses: DeterminateSystems/nix-installer-action@v4
-      - uses: DeterminateSystems/magic-nix-cache-action@v2
-      - run: nix flake check --all-systems
-      - run: nix build
-      - run: nix develop --command cargo fmt --check
-      - run: nix develop --command cargo clippy
-      - run: nix develop --command cargo test
-      - run: nix flake check
-      - run: nix build
-=======
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v10
       - name: Set up Nix cache
@@ -43,4 +32,3 @@ jobs:
         run: nix develop --command cargo test
       - name: Build Nix package
         run: nix build
->>>>>>> origin/main
