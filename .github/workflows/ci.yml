@@ -2,8 +2,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*.*.*"
   pull_request:
     branches:
       - main
@@ -13,10 +11,12 @@ jobs:
     environment: build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: DeterminateSystems/flake-checker-action@v5
+      - uses: actions/checkout@v4
+      - name: Check Nix flake
+        uses: DeterminateSystems/flake-checker-action@v5
         with:
           fail-mode: true
+<<<<<<< HEAD
       - uses: DeterminateSystems/nix-installer-action@v4
       - uses: DeterminateSystems/magic-nix-cache-action@v2
       - run: nix flake check --all-systems
@@ -26,3 +26,21 @@ jobs:
       - run: nix develop --command cargo test
       - run: nix flake check
       - run: nix build
+=======
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v10
+      - name: Set up Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v4
+      - name: Check flake outputs
+        run: nix flake check --all-systems
+      - name: Check Rust formatting
+        run: nix develop --command cargo fmt --check
+      - name: Run Clippy
+        run: nix develop --command cargo clippy
+      - name: Rust build in release mode
+        run: nix develop --command cargo build --release
+      - name: Run Rust tests
+        run: nix develop --command cargo test
+      - name: Build Nix package
+        run: nix build
+>>>>>>> origin/main

@@ -1,7 +1,4 @@
-use super::{
-    headings::FancyHeading,
-    parse::{ast, node_to_string},
-};
+use super::{headings::FancyHeading, parse::ast};
 
 pub fn get_document_title(body: &str) -> Option<String> {
     let ast = ast(body);
@@ -12,7 +9,7 @@ pub fn get_document_title(body: &str) -> Option<String> {
             num_headers += 1;
 
             if num_headers == 1 && heading.level == 1 {
-                return Some(node_to_string(node));
+                return Some(node.collect_text());
             }
         }
     }

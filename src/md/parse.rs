@@ -1,31 +1,13 @@
-use markdown_it::{
-    parser::inline::Text,
-    plugins::{
-        cmark::{
-            block::paragraph::Paragraph,
-            inline::{
-                backticks::CodeInline,
-                emphasis::{Em, Strong},
-                link::Link,
-            },
-        },
-        extra::strikethrough::Strikethrough,
-    },
-    Node,
-};
+use markdown_it::Node;
 
-use crate::md::{
-    code::{add_code_block_rule, FancyCodeBlock},
-    headings::add_heading_rule,
-    image::add_image_rule,
-};
+use crate::md::{code::add_code_block_rule, headings::add_heading_rule, image::add_image_rule};
 
 use super::headings::FancyHeading;
 
 pub(super) fn nodes_to_string(nodes: Vec<&Node>) -> String {
     nodes
         .iter()
-        .map(|node| node_to_string(node))
+        .map(|node| node.collect_text())
         .collect::<Vec<String>>()
         .join(" ")
 }
@@ -49,39 +31,12 @@ pub(super) fn preamble(node: &Node) -> String {
     nodes_to_string(nodes)
 }
 
-// TODO: make this less kludgey
-pub fn node_to_string(node: &Node) -> String {
-    let mut pieces: Vec<String> = Vec::new();
-
-    for sub in node.children.iter() {
-        if let Some(txt) = sub.cast::<Text>() {
-            pieces.push(txt.content.clone());
-        } else if sub.is::<Paragraph>() {
-            pieces.push(format!(" {} ", node_to_string(sub)));
-        } else if let Some(code) = sub.cast::<FancyCodeBlock>() {
-            pieces.push(code.content.clone());
-        } else if sub.is::<CodeInline>()
-            || sub.is::<Link>()
-            || sub.is::<Strong>()
-            || sub.is::<Em>()
-            || sub.is::<Strikethrough>()
-            || sub.is::<FancyHeading>()
-        {
-            pieces.push(node_to_string(sub));
-        } else {
-            pieces.push(node.render());
-        }
-    }
-
-    pieces.join("").trim().to_owned()
-}
-
 pub fn render(ast: &Node) -> String {
     ast.render()
 }
 
 pub fn ast(input: &str) -> Node {
-    use markdown_it::plugins::cmark::*;
+    use markdown_it::plugins::cmark::{block, inline};
 
     let md = &mut markdown_it::MarkdownIt::new();
 
@@ -96,73 +51,31 @@ pub fn ast(input: &str) -> Node {
     inline::autolink::add(md);
     inline::entity::add(md);
 
+    // Replaces block::code::add(md)
+    add_code_block_rule(md);
     block::fence::add(md);
     block::blockquote::add(md);
     block::hr::add(md);
     block::list::add(md);
     block::reference::add(md);
-    block::heading::add(md);
+    // Replaces block::heading::add(md)
+    add_heading_rule(md);
     block::lheading::add(md);
     block::paragraph::add(md);
 
-    add_heading_rule(md);
-    add_code_block_rule(md);
+    // Plugins
+    use markdown_it::plugins::extra::{beautify_links, strikethrough, tables, typographer};
 
-    markdown_it::plugins::extra::add(md);
+    strikethrough::add(md);
+    beautify_links::add(md);
+    // Disabled
+    // linkify::add(md);
+    tables::add(md);
+    // Disabled
+    // syntect::add(md);
+    typographer::add(md);
+    // Disabled (MAYBE: make this configurable?)
+    // smartquotes::add(md);
 
     md.parse(input)
-}
-
-#[cfg(test)]
-mod tests {
-    use indoc::indoc;
-
-    use super::{ast, node_to_string};
-
-    #[test]
-    fn node_to_string_fn() {
-        let cases: Vec<(&str, &str)> = vec![
-            ("", ""),
-            (
-                r#"## Some `code` and some **bold** and some *italics*"#,
-                "Some code and some bold and some italics",
-            ),
-            (
-                r#"A link to [Google](https://google.com)"#,
-                "A link to Google",
-            ),
-            (
-                indoc! {"
-                    Some normal text.
-
-                    ## And then a header
-                "},
-                "Some normal text. And then a header",
-            ),
-            (
-                indoc! {"
-                    Some text.
-
-                    ## And then a header with `code`
-                "},
-                "Some text. And then a header with code",
-            ),
-            (
-                indoc! {"
-                    Some text plus **bold**.
-
-                    ```python
-                    x = 5
-                    ```
-                "},
-                "Some text plus bold. x = 5",
-            ),
-        ];
-
-        for (md, expected) in cases {
-            let tree = ast(md);
-            let output = &node_to_string(&tree);
-            assert_eq!(output, expected);
-        }
-    }
 }
