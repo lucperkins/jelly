@@ -45,7 +45,7 @@ impl NodeValue for FancyHeading {
         debug_assert!(self.level >= 2 && self.level <= 6);
 
         // Add slug to attributes
-        let slug = slugify(&node_to_string(node));
+        let slug = slugify(node_to_string(node));
         let h_attrs = h_attrs(&slug);
         let a_attrs = a_attrs(&slug);
 
