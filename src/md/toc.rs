@@ -5,7 +5,7 @@
 
 use markdown_it::Node;
 use serde::Serialize;
-use slugify::slugify;
+use slug::slugify;
 
 use super::headings::Headings;
 
@@ -38,7 +38,7 @@ pub struct TocEntry {
 
 impl TocEntry {
     pub fn new(level: u8, text: &str, children: TableOfContents) -> Self {
-        let slug = slugify::slugify!(text);
+        let slug = slugify(text);
         Self {
             level,
             text: String::from(text),
@@ -108,27 +108,36 @@ mod tests {
 
     #[test]
     fn create_toc() {
-        let cases: Vec<(&str, TableOfContents)> = vec![
-            ("", TableOfContents(vec![])),
-            (
-                indoc! {"
-                    # This gets ignored
+        let cases: Vec<(&str, TableOfContents)> = vec![(
+            indoc! {"
+                # This gets ignored
 
-                    Here is some text.
+                Here is some text.
 
-                    ## Now a heading 2
+                ## Now a heading 2
 
-                    More text.
+                More text.
 
-                    ### Now a heading 3
+                ### Now a heading 3
 
-                    More text.
+                More text.
 
-                    #### Let's go even deeper
+                #### Let's go even deeper
 
-                    Filler here.
-                "},
-                TableOfContents(vec![TocEntry::new(
+                Filler here.
+
+                ## And now back to a heading 2
+
+                More text.
+
+                ### Another heading 3
+
+                ## And yet another heading 2
+
+                #### Let's skip a level
+            "},
+            TableOfContents(vec![
+                TocEntry::new(
                     2,
                     "Now a heading 2",
                     TableOfContents(vec![TocEntry::new(
@@ -136,13 +145,31 @@ mod tests {
                         "Now a heading 3",
                         TableOfContents(vec![TocEntry::new(
                             4,
-                            "Let’s go even deeper", // TODO: figure out why I need the curly apostrophe here
+                            "Let’s go even deeper",
                             TableOfContents::empty(),
                         )]),
                     )]),
-                )]),
-            ),
-        ];
+                ),
+                TocEntry::new(
+                    2,
+                    "And now back to a heading 2",
+                    TableOfContents(vec![TocEntry::new(
+                        3,
+                        "Another heading 3",
+                        TableOfContents::empty(),
+                    )]),
+                ),
+                TocEntry::new(
+                    2,
+                    "And yet another heading 2",
+                    TableOfContents(vec![TocEntry::new(
+                        4,
+                        "Let’s skip a level",
+                        TableOfContents::empty(),
+                    )]),
+                ),
+            ]),
+        )];
 
         for (md, expected_toc) in cases {
             let tree = ast(md);
