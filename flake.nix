@@ -78,6 +78,8 @@
           rustPlatform.buildRustPackage {
             pname = name;
             inherit version;
+            buildInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin
+              (with pkgs.darwin.apple_sdk.frameworks; [ CoreServices ]);
             src = ./.;
             cargoLock.lockFile = ./Cargo.lock;
           };
