@@ -34,6 +34,14 @@ struct Serve {
 
     #[arg(short, long, help = "Open the browser to the running site")]
     open: bool,
+
+    #[arg(
+        short,
+        long,
+        default_value_t = 8080,
+        help = "The HTTP port to listen on"
+    )]
+    port: u16,
 }
 
 /// Generate a search index for a Jelly docs project
@@ -81,6 +89,6 @@ fn main() -> Result<(), Error> {
     match command {
         Command::Build(Build { source, out }) => build(source, out),
         Command::Index(Index { source, out }) => index(source, out),
-        Command::Serve(Serve { source, open }) => serve(source, open),
+        Command::Serve(Serve { source, open, port }) => serve(source, open, port),
     }
 }

@@ -11,6 +11,7 @@ use std::{
 };
 use tempfile::TempDir;
 use tiny_http::Request;
+use tracing::{debug, info};
 
 struct FileServer {
     root: PathBuf,
@@ -72,35 +73,37 @@ impl FileServer {
     }
 }
 
-pub fn serve(source: PathBuf, open: bool) -> Result<(), Error> {
+pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     let out = TempDir::new()?; // TODO: make this a temporary directory
     let out_path = out.as_ref();
 
-    let bind_address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080); // TODO: make this configurable
+    let bind_address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port); // TODO: make this configurable
     if TcpListener::bind(bind_address).is_err() {
         return Err(Error::PortNotFree(bind_address.to_string())); // TODO: improve this error
     }
 
-    tracing::debug!("adding Ctrl-C handler");
+    info!("listening on port {port}");
+
+    debug!("adding Ctrl-C handler");
 
     ctrlc::set_handler(move || {
-        tracing::debug!("detected Ctrl-C; exiting");
+        debug!("detected Ctrl-C; exiting");
         exit(0);
     })
     .expect("something went wrong while quitting");
 
-    tracing::debug!("added Ctrl-C handler");
+    debug!("added Ctrl-C handler");
 
-    tracing::debug!("serving docs; writing output to {:?}", out_path);
+    debug!("serving docs; writing output to {:?}", out_path);
 
     // Initial site build
     build(source.clone(), out_path.to_path_buf())?;
 
-    tracing::debug!("creating file server");
+    debug!("creating file server");
 
     let file_server = FileServer::new(PathBuf::from(out_path), bind_address);
 
-    tracing::debug!("starting file server");
+    debug!("starting file server");
 
     thread::spawn(move || {
         file_server.serve().expect("http server error");
@@ -110,11 +113,11 @@ pub fn serve(source: PathBuf, open: bool) -> Result<(), Error> {
         open::that("http://localhost:8080")?;
     }
 
-    tracing::debug!("successfully built site");
+    debug!("successfully built site");
 
-    tracing::debug!("successfully bound to {}", bind_address);
+    debug!("successfully bound to {}", bind_address);
 
-    tracing::debug!("setting up watcher on {:?}", source);
+    debug!("setting up watcher on {:?}", source);
 
     let (_tx, rx) = channel::<Event>();
     let mut watcher = notify::recommended_watcher(|res| match res {
@@ -123,17 +126,17 @@ pub fn serve(source: PathBuf, open: bool) -> Result<(), Error> {
 
             match kind {
                 Create(_) | Modify(_) | Remove(_) => {
-                    tracing::debug!("got a {:?} event", kind);
+                    debug!("got a {:?} event", kind);
                 }
                 _ => {
-                    tracing::debug!("got some other kind of event: {:?}", kind);
+                    debug!("got some other kind of event: {:?}", kind);
                 }
             }
         }
         Err(e) => println!("watch error: {:?}", e),
     })?;
 
-    tracing::debug!("set up watcher on {:?}", source);
+    debug!("set up watcher on {:?}", source);
 
     watcher.watch(source.as_path(), notify::RecursiveMode::Recursive)?; // Why doesn't this watch?
 
@@ -143,7 +146,7 @@ pub fn serve(source: PathBuf, open: bool) -> Result<(), Error> {
         return Err(Error::Recv(e));
     }
 
-    tracing::debug!("quitting");
+    debug!("quitting");
 
     Ok(())
 }
