@@ -42,15 +42,25 @@
       devShells = forEachSupportedSystem ({ pkgs }: {
         default =
           let
-            ci = pkgs.writeScriptBin "ci" ''
-              cargo fmt --check
-              cargo clippy
-              cargo build --release
-              cargo test
-              nix build
-            '';
+            ci = pkgs.writeShellApplication {
+              name = "ci";
+              runtimeInputs = with pkgs; [ rustToolchain ];
+              text = ''
+                cargo fmt --check
+                cargo clippy
+                cargo build --release
+                cargo test
+                nix build
+              '';
+            };
 
-            dev = pkgs.writeScriptBin "dev" "bacon check";
+            dev = pkgs.writeShellApplication {
+              name = "dev";
+              runtimeInputs = with pkgs; [ bacon ];
+              text = ''
+                bacon check
+              '';
+            };
 
             scripts = [
               ci
