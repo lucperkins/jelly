@@ -1,0 +1,27 @@
+default_job = "check"
+
+[jobs.check]
+command = ["cargo", "check", "--color", "always"]
+need_stdout = false
+
+[jobs.clippy]
+command = ["cargo", "clippy", "--color", "always"]
+need_stdout = false
+
+[jobs.test]
+command = ["cargo", "test", "--color", "always", "--", "--color", "always"]
+need_stdout = true
+
+[jobs.doc]
+command = ["cargo", "doc", "--color", "always", "--no-deps"]
+need_stdout = false
+
+[jobs.doc-open]
+command = ["cargo", "doc", "--color", "always", "--no-deps", "--open"]
+need_stdout = false
+on_success = "back"
+
+[jobs.run]
+command = ["cargo", "run", "--color", "always"]
+need_stdout = true
+allow_warnings = true

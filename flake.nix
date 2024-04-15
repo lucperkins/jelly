@@ -2,12 +2,12 @@
   description = "Jelly: a golden path static site generator for documentation";
 
   inputs = {
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.*.tar.gz";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.*";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    flake-schemas.url = "https://flakehub.com/f/DeterminateSystems/flake-schemas/*.tar.gz";
+    flake-schemas.url = "https://flakehub.com/f/DeterminateSystems/flake-schemas/*";
   };
 
   outputs =
@@ -42,27 +42,26 @@
       devShells = forEachSupportedSystem ({ pkgs }: {
         default =
           let
-            xFunc = cmd: pkgs.writeScriptBin "x-${cmd}" ''
-              cargo watch -x ${cmd}
-            '';
-
             ci = pkgs.writeScriptBin "ci" ''
               cargo fmt --check
               cargo clippy
               cargo build --release
               cargo test
+              nix build
             '';
+
+            dev = pkgs.writeScriptBin "dev" "bacon check";
 
             scripts = [
               ci
-              (builtins.map (cmd: xFunc cmd) [ "build" "check" "clippy" "run" "test" ])
+              dev
             ];
           in
           pkgs.mkShell {
             packages = with pkgs; [
               rustToolchain
               cargo-edit
-              cargo-watch
+              bacon
             ] ++ scripts ++ pkgs.lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk.frameworks; [ CoreServices ]);
 
             RUST_LOG = "trace";
