@@ -35,12 +35,8 @@ jobs:
     strategy:
       matrix:
         systems:
-          - nix-system: aarch64-darwin
-            runner: macos-latest-xlarge
           - nix-system: x86_64-darwin
             runner: macos-12
-          - nix-system: aarch64-linux
-            runner: namespace-profile-default-arm64
           - nix-system: x86_64-linux
             runner: ubuntu-22.04
     steps:
