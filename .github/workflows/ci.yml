@@ -36,7 +36,7 @@ jobs:
       matrix:
         systems:
           - nix-system: x86_64-darwin
-            runner: macos-12
+            runner: macos-14
           - nix-system: x86_64-linux
             runner: ubuntu-22.04
     steps:
