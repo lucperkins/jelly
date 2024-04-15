@@ -47,6 +47,7 @@
               cargo clippy
               cargo build --release
               cargo test
+              nix build
             '';
 
             dev = pkgs.writeScriptBin "dev" "bacon check";
