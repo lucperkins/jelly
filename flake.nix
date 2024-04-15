@@ -42,10 +42,6 @@
       devShells = forEachSupportedSystem ({ pkgs }: {
         default =
           let
-            xFunc = cmd: pkgs.writeScriptBin "x-${cmd}" ''
-              cargo watch -x ${cmd}
-            '';
-
             ci = pkgs.writeScriptBin "ci" ''
               cargo fmt --check
               cargo clippy
@@ -55,14 +51,13 @@
 
             scripts = [
               ci
-              (builtins.map (cmd: xFunc cmd) [ "build" "check" "run" "test" ])
             ];
           in
           pkgs.mkShell {
             packages = with pkgs; [
               rustToolchain
               cargo-edit
-              cargo-watch
+              bacon
             ] ++ scripts;
           };
       });
