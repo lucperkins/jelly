@@ -49,8 +49,11 @@
               cargo test
             '';
 
+            dev = pkgs.writeScriptBin "dev" "bacon check";
+
             scripts = [
               ci
+              dev
             ];
           in
           pkgs.mkShell {
