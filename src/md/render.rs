@@ -30,6 +30,7 @@ impl<'a> TemplateAttrs<'a> {
     }
 }
 
+#[cfg(feature = "handlebars-templating")]
 pub fn render_page(page: &Page) -> Result<String, Error> {
     let mut h = Handlebars::new();
     h.set_strict_mode(true);

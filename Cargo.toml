@@ -3,6 +3,10 @@ name = "jelly"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = ["handlebars-templating"]
+handlebars-templating = ["handlebars"]
+
 [dependencies]
 base64 = { version = "0.22", default-features = false }
 clap = { version = "4.5", default-features = false, features = [
@@ -19,7 +23,7 @@ color-eyre = { version = "0.6", default-features = false }
 eyre = { version = "0.6", default-features = false }
 glob = { version = "0.3", default-features = false }
 gray_matter = { version = "0.2", default-features = false, features = ["yaml"] }
-handlebars = { version = "5.1", default-features = false }
+handlebars = { version = "5.1", default-features = false, optional = true }
 indoc = { version = "2.0", default-features = false }
 markdown-it = { version = "0.6", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
