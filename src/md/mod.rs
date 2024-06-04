@@ -1,17 +1,9 @@
-mod code;
-mod headings;
-mod highlight;
-mod image;
-mod parse;
-mod render;
-mod search;
-mod title;
-mod toc;
+#[cfg(feature = "markdown-it-md")]
+mod markdown_it_md;
+pub(crate) use markdown_it_md::{
+    ast, build_search_index_for_page, get_document_title, render, render_page, SearchDocument,
+    SearchIndex, TableOfContents,
+};
 
-pub use parse::{ast, render};
-pub use render::render_page;
-pub use search::{build_search_index_for_page, SearchDocument, SearchIndex};
-pub use title::get_document_title;
-pub use toc::TableOfContents;
-#[cfg(test)]
-pub use toc::TocEntry;
+#[cfg(all(test, feature = "markdown-it-md"))]
+pub(crate) use markdown_it_md::TocEntry;

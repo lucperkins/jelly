@@ -1,6 +1,6 @@
 use markdown_it::Node;
 
-use crate::md::{code::add_code_block_rule, headings::add_heading_rule, image::add_image_rule};
+use super::{code::add_code_block_rule, headings::add_heading_rule, image::add_image_rule};
 
 use super::headings::FancyHeading;
 
