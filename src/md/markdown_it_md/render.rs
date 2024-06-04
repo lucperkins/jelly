@@ -30,10 +30,11 @@ impl<'a> TemplateAttrs<'a> {
     }
 }
 
+#[cfg(feature = "handlebars-templating")]
 pub fn render_page(page: &Page) -> Result<String, Error> {
     let mut h = Handlebars::new();
     h.set_strict_mode(true);
-    let template = include_str!("../template/page.hbs");
+    let template = include_str!("../../template/page.hbs");
     let _ = h.register_template_string("html", template);
     let html = page.html.as_str();
 
