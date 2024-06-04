@@ -39,6 +39,10 @@ jobs:
             runner: macos-14
           - nix-system: x86_64-linux
             runner: ubuntu-22.04
+          - nix-system: aarch64-darwin
+            runner: macos-latest-xlarge
+          - nix-system: aarch64-linux
+            runner: namespace-profile-default-arm64
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
