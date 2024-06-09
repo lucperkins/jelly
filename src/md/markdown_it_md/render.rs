@@ -1,5 +1,6 @@
 use crate::content::Link;
 use crate::content::Page;
+use crate::content::SiteAttrs;
 use crate::error::Error;
 use handlebars::Handlebars;
 use serde::Serialize;
@@ -11,7 +12,8 @@ struct TemplateAttrs<'a> {
     title: String,
     content: String,
     breadcrumb: &'a Vec<Link>,
-    toc: &'a TableOfContents,
+    toc: Option<&'a TableOfContents>,
+    site: &'a SiteAttrs<'a>,
 }
 
 impl<'a> TemplateAttrs<'a> {
@@ -20,18 +22,20 @@ impl<'a> TemplateAttrs<'a> {
         content: &str,
         breadcrumb: &'a Vec<Link>,
         toc: &'a TableOfContents,
+        site: &'a SiteAttrs,
     ) -> Self {
         Self {
             title: String::from(title),
             content: String::from(content),
             breadcrumb,
-            toc,
+            toc: if toc.0.len() > 0 { Some(toc) } else { None },
+            site,
         }
     }
 }
 
 #[cfg(feature = "handlebars-templating")]
-pub fn render_page(page: &Page) -> Result<String, Error> {
+pub fn render_page(page: &Page, site: &SiteAttrs) -> Result<String, Error> {
     let mut h = Handlebars::new();
     h.set_strict_mode(true);
 
@@ -45,7 +49,13 @@ pub fn render_page(page: &Page) -> Result<String, Error> {
     h.register_template_string("html", template).unwrap(); // infallible operation
     let html = page.html.as_str();
 
-    let attrs = TemplateAttrs::new(&page.title, html, &page.breadcrumb, &page.table_of_contents);
+    let attrs = TemplateAttrs::new(
+        &page.title,
+        html,
+        &page.breadcrumb,
+        &page.table_of_contents,
+        site,
+    );
 
     let s = h.render("html", &attrs)?;
     Ok(s)

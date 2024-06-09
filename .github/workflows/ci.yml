@@ -28,7 +28,7 @@ jobs:
       - name: Rust build in release mode
         run: nix develop --command cargo build --release
       - name: Run Rust tests
-        run: nix develop --command cargo test
+        run: nix develop --command cargo test --all --all-targets --all-features
       - name: Ensure no unused Rust dependencies
         run: nix develop --command cargo machete
 

@@ -25,8 +25,10 @@ pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
 pub fn build(source: &PathBuf, out: &Path) -> Result<(), Error> {
     let site = build_site(source.into())?;
 
+    let attrs = site.attrs();
+
     for page in site.pages() {
-        let html = render_page(page)?;
+        let html = render_page(page, &attrs)?;
         let mut path = out.join(&page.relative_path);
 
         path.set_extension("html");

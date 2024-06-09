@@ -7,6 +7,11 @@ use super::{page::Page, Section};
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Site(pub Section);
 
+#[derive(Serialize)]
+pub struct SiteAttrs<'a> {
+    title: &'a str,
+}
+
 impl Site {
     pub fn pages(&self) -> Vec<&Page> {
         self.0.pages()
@@ -23,5 +28,11 @@ impl Site {
         }
 
         docs
+    }
+
+    pub fn attrs(&self) -> SiteAttrs {
+        SiteAttrs {
+            title: &self.0.title,
+        }
     }
 }

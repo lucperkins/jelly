@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>{{title}}</title>
+    <title>{{title}} | {{site.title}}</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
@@ -25,8 +25,16 @@
     </script>
   </head>
   <body class="font-sans antialiased">
-    <main class="p-12">
-      <header>
+    <main>
+      <nav class="bg-gray-200 py-2 shadow-md">
+        <div class="mx-auto container px-4 md:px-0">
+          <a href="/" class="text-xl hover:text-primary duration-hover">
+            {{site.title}}
+          </a>
+        </div>
+      </nav>
+
+      <header class="py-8 mx-auto container px-4 md:px-0">
         <div class="flex items-center space-x-2">
           {{#each breadcrumb}}
           <a href="{{path}}" class="text-sm hover:text-primary duration-hover">{{title}}</a>
@@ -36,57 +44,60 @@
         <h1 class="text-3xl font-semibold">{{title}}</h1>
       </header>
 
-      <div>
-        <p>Table of contents</p>
+      {{#if toc}}
+      <div class="py-8 mx-auto container px-4 md:px-0">
+        <p class="font-semibold text-lg">Contents</p>
 
-        <div>
-          <ul>
-            {{#each toc as |h2|}}
-            <li>
-              <a href="#{{h2.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h2.text}}</a>
-            </li>
-            <li>
-              <ul class="ml-4">
-                {{#each h2.children as |h3|}}
-                <li>
-                  <a href="#{{h3.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h3.text}}</a>
-                </li>
-                <li>
+        <ul>
+          {{#each toc as |h2|}}
+          <li>
+            <a href="#{{h2.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h2.text}}</a>
+          </li>
+
+          <li>
+            <ul class="ml-4">
+              {{#each h2.children as |h3|}}
+              <li>
+                <a href="#{{h3.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h3.text}}</a>
+              </li>
+              <li>
+                <ul class="ml-4">
+                  {{#each h3.children as |h4|}}
+                  <li>
+                    <a href="#{{h4.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h4.text}}</a>
+                  </li>
+                  <li>
                   <ul class="ml-4">
-                    {{#each h3.children as |h4|}}
+                    {{#each h4.children as |h5|}}
                     <li>
-                      <a href="#{{h4.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h4.text}}</a>
+                      <a href="#{{h5.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h5.text}}</a>
                     </li>
                     <li>
                     <ul class="ml-4">
-                      {{#each h4.children as |h5|}}
+                      {{#each h5.children as |h6|}}
                       <li>
-                        <a href="#{{h5.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h5.text}}</a>
+                        <a href="#{{h6.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h6.text}}</a>
                       </li>
-                      <li>
-                      <ul class="ml-4">
-                        {{#each h5.children as |h6|}}
-                        <li>
-                          <a href="#{{h6.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h6.text}}</a>
-                        </li>
-                        {{/each}}
-                      </ul>
                       {{/each}}
                     </ul>
-                  </li>
                     {{/each}}
                   </ul>
                 </li>
-                {{/each}}
-              </ul>
-            </li>
-            {{/each}}
-          </ul>
-        </div>
+                  {{/each}}
+                </ul>
+              </li>
+              {{/each}}
+            </ul>
+          </li>
+          {{/each}}
+        </ul>
       </div>
+      {{/if}}
 
-      <div id="content" class="prose max-w-none">
-        {{{content}}}
+      <div class="mx-auto container px-4 md:px-0">
+        <div id="content" class="prose max-w-none">
+          {{{content}}}
+        </div>
       </div>
     </main>
 
