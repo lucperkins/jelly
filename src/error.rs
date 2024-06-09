@@ -38,6 +38,7 @@ pub enum Error {
     #[error("render error: {0}")]
     Render(#[from] handlebars::RenderError),
 
+    #[cfg(feature = "syntect-code-rendering")]
     #[error("syntect error: {0}")]
     Syntect(#[from] syntect::Error),
 
