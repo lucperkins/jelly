@@ -71,10 +71,9 @@
             packages = with pkgs; [
               rustToolchain
               cargo-edit
+              cargo-machete
               bacon
             ] ++ scripts ++ pkgs.lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk.frameworks; [ CoreServices ]);
-
-            RUST_LOG = "trace";
           };
       });
 
