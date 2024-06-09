@@ -31,7 +31,8 @@ fn a_attrs<'a>(slug: &str) -> Vec<(&'a str, String)> {
     vec![
         ("href", format!("#{}", slug)),
         ("x-show", String::from("open")),
-        ("class", String::from("ml-2")),
+        ("x-transition.duration.500ms", String::from("")),
+        ("class", String::from("ml-2 text-primary not-prose")),
     ]
 }
 

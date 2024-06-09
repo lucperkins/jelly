@@ -34,8 +34,15 @@ impl<'a> TemplateAttrs<'a> {
 pub fn render_page(page: &Page) -> Result<String, Error> {
     let mut h = Handlebars::new();
     h.set_strict_mode(true);
+
+    #[cfg(not(feature = "dev-templates"))]
     let template = include_str!("../../template/page.hbs");
-    let _ = h.register_template_string("html", template);
+
+    #[cfg(feature = "dev-templates")]
+    let template =
+        std::fs::read_to_string("src/template/page.hbs").expect("couldn't read page.hbs");
+
+    h.register_template_string("html", template).unwrap(); // infallible operation
     let html = page.html.as_str();
 
     let attrs = TemplateAttrs::new(&page.title, html, &page.breadcrumb, &page.table_of_contents);
