@@ -8,9 +8,15 @@ default = ["handlebars-templating", "markdown-it-md"]
 handlebars-templating = ["handlebars"]
 markdown-it-md = ["markdown-it", "syntect-code-rendering"]
 syntect-code-rendering = ["syntect"]
+# Use this feature when you're working on the Handlebar templates
+dev-handlebar-templates = []
 
 [dependencies]
-base64 = { version = "0.22", default-features = false }
+syntect = { version = "5", default-features = false, features = [
+  "default-syntaxes",
+  "html",
+  "regex-onig",
+], optional = true }
 clap = { version = "4.5", default-features = false, features = [
   "color",
   "derive",
@@ -22,20 +28,24 @@ clap = { version = "4.5", default-features = false, features = [
   "usage",
 ] }
 color-eyre = { version = "0.6", default-features = false }
-eyre = { version = "0.6", default-features = false }
+ctrlc = { version = "3.4.4", default-features = false }
 glob = { version = "0.3", default-features = false }
 gray_matter = { version = "0.2", default-features = false, features = ["yaml"] }
 handlebars = { version = "5.1", default-features = false, optional = true }
 indoc = { version = "2.0", default-features = false }
+mime_guess = { version = "2.0.4", default-features = false }
+notify = { version = "6.1.1", default-features = true }
+open = { version = "5.1.2", default-features = false }
 markdown-it = { version = "0.6", default-features = false, optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0", default-features = false }
 serde_yaml = { version = "0.9", default-features = false }
 slug = { version = "0.1", default-features = false }
-syntect = { version = "5", default-features = false, features = [
-  "default-syntaxes",
-  "html",
-  "regex-onig",
-], optional = true }
+tempfile = { version = "3.10.1", default-features = false }
 thiserror = { version = "1", default-features = false }
+tiny_http = { version = "0.12.0", default-features = false }
 titlecase = { version = "3", default-features = false }
+tracing = { version = "0.1.40", default-features = false }
+tracing-subscriber = { version = "0.3.18", default-features = false, features = [
+  "fmt",
+] }

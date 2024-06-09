@@ -2,7 +2,6 @@ use std::{
     fs::{create_dir_all, File},
     io::Write,
     path::PathBuf,
-    process::ExitCode,
 };
 
 use crate::{
@@ -23,8 +22,8 @@ pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
     Ok(Site(content))
 }
 
-pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
-    let site = build_site(source)?;
+pub fn build(source: &PathBuf, out: &PathBuf) -> Result<(), Error> {
+    let site = build_site(source.into())?;
 
     for page in site.pages() {
         let html = render_page(page)?;
@@ -39,7 +38,7 @@ pub fn build(source: PathBuf, out: PathBuf) -> eyre::Result<ExitCode> {
         file.write_all(html.as_bytes())?;
     }
 
-    Ok(ExitCode::SUCCESS)
+    Ok(())
 }
 
 #[cfg(test)]

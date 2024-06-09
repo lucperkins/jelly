@@ -1,7 +1,7 @@
 use serde::Serialize;
-use std::{fs::File, io::Write, path::PathBuf, process::ExitCode};
+use std::{fs::File, io::Write, path::PathBuf};
 
-use crate::md::SearchDocument;
+use crate::{error::Error, md::SearchDocument};
 
 use super::build::build_site;
 
@@ -10,7 +10,7 @@ struct SiteIndex {
     documents: Vec<SearchDocument>,
 }
 
-pub fn index(source: PathBuf, out: Option<PathBuf>) -> eyre::Result<ExitCode> {
+pub fn index(source: PathBuf, out: Option<PathBuf>) -> Result<(), Error> {
     let site = build_site(source)?;
     let documents = site.documents();
     let site_index = SiteIndex { documents };
@@ -23,5 +23,5 @@ pub fn index(source: PathBuf, out: Option<PathBuf>) -> eyre::Result<ExitCode> {
         println!("{json}");
     }
 
-    Ok(ExitCode::SUCCESS)
+    Ok(())
 }

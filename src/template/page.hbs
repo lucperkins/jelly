@@ -16,6 +16,9 @@
             colors: {
               primary: "var(--primary)",
             },
+            transitionDuration: {
+              hover: "200ms",
+            },
           },
         },
       };
@@ -26,13 +29,13 @@
       <header>
         <div class="flex items-center space-x-2">
           {{#each breadcrumb}}
-            <a href="{{path}}" class="text-sm hover:text-primary">{{title}}</a>
+          <a href="{{path}}" class="text-sm hover:text-primary duration-hover">{{title}}</a>
           {{/each}}
         </div>
 
         <h1 class="text-3xl font-semibold">{{title}}</h1>
       </header>
-      <div id="content" class="prose">
+      <div id="content" class="prose max-w-none">
         {{{content}}}
       </div>
     </main>
