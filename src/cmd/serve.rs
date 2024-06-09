@@ -162,7 +162,11 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
 
     debug!("set up watcher on {:?}", source);
 
+    #[cfg(not(feature = "dev-handlebar-templates"))]
     let watch_paths = vec![source, "src/template".into()];
+
+    #[cfg(feature = "dev-handlebar-templates")]
+    let watch_paths = vec![source];
 
     for path in watch_paths {
         watcher.watch(path.as_path(), notify::RecursiveMode::Recursive)?;

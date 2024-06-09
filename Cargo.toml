@@ -8,7 +8,8 @@ default = ["handlebars-templating", "markdown-it-md"]
 handlebars-templating = ["handlebars"]
 markdown-it-md = ["markdown-it", "syntect-code-rendering"]
 syntect-code-rendering = ["syntect"]
-dev-templates = []
+# Use this feature when you're working on the Handlebar templates
+dev-handlebar-templates = []
 
 [dependencies]
 syntect = { version = "5", default-features = false, features = [
@@ -16,7 +17,6 @@ syntect = { version = "5", default-features = false, features = [
   "html",
   "regex-onig",
 ], optional = true }
-base64 = { version = "0.22", default-features = false }
 clap = { version = "4.5", default-features = false, features = [
   "color",
   "derive",
@@ -29,7 +29,6 @@ clap = { version = "4.5", default-features = false, features = [
 ] }
 color-eyre = { version = "0.6", default-features = false }
 ctrlc = { version = "3.4.4", default-features = false }
-eyre = { version = "0.6", default-features = false }
 glob = { version = "0.3", default-features = false }
 gray_matter = { version = "0.2", default-features = false, features = ["yaml"] }
 handlebars = { version = "5.1", default-features = false, optional = true }

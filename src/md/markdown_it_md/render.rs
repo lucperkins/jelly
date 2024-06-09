@@ -35,10 +35,10 @@ pub fn render_page(page: &Page) -> Result<String, Error> {
     let mut h = Handlebars::new();
     h.set_strict_mode(true);
 
-    #[cfg(not(feature = "dev-templates"))]
+    #[cfg(not(feature = "dev-handlebar-templates"))]
     let template = include_str!("../../template/page.hbs");
 
-    #[cfg(feature = "dev-templates")]
+    #[cfg(feature = "dev-handlebar-templates")]
     let template =
         std::fs::read_to_string("src/template/page.hbs").expect("couldn't read page.hbs");
 
