@@ -87,7 +87,7 @@ fn main() -> Result<(), Error> {
     let Cli { command } = Cli::parse();
 
     match command {
-        Command::Build(Build { source, out }) => build(source, out),
+        Command::Build(Build { source, out }) => build(&source, &out),
         Command::Index(Index { source, out }) => index(source, out),
         Command::Serve(Serve { source, open, port }) => serve(source, open, port),
     }

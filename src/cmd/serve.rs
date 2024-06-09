@@ -11,7 +11,27 @@ use std::{
 };
 use tempfile::TempDir;
 use tiny_http::Request;
-use tracing::{debug, info};
+use tracing::{debug, error, info};
+
+#[derive(Clone)]
+struct Site {
+    source: PathBuf,
+    out: PathBuf,
+}
+
+impl Site {
+    fn new(source: PathBuf, out: PathBuf) -> Self {
+        Self { source, out }
+    }
+
+    fn build(&self) {
+        debug!("building site");
+
+        if let Err(e) = build(&self.source, &self.out) {
+            error!("error building site: {e}");
+        }
+    }
+}
 
 struct FileServer {
     root: PathBuf,
@@ -74,8 +94,8 @@ impl FileServer {
 }
 
 pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
-    let out = TempDir::new()?; // TODO: make this a temporary directory
-    let out_path = out.as_ref();
+    let tmp_dir = TempDir::new()?; // TODO: make this a temporary directory
+    let out_path = tmp_dir.as_ref().to_owned();
 
     let bind_address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port); // TODO: make this configurable
     if TcpListener::bind(bind_address).is_err() {
@@ -96,8 +116,10 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
 
     debug!("serving docs; writing output to {:?}", out_path);
 
+    let site = Site::new(source.clone(), out_path.clone());
+
     // Initial site build
-    build(source.clone(), out_path.to_path_buf())?;
+    site.build();
 
     debug!("creating file server");
 
@@ -120,13 +142,15 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     debug!("setting up watcher on {:?}", source);
 
     let (_tx, rx) = channel::<Event>();
-    let mut watcher = notify::recommended_watcher(|res| match res {
+    let mut watcher = notify::recommended_watcher(move |res| match res {
         Ok(Event { kind, .. }) => {
             use notify::EventKind::*;
 
             match kind {
                 Create(_) | Modify(_) | Remove(_) => {
-                    debug!("got a {:?} event", kind);
+                    debug!("got a {kind:?} event");
+
+                    site.build();
                 }
                 _ => {
                     debug!("got some other kind of event: {:?}", kind);
@@ -138,10 +162,14 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
 
     debug!("set up watcher on {:?}", source);
 
-    watcher.watch(source.as_path(), notify::RecursiveMode::Recursive)?; // Why doesn't this watch?
+    let watch_paths = vec![source, "src/template".into()];
+
+    for path in watch_paths {
+        watcher.watch(path.as_path(), notify::RecursiveMode::Recursive)?;
+    }
 
     if let Err(e) = rx.recv() {
-        out.close()?;
+        tmp_dir.close()?;
         tracing::debug!("error encountered from listener: {}", e);
         return Err(Error::Recv(e));
     }
