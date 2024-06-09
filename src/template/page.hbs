@@ -35,6 +35,56 @@
 
         <h1 class="text-3xl font-semibold">{{title}}</h1>
       </header>
+
+      <div>
+        <p>Table of contents</p>
+
+        <div>
+          <ul>
+            {{#each toc as |h2|}}
+            <li>
+              <a href="#{{h2.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h2.text}}</a>
+            </li>
+            <li>
+              <ul class="ml-4">
+                {{#each h2.children as |h3|}}
+                <li>
+                  <a href="#{{h3.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h3.text}}</a>
+                </li>
+                <li>
+                  <ul class="ml-4">
+                    {{#each h3.children as |h4|}}
+                    <li>
+                      <a href="#{{h4.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h4.text}}</a>
+                    </li>
+                    <li>
+                    <ul class="ml-4">
+                      {{#each h4.children as |h5|}}
+                      <li>
+                        <a href="#{{h5.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h5.text}}</a>
+                      </li>
+                      <li>
+                      <ul class="ml-4">
+                        {{#each h5.children as |h6|}}
+                        <li>
+                          <a href="#{{h6.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h6.text}}</a>
+                        </li>
+                        {{/each}}
+                      </ul>
+                      {{/each}}
+                    </ul>
+                  </li>
+                    {{/each}}
+                  </ul>
+                </li>
+                {{/each}}
+              </ul>
+            </li>
+            {{/each}}
+          </ul>
+        </div>
+      </div>
+
       <div id="content" class="prose max-w-none">
         {{{content}}}
       </div>
