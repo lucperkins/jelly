@@ -138,7 +138,7 @@ mod tests {
                         "", // Omit for testing
                         vec![Link::new(
                             &PathBuf::from("tests/full/medium"),
-                            "Documentation",
+                            "Medium-sized project",
                         )],
                         TableOfContents(vec![TocEntry::new(
                             2,
@@ -160,7 +160,10 @@ mod tests {
                             "", // Omit for testing
                             "", // Omit for testing
                             vec![
-                                Link::new(&PathBuf::from("tests/full/medium"), "Documentation"),
+                                Link::new(
+                                    &PathBuf::from("tests/full/medium"),
+                                    "Medium-sized project",
+                                ),
                                 Link::new(&PathBuf::from("tests/full/medium/setup"), "Setup"),
                             ],
                             TableOfContents::empty(),
