@@ -1,10 +1,12 @@
-<html>
+<html class="h-screen">
   <head>
     <title>{{title}} | {{site.title}}</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
     <style>
+      [x-cloak] { display: none !important; }
+
       :root {
         --primary: purple;
       }
@@ -23,9 +25,10 @@
         },
       };
     </script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
   </head>
-  <body class="font-sans antialiased">
-    <main>
+  <body class="font-sans antialiased flex flex-col min-h-full">
+    <main class="flex-1">
       <nav class="bg-gray-200 py-2 shadow-md">
         <div class="mx-auto container px-4 md:px-0">
           <a href="/" class="text-xl hover:text-primary duration-hover">
@@ -55,7 +58,7 @@
           </li>
 
           <li>
-            <ul class="ml-4">
+            <ul class="ml-4"
               {{#each h2.children as |h3|}}
               <li>
                 <a href="#{{h3.slug}}" class="text-primary hover:text-red-500 duration-hover">{{h3.text}}</a>
@@ -101,6 +104,10 @@
       </div>
     </main>
 
-    <script src="https://unpkg.com/alpinejs" defer></script>
+    <footer class="bg-black text-gray-200 pt-4 pb-8 shadow-md" x-data="{ year: new Date().getFullYear() }">
+      <div class="mx-auto container px-4 md:px-0 text-right" x-cloak>
+        <span class="text-sm">Copright &copy; <span x-text="year"/></span>
+      </div>
+    </footer>
   </body>
 </html>
