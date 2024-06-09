@@ -28,7 +28,7 @@ impl<'a> TemplateAttrs<'a> {
             title: String::from(title),
             content: String::from(content),
             breadcrumb,
-            toc: if toc.0.len() > 0 { Some(toc) } else { None },
+            toc: if toc.0.is_empty() { None } else { Some(toc) },
             site,
         }
     }
