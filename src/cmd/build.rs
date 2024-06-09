@@ -1,7 +1,7 @@
 use std::{
     fs::{create_dir_all, File},
     io::Write,
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use crate::{
@@ -22,7 +22,7 @@ pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
     Ok(Site(content))
 }
 
-pub fn build(source: &PathBuf, out: &PathBuf) -> Result<(), Error> {
+pub fn build(source: &PathBuf, out: &Path) -> Result<(), Error> {
     let site = build_site(source.into())?;
 
     for page in site.pages() {

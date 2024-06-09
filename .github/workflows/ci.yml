@@ -24,7 +24,7 @@ jobs:
       - name: Check Rust formatting
         run: nix develop --command cargo fmt --check
       - name: Run Clippy
-        run: nix develop --command cargo clippy
+        run: nix develop --command cargo clippy --all --all-targets --all-features --  -Dwarnings
       - name: Rust build in release mode
         run: nix develop --command cargo build --release
       - name: Run Rust tests
