@@ -1,0 +1,20 @@
+{{#*inline "level"}}
+{{#each this}}
+<li>
+  <a href="#{{ slug }}" class="hover:text-primary duration-hover">{{ text }}</a>
+</li>
+{{#with children}}
+<ul class="ml-4">
+  {{> level this.entries }}
+</ul>
+{{/with}}
+{{/each}}
+{{/inline}}
+
+<div>
+  <p class="font-semibold text-lg">Contents</p>
+
+  <ul>
+    {{> level entries }}
+  </ul>
+</div>

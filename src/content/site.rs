@@ -8,8 +8,15 @@ use super::{page::Page, Section};
 pub struct Site(pub Section);
 
 #[derive(Serialize)]
+struct PageEntry {
+    title: String,
+    path: String,
+}
+
+#[derive(Serialize)]
 pub struct SiteAttrs<'a> {
     title: &'a str,
+    pages: Vec<PageEntry>,
 }
 
 impl Site {
@@ -33,6 +40,14 @@ impl Site {
     pub fn attrs(&self) -> SiteAttrs {
         SiteAttrs {
             title: &self.0.title,
+            pages: self
+                .pages()
+                .iter()
+                .map(|p| PageEntry {
+                    title: p.title.clone(),
+                    path: p.path.clone(),
+                })
+                .collect(),
         }
     }
 }

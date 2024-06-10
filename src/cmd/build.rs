@@ -69,7 +69,7 @@ mod tests {
                             "", // Omit for testing
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
-                            TableOfContents(vec![]),
+                            TableOfContents::new(vec![]),
                             SearchIndex(vec![SearchDocument::new(
                                 1,
                                 "Contact us",
@@ -85,7 +85,7 @@ mod tests {
                             "", // Omit for testing
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
-                            TableOfContents(vec![TocEntry::new(
+                            TableOfContents::new(vec![TocEntry::new(
                                 2,
                                 "About this site",
                                 TableOfContents::empty(),
@@ -113,7 +113,7 @@ mod tests {
                             "", // Omit for testing
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
-                            TableOfContents(vec![]),
+                            TableOfContents::new(vec![]),
                             SearchIndex(vec![SearchDocument::new(
                                 1,
                                 "About",
@@ -140,7 +140,7 @@ mod tests {
                             &PathBuf::from("tests/full/medium"),
                             "Medium-sized project",
                         )],
-                        TableOfContents(vec![TocEntry::new(
+                        TableOfContents::new(vec![TocEntry::new(
                             2,
                             "About this site",
                             TableOfContents::empty(),
