@@ -129,7 +129,7 @@ mod tests {
             (
                 "medium",
                 Site(Section::new(
-                    "Documentation",
+                    "Medium-sized project",
                     Some(vec![Page::new(
                         "tests/full/medium/index.md",
                         "index.md",
