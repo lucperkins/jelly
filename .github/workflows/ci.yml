@@ -52,6 +52,10 @@ jobs:
 
   site:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Nix
@@ -61,7 +65,7 @@ jobs:
       - name: Build example site
         run: nix run . -- build --source ./tests/full/medium
       - name: Publish example site
-        uses: actions/upload-pages-artifact@v3.0.1
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: example-site
-          path: dist/
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/
