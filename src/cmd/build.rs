@@ -25,8 +25,10 @@ pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
 pub fn build(source: &PathBuf, out: &Path) -> Result<(), Error> {
     let site = build_site(source.into())?;
 
+    let attrs = site.attrs();
+
     for page in site.pages() {
-        let html = render_page(page)?;
+        let html = render_page(page, &attrs)?;
         let mut path = out.join(&page.relative_path);
 
         path.set_extension("html");
@@ -67,7 +69,7 @@ mod tests {
                             "", // Omit for testing
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
-                            TableOfContents(vec![]),
+                            TableOfContents::new(vec![]),
                             SearchIndex(vec![SearchDocument::new(
                                 1,
                                 "Contact us",
@@ -83,7 +85,7 @@ mod tests {
                             "", // Omit for testing
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
-                            TableOfContents(vec![TocEntry::new(
+                            TableOfContents::new(vec![TocEntry::new(
                                 2,
                                 "About this site",
                                 TableOfContents::empty(),
@@ -111,7 +113,7 @@ mod tests {
                             "", // Omit for testing
                             "", // Omit for testing
                             vec![Link::new(&PathBuf::from("tests/full/basic"), "Welcome")],
-                            TableOfContents(vec![]),
+                            TableOfContents::new(vec![]),
                             SearchIndex(vec![SearchDocument::new(
                                 1,
                                 "About",
@@ -127,7 +129,7 @@ mod tests {
             (
                 "medium",
                 Site(Section::new(
-                    "Documentation",
+                    "Medium-sized project",
                     Some(vec![Page::new(
                         "tests/full/medium/index.md",
                         "index.md",
@@ -136,9 +138,9 @@ mod tests {
                         "", // Omit for testing
                         vec![Link::new(
                             &PathBuf::from("tests/full/medium"),
-                            "Documentation",
+                            "Medium-sized project",
                         )],
-                        TableOfContents(vec![TocEntry::new(
+                        TableOfContents::new(vec![TocEntry::new(
                             2,
                             "About this site",
                             TableOfContents::empty(),
@@ -158,7 +160,10 @@ mod tests {
                             "", // Omit for testing
                             "", // Omit for testing
                             vec![
-                                Link::new(&PathBuf::from("tests/full/medium"), "Documentation"),
+                                Link::new(
+                                    &PathBuf::from("tests/full/medium"),
+                                    "Medium-sized project",
+                                ),
                                 Link::new(&PathBuf::from("tests/full/medium/setup"), "Setup"),
                             ],
                             TableOfContents::empty(),

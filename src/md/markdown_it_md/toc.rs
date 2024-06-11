@@ -10,7 +10,9 @@ use slug::slugify;
 use super::headings::Headings;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
-pub struct TableOfContents(pub Vec<TocEntry>);
+pub struct TableOfContents {
+    pub entries: Vec<TocEntry>,
+}
 
 impl TableOfContents {
     pub fn parse(document: &Node) -> Self {
@@ -24,7 +26,12 @@ impl TableOfContents {
     }
 
     pub fn empty() -> Self {
-        Self(vec![])
+        Self { entries: vec![] }
+    }
+
+    #[cfg(test)]
+    pub fn new(entries: Vec<TocEntry>) -> Self {
+        Self { entries }
     }
 }
 
@@ -57,7 +64,9 @@ struct TocBuilder {
 impl TocBuilder {
     fn new() -> Self {
         Self {
-            top_level: TableOfContents(Vec::new()),
+            top_level: TableOfContents {
+                entries: Vec::new(),
+            },
             chain: Vec::new(),
         }
     }
@@ -72,7 +81,7 @@ impl TocBuilder {
         loop {
             match self.chain.pop() {
                 Some(mut next) => {
-                    next.children.0.extend(this);
+                    next.children.entries.extend(this);
                     if next.level < level {
                         self.chain.push(next);
                         return;
@@ -81,7 +90,7 @@ impl TocBuilder {
                     }
                 }
                 None => {
-                    self.top_level.0.extend(this);
+                    self.top_level.entries.extend(this);
                     return;
                 }
             }
@@ -136,14 +145,14 @@ mod tests {
 
                 #### Let's skip a level
             "},
-            TableOfContents(vec![
+            TableOfContents::new(vec![
                 TocEntry::new(
                     2,
                     "Now a heading 2",
-                    TableOfContents(vec![TocEntry::new(
+                    TableOfContents::new(vec![TocEntry::new(
                         3,
                         "Now a heading 3",
-                        TableOfContents(vec![TocEntry::new(
+                        TableOfContents::new(vec![TocEntry::new(
                             4,
                             "Let's go even deeper",
                             TableOfContents::empty(),
@@ -153,7 +162,7 @@ mod tests {
                 TocEntry::new(
                     2,
                     "And now back to a heading 2",
-                    TableOfContents(vec![TocEntry::new(
+                    TableOfContents::new(vec![TocEntry::new(
                         3,
                         "Another heading 3",
                         TableOfContents::empty(),
@@ -162,7 +171,7 @@ mod tests {
                 TocEntry::new(
                     2,
                     "And yet another heading 2",
-                    TableOfContents(vec![TocEntry::new(
+                    TableOfContents::new(vec![TocEntry::new(
                         4,
                         "Let's skip a level",
                         TableOfContents::empty(),
