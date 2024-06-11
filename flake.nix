@@ -73,7 +73,10 @@
               cargo-edit
               cargo-machete
               bacon
-            ] ++ scripts ++ pkgs.lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk.frameworks; [ CoreServices ]);
+              static-web-server
+            ]
+            ++ scripts
+            ++ pkgs.lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk.frameworks; [ CoreServices ]);
           };
       });
 

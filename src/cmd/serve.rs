@@ -123,7 +123,7 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
 
     debug!("creating file server");
 
-    let file_server = FileServer::new(PathBuf::from(out_path), bind_address);
+    let file_server = FileServer::new(out_path, bind_address);
 
     debug!("starting file server");
 
