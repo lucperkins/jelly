@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <title>Setup</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <style>
+      :root {
+        --primary: purple;
+      }
+    </style>
+    <script type="text/javascript">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "var(--primary)",
+            },
+            transitionDuration: {
+              hover: "200ms",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="font-sans antialiased">
+    <main class="p-12">
+      <header>
+        <div class="flex items-center space-x-2">
+          <a href="./tests/full/medium" class="text-sm hover:text-primary duration-hover">Documentation</a>
+          <a href="./tests/full/medium/setup" class="text-sm hover:text-primary duration-hover">Setup</a>
+        </div>
+
+        <h1 class="text-3xl font-semibold">Setup</h1>
+      </header>
+      <div id="content" class="prose max-w-none">
+        <p>Here is how to set things up.</p>
+<p>Here is some other info.</p>
+
+      </div>
+    </main>
+
+    <script src="https://unpkg.com/alpinejs" defer></script>
+  </body>
+</html>
