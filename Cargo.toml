@@ -47,5 +47,7 @@ tiny_http = { version = "0.12.0", default-features = false }
 titlecase = { version = "3", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-subscriber = { version = "0.3.18", default-features = false, features = [
+  "ansi",
+  "env-filter",
   "fmt",
 ] }

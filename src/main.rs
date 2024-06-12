@@ -6,6 +6,7 @@ use jelly::{
 };
 use std::io::IsTerminal;
 use std::path::PathBuf;
+use tracing_subscriber::EnvFilter;
 
 /// Build a Jelly docs project
 #[derive(Parser)]
@@ -73,7 +74,10 @@ struct Cli {
 }
 
 fn main() -> Result<(), Error> {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_ansi(true)
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
 
     color_eyre::config::HookBuilder::default()
         .theme(if !std::io::stderr().is_terminal() {
