@@ -48,6 +48,9 @@ pub enum Error {
     #[error("UTF-8 error: {0}")]
     Utf8(#[from] std::string::FromUtf8Error),
 
+    #[error("WebSocket error: {0}")]
+    WebSocket(#[from] ws::Error),
+
     #[error("yaml parse error: {0}")]
     Yaml(#[from] serde_yaml::Error),
 
