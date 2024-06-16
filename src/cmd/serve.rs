@@ -175,12 +175,13 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
                 }
                 Ok(())
             }
-        })?;
+        })
+        .map_err(Box::new)?;
 
         let broadcaster = ws_server.broadcaster();
 
         // TODO: make WS address configurable
-        let ws_server = ws_server.bind("127.0.0.1:8999")?;
+        let ws_server = ws_server.bind("127.0.0.1:8999").map_err(Box::new)?;
 
         thread::spawn(move || {
             ws_server.run().unwrap();
@@ -208,7 +209,9 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
 
                     debug!("broadcaster sending message");
 
-                    broadcaster.send(live_reload_message(paths)).unwrap();
+                    broadcaster
+                        .send(live_reload_message(paths.first().unwrap()))
+                        .unwrap();
 
                     debug!("broadcaster sent message");
                 }
@@ -243,17 +246,16 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     Ok(())
 }
 
-fn live_reload_message(paths: Vec<PathBuf>) -> String {
+fn live_reload_message(path: &PathBuf) -> String {
     format!(
         r#"
 {{
     "command": "reload",
-    "path": {},
+    "path": {path:?},
     "originalPath": "",
     "liveCSS": true,
     "liveImg": true,
     "protocol": ["http://livereload.com/protocols/official-7"]
-}}"#,
-        serde_json::to_string(&paths.get(0)).unwrap()
+}}"#
     )
 }
