@@ -65,6 +65,7 @@ mod tests {
                         Page::new(
                             "tests/full/basic/contact.md",
                             "contact.md",
+                            "contact",
                             "Contact us",
                             "", // Omit for testing
                             "", // Omit for testing
@@ -81,6 +82,7 @@ mod tests {
                         Page::new(
                             "tests/full/basic/index.md",
                             "index.md",
+                            "",
                             "Welcome",
                             "", // Omit for testing
                             "", // Omit for testing
@@ -109,6 +111,7 @@ mod tests {
                         Page::new(
                             "tests/full/basic/about.md",
                             "about.md",
+                            "about",
                             "About",
                             "", // Omit for testing
                             "", // Omit for testing
@@ -133,6 +136,7 @@ mod tests {
                     Some(vec![Page::new(
                         "tests/full/medium/index.md",
                         "index.md",
+                        "",
                         "Welcome",
                         "", // Omit for testing
                         "", // Omit for testing
@@ -156,6 +160,7 @@ mod tests {
                         Some(vec![Page::new(
                             "tests/full/medium/setup/index.md",
                             "setup/index.md",
+                            "setup",
                             "Setup",
                             "", // Omit for testing
                             "", // Omit for testing

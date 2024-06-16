@@ -17,11 +17,13 @@ use std::{
     cmp::Ordering,
     path::{Path, PathBuf},
 };
+use tracing::debug;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 pub struct Page {
     pub path: String,
     pub relative_path: String,
+    pub page_url: String,
     pub title: String,
     pub body: String,
     pub html: String,
@@ -52,15 +54,37 @@ impl Page {
         }
 
         let title: String = infer_page_title(front, path, file, &config.title_config);
-        let relative_path = path.strip_prefix(&config.root)?.to_string_lossy();
+        let relative_path = path.strip_prefix(&config.root)?;
         let tree = ast(&result.content);
         let table_of_contents = TableOfContents::parse(&tree);
         let html = render(&tree);
         let search_index = build_search_index_for_page(&title, &tree);
 
+        let page_url = if let Some(last_segment) = relative_path
+            .with_extension("")
+            .file_name()
+            .and_then(|name| name.to_str())
+        {
+            if last_segment == "index" {
+                relative_path
+                    .parent()
+                    .unwrap_or(relative_path)
+                    .to_path_buf()
+            } else {
+                relative_path.to_path_buf()
+            }
+        } else {
+            relative_path.to_path_buf()
+        };
+
+        debug!("path: {path:?}");
+        debug!("relative_path: {relative_path:?}");
+        debug!("page_url: {page_url:?}");
+
         Ok(Page {
             path: String::from(path.to_string_lossy()),
-            relative_path: String::from(relative_path),
+            relative_path: String::from(relative_path.to_string_lossy()),
+            page_url: String::from(page_url.to_string_lossy()),
             title,
             body: result.content,
             html,
@@ -80,6 +104,7 @@ impl Page {
     pub fn new(
         path: &str,
         relative_path: &str,
+        page_url: &str,
         title: &str,
         body: &str,
         html: &str,
@@ -91,6 +116,7 @@ impl Page {
         Self {
             path: String::from(path),
             relative_path: String::from(relative_path),
+            page_url: String::from(page_url),
             title: String::from(title),
             body: String::from(body),
             html: String::from(html),

@@ -44,32 +44,39 @@ fn register_templates(h: &mut Handlebars) {
 
     h.register_template_string(
         "page",
-        fs::read_to_string("assets/templates/page.hbs").expect("couldn't read page.hbs"),
+        fs::read_to_string("assets/templates/handlebars/page.hbs").expect("couldn't read page.hbs"),
     )
     .unwrap();
 
     h.register_template_string(
         "toc",
-        fs::read_to_string("assets/templates/toc.hbs").expect("couldn't read toc.hbs"),
+        fs::read_to_string("assets/templates/handlebars/toc.hbs").expect("couldn't read toc.hbs"),
     )
     .unwrap();
 
     h.register_template_string(
         "sidebar",
-        fs::read_to_string("assets/templates/sidebar.hbs").expect("couldn't read sidebar.hbs"),
+        fs::read_to_string("assets/templates/handlebars/sidebar.hbs")
+            .expect("couldn't read sidebar.hbs"),
     )
     .unwrap();
 }
 
 #[cfg(not(feature = "dev-handlebars-templates"))]
 fn register_templates(h: &mut Handlebars) {
-    h.register_template_string("page", include_str!("../../../assets/templates/page.hbs"))
-        .unwrap();
-    h.register_template_string("toc", include_str!("../../../assets/templates/toc.hbs"))
-        .unwrap();
+    h.register_template_string(
+        "page",
+        include_str!("../../../assets/templates/handlebars/page.hbs"),
+    )
+    .unwrap();
+    h.register_template_string(
+        "toc",
+        include_str!("../../../assets/templates/handlebars/toc.hbs"),
+    )
+    .unwrap();
     h.register_template_string(
         "sidebar",
-        include_str!("../../../assets/templates/sidebar.hbs"),
+        include_str!("../../../assets/templates/handlebars/sidebar.hbs"),
     )
     .unwrap();
 }
