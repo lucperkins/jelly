@@ -10,7 +10,7 @@ pub struct Site(pub Section);
 #[derive(Serialize)]
 struct PageEntry {
     title: String,
-    path: String,
+    page_url: String,
 }
 
 #[derive(Serialize)]
@@ -45,7 +45,7 @@ impl Site {
                 .iter()
                 .map(|p| PageEntry {
                     title: p.title.clone(),
-                    path: p.path.clone(),
+                    page_url: p.page_url.clone(),
                 })
                 .collect(),
         }
