@@ -11,6 +11,8 @@ use crate::{
     md::render_page,
 };
 
+use super::index::SiteIndex;
+
 pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
     let config = SiteConfig {
         root: source,
@@ -39,6 +41,12 @@ pub fn build(source: &PathBuf, out: &Path) -> Result<(), Error> {
         let mut file = File::create(path)?;
         file.write_all(html.as_bytes())?;
     }
+
+    let search_index = SiteIndex::new(site.documents());
+    let search_index_json = serde_json::to_string(&search_index)?;
+    let index_file_path = out.join("search.json");
+    let mut index_json_file = File::create(index_file_path)?;
+    index_json_file.write(search_index_json.as_bytes())?;
 
     Ok(())
 }

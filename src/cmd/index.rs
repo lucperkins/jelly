@@ -6,14 +6,19 @@ use crate::{error::Error, md::SearchDocument};
 use super::build::build_site;
 
 #[derive(Serialize)]
-struct SiteIndex {
+pub struct SiteIndex {
     documents: Vec<SearchDocument>,
+}
+
+impl SiteIndex {
+    pub fn new(documents: Vec<SearchDocument>) -> Self {
+        Self { documents }
+    }
 }
 
 pub fn index(source: PathBuf, out: Option<PathBuf>) -> Result<(), Error> {
     let site = build_site(source)?;
-    let documents = site.documents();
-    let site_index = SiteIndex { documents };
+    let site_index = SiteIndex::new(site.documents());
     let json = serde_json::to_string(&site_index)?;
 
     if let Some(out) = out {
