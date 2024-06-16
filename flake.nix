@@ -73,6 +73,7 @@
               cargo-edit
               cargo-machete
               bacon
+              rust-analyzer
               static-web-server
             ]
             ++ scripts

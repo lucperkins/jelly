@@ -12,6 +12,9 @@ use std::{
 use tempfile::TempDir;
 use tiny_http::Request;
 use tracing::{debug, error, info};
+use ws::{Message, Sender, WebSocket};
+
+const LIVE_RELOAD_JS: &str = include_str!("../../assets/livereload.js");
 
 #[derive(Clone)]
 struct Site {
@@ -56,37 +59,52 @@ impl FileServer {
     fn handle_files(&self, req: Request) -> Result<(), Error> {
         // Borrowed from Cobalt
         let mut req_path = req.url().to_string();
-        if let Some(position) = req_path.rfind('?') {
-            req_path.truncate(position);
-        }
 
-        let path = self.root.to_path_buf().join(&req_path[1..]);
-        let serve_path = if path.is_file() {
-            path
-        } else {
-            path.join("index.html")
-        };
-        if serve_path.exists() {
-            let file = std::fs::File::open(&serve_path).expect("failed to find file");
-            let mut response = tiny_http::Response::from_file(file);
-            if let Some(mime) = mime_guess::MimeGuess::from_path(&serve_path).first_raw() {
-                let content_type = format!("Content-Type:{}", mime);
-
-                let content_type =
-                    tiny_http::Header::from_str(&content_type).expect("formatted correctly");
-                response.add_header(content_type);
-            }
-            req.respond(response).expect("can't respond");
-        } else {
+        if req_path.starts_with("/livereload.js") {
             req.respond(
-                tiny_http::Response::from_string("<h1><center>404: Page not found</center></h1>")
+                tiny_http::Response::from_string(LIVE_RELOAD_JS).with_header(
+                    tiny_http::Header::from_str("Content-Type:text/javascript")
+                        .expect("formatted correctly"),
+                ),
+            )
+            .expect("can't respond");
+        } else {
+            if let Some(position) = req_path.rfind('?') {
+                req_path.truncate(position);
+            }
+
+            let path = self.root.to_path_buf().join(&req_path[1..]);
+
+            let serve_path = if path.is_file() {
+                path
+            } else {
+                path.join("index.html")
+            };
+
+            if serve_path.exists() {
+                let file = std::fs::File::open(&serve_path).expect("failed to find file");
+                let mut response = tiny_http::Response::from_file(file);
+                if let Some(mime) = mime_guess::MimeGuess::from_path(&serve_path).first_raw() {
+                    let content_type = format!("Content-Type:{}", mime);
+
+                    let content_type =
+                        tiny_http::Header::from_str(&content_type).expect("formatted correctly");
+                    response.add_header(content_type);
+                }
+                req.respond(response).expect("can't respond");
+            } else {
+                req.respond(
+                    tiny_http::Response::from_string(
+                        "<h1><center>404: Page not found</center></h1>",
+                    )
                     .with_status_code(404)
                     .with_header(
                         tiny_http::Header::from_str("Content-Type: text/html")
                             .expect("formatted correctly"),
                     ),
-            )
-            .expect("couldn't respond with 404");
+                )
+                .expect("couldn't respond with 404");
+            }
         }
 
         Ok(())
@@ -121,36 +139,81 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     // Initial site build
     site.build();
 
-    debug!("creating file server");
-
-    let file_server = FileServer::new(out_path, bind_address);
-
-    debug!("starting file server");
-
-    thread::spawn(move || {
-        file_server.serve().expect("http server error");
-    });
-
     if open {
-        open::that("http://localhost:8080")?;
+        open::that(format!("http://localhost:{port}"))?;
     }
 
     debug!("successfully built site");
 
     debug!("successfully bound to {}", bind_address);
 
+    debug!("setting up broadcaster server for live reload");
+
+    let broadcaster = {
+        thread::spawn(move || {
+            debug!("creating file server");
+
+            let file_server = FileServer::new(out_path, bind_address);
+
+            debug!("starting file server");
+
+            file_server.serve().expect("http server error");
+        });
+
+        let ws_server = WebSocket::new(|output: Sender| {
+            move |msg: Message| {
+                if msg.into_text().unwrap().contains("\"hello\"") {
+                    return output.send(Message::text(
+                        r#"
+                    {
+                        "command": "hello",
+                        "protocols": [ "http://livereload.com/protocols/official-7" ],
+                        "serverName": "Jelly"
+                    }
+                "#,
+                    ));
+                }
+                Ok(())
+            }
+        })
+        .map_err(Box::new)?;
+
+        let broadcaster = ws_server.broadcaster();
+
+        // TODO: make WS address configurable
+        let ws_server = ws_server.bind("127.0.0.1:8999").map_err(Box::new)?;
+
+        thread::spawn(move || {
+            ws_server.run().unwrap();
+        });
+
+        broadcaster
+    };
+
     debug!("setting up watcher on {:?}", source);
 
     let (_tx, rx) = channel::<Event>();
     let mut watcher = notify::recommended_watcher(move |res| match res {
-        Ok(Event { kind, .. }) => {
+        Ok(Event { kind, paths, .. }) => {
             use notify::EventKind::*;
 
             match kind {
                 Create(_) | Modify(_) | Remove(_) => {
                     debug!("got a {kind:?} event");
 
+                    debug!("rebuilding site");
+
                     site.build();
+
+                    debug!("successfully rebuilt site");
+
+                    debug!("broadcaster sending message");
+
+                    broadcaster
+                        .send(live_reload_message(paths.first().unwrap()))
+                        .unwrap();
+
+                    debug!("broadcaster sent message");
                 }
                 _ => {
                     debug!("got some other kind of event: {:?}", kind);
@@ -166,7 +229,7 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     let watch_paths = vec![source];
 
     #[cfg(feature = "dev-handlebars-templates")]
-    let watch_paths = vec![source, "src/templates".into()];
+    let watch_paths = vec![source, "assets/templates".into()];
 
     for path in watch_paths {
         watcher.watch(path.as_path(), notify::RecursiveMode::Recursive)?;
@@ -181,4 +244,18 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     debug!("quitting");
 
     Ok(())
+}
+
+fn live_reload_message(path: &PathBuf) -> String {
+    format!(
+        r#"
+{{
+    "command": "reload",
+    "path": {path:?},
+    "originalPath": "",
+    "liveCSS": true,
+    "liveImg": true,
+    "protocol": ["http://livereload.com/protocols/official-7"]
+}}"#
+    )
 }
