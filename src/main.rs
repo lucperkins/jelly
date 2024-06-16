@@ -39,7 +39,7 @@ struct Serve {
     #[arg(
         short,
         long,
-        default_value_t = 8080,
+        default_value_t = 3000,
         help = "The HTTP port to listen on"
     )]
     port: u16,

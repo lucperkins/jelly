@@ -140,7 +140,7 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     site.build();
 
     if open {
-        open::that("http://localhost:8080")?;
+        open::that(format!("http://localhost:{port}"))?;
     }
 
     debug!("successfully built site");
@@ -229,7 +229,7 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     let watch_paths = vec![source];
 
     #[cfg(feature = "dev-handlebars-templates")]
-    let watch_paths = vec![source, "src/templates".into()];
+    let watch_paths = vec![source, "assets/templates".into()];
 
     for path in watch_paths {
         watcher.watch(path.as_path(), notify::RecursiveMode::Recursive)?;
