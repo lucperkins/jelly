@@ -46,7 +46,7 @@ pub fn build(source: &PathBuf, out: &Path) -> Result<(), Error> {
     let search_index_json = serde_json::to_string(&search_index)?;
     let index_file_path = out.join("search.json");
     let mut index_json_file = File::create(index_file_path)?;
-    index_json_file.write(search_index_json.as_bytes())?;
+    index_json_file.write_all(search_index_json.as_bytes())?;
 
     Ok(())
 }
