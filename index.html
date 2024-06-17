@@ -1,4 +1,9 @@
-<html class="h-screen" x-data="{ dark: $persist(false) }" :class="{ 'dark': dark }">
+<!DOCTYPE html>
+<html
+  x-data="{ dark: $persist(window.matchMedia('(prefers-color-scheme: dark)').matches), search: false }"
+  :class="{ 'dark': dark }"
+  class="h-screen"
+>
   <head>
     <script>
       const darkMode = window.localStorage.getItem("_x_dark");
@@ -8,14 +13,19 @@
     <title>Welcome | Medium-sized project</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <style>
       [x-cloak] { display: none !important; }
 
       :root {
-        --primary: pink;
+        --primary: purple;
       }
     </style>
+
+    <script defer src="https://unpkg.com/@alpinejs/persist"></script>
+    <script defer src="https://unpkg.com/alpinejs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
     <script type="text/javascript">
       tailwind.config = {
         darkMode: "class",
@@ -30,6 +40,60 @@
           },
         },
       };
+
+      const options = {
+        keys: ["level", "page_title", "title", "content"],
+        isCaseSensitive: false,
+        useExtendedSearch: true,
+      };
+
+      document.addEventListener("alpine:init", () => {
+        const docs = [{"level":1,"page_title":"Welcome","title":"Welcome","content":"Welcome to the site."},{"level":2,"page_title":"Welcome","title":"About this site","content":"Some info here."},{"level":1,"page_title":"Setup","title":"Setup","content":"Here is how to set things up. Here is some other info."}];
+        console.log(docs);
+        const fuse = new Fuse(docs, options, Fuse.createIndex(options.keys, docs));
+
+        Alpine.store("search", {
+          query: "",
+          showModal: false,
+          selectedN: -1,
+
+          // Move between results
+          down() {
+            const newSelected = (this.selected + 1) % this.results.length;
+            this.select(newSelected);
+          },
+          up() {
+            const newSelected = (this.selected - 1 + this.results.length) % this.results.length;
+            this.select(newSelected);
+          },
+          navigateToResult() {
+            /*
+            const result = this.results[this.selectedN];
+            const href = `#${result.item.kind}-${result.item.name.replace('/', '-')}`;
+            window.location.href = href;
+            self.close();
+            */
+          },
+          enter() {
+            if (this.selected >= 0) {
+              this.navigateToResult();
+              this.close();
+              this.query = '';
+              this.select(-1);
+            }
+          },
+          hasResults() { return this.results.length > 0; },
+          isHere(idx) { return this.selectedN === idx; },
+          get selected() { return this.selectedN; },
+          select(idx) { this.selectedN = idx; },
+          get show() { return this.showModal; },
+          open() { this.showModal = true; },
+          close() { this.showModal = false; },
+          toggle() { this.showModal = !this.showModal; },
+          get placeholder() { return (this.query === "") ? "Search" : ""; },
+          get results() { return fuse.search(this.query); },
+        });
+      });
     </script>
   </head>
   <body class="font-sans antialiased flex flex-col min-h-full dark:bg-black dark:text-white">
@@ -43,7 +107,13 @@
               </a>
             </div>
 
-            <div>
+            <div class="flex items-center gap-4">
+              <button @click="$store.search.open()" x-cloak>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 duration-hover">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+              </button>
+
               <button @click="dark = !dark">
                 <svg x-show="dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-yellow-500">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
@@ -111,8 +181,70 @@
       </div>
     </footer>
 
-    <script src="https://unpkg.com/@alpinejs/persist" defer></script>
-    <script src="https://unpkg.com/alpinejs" defer></script>
+    <div
+      x-show="$store.search.show"
+      x-init="$watch('$store.search.show', () => setTimeout(() => $refs.searchInput.focus(), 50))"
+      @keydown.window.prevent.cmd.k="$store.search.toggle()"
+      @keydown.window.prevent.escape="$store.search.close()"
+      role="dialog"
+      aria-labelledby="search-title"
+      aria-modal="true"
+      class="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24"
+    >
+      <div class="fixed inset-0 bg-slate-900/25 backdrop-blur transition-opacity opacity-100"></div>
+
+      <div
+        @click.outside="search = false"
+        x-transition:enter="motion-safe:ease-out duration-1000"
+        x-transition:enter-start="opacity-0 scale-90"
+        x-transition:enter-end="opacity-100 scale-100"
+        class="relative w-full max-w-lg transform px-4 transition-all opacity-100 scale-100"
+      >
+        <div class="overflow-hidden rounded-lg bg-white shadow-md rounded-lg">
+          <div class="relative">
+            <input
+              x-model="$store.search.query"
+              x-ref="searchInput"
+              @keydown.down.prevent="$store.search.down()"
+              @keydown.up.prevent="$store.search.up()"
+              @keydown.enter.prevent="$store.search.enter()"
+              class="block w-full appearance-none bg-transparent py-4 pl-4 pr-12 text-base text-slate-900 placeholder:text-slate-600 focus:outline-none sm:text-sm sm:leading-6"
+              placeholder="Search..."
+              aria-label="Search widget"
+              irole="combobox"
+              type="text"
+              aria-expanded="false"
+              aria-autocomplete="list"
+              tabindex="0"
+            >
+
+            <svg class="pointer-events-none absolute right-4 top-4 h-6 w-6 fill-slate-400" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.47 21.53a.75.75 0 1 0 1.06-1.06l-1.06 1.06Zm-9.97-4.28a6.75 6.75 0 0 1-6.75-6.75h-1.5a8.25 8.25 0 0 0 8.25 8.25v-1.5ZM3.75 10.5a6.75 6.75 0 0 1 6.75-6.75v-1.5a8.25 8.25 0 0 0-8.25 8.25h1.5Zm6.75-6.75a6.75 6.75 0 0 1 6.75 6.75h1.5a8.25 8.25 0 0 0-8.25-8.25v1.5Zm11.03 16.72-5.196-5.197-1.061 1.06 5.197 5.197 1.06-1.06Zm-4.28-9.97c0 1.864-.755 3.55-1.977 4.773l1.06 1.06A8.226 8.226 0 0 0 18.75 10.5h-1.5Zm-1.977 4.773A6.727 6.727 0 0 1 10.5 17.25v1.5a8.226 8.226 0 0 0 5.834-2.416l-1.061-1.061Z"></path>
+            </svg>
+          </div>
+
+          <div x-show="$store.search.hasResults()" class="border-t pb-2 dark:bg-black dark:text-white">
+            <ul>
+              <template x-for="(result, idx) in $store.search.results" :key="idx">
+                <li
+                  @mousenter="$store.search.select(idx)"
+                  :tabindex="0"
+                  class="tracking-tight font-light py-1 px-2.5 flex items-center space-x-1 hover:bg-gray-200 hover:cursor-pointer"
+                  :class="$store.search.isHere(idx) ? 'bg-gray-100' : ''"
+                >
+                  <a
+                    x-text="result.item.title"
+                    href="#"
+                    @click="$store.search.close()"
+                  ></a>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="/livereload.js?port=8999&amp;mindelay=10"></script>
   </body>
 </html>
