@@ -17,6 +17,7 @@ struct PageEntry {
 pub struct SiteAttrs<'a> {
     title: &'a str,
     pages: Vec<PageEntry>,
+    index: String,
 }
 
 impl Site {
@@ -38,6 +39,9 @@ impl Site {
     }
 
     pub fn attrs(&self) -> SiteAttrs {
+        // TODO: remove unwrap
+        let index_json = serde_json::to_string(&self.documents()).unwrap();
+
         SiteAttrs {
             title: &self.0.title,
             pages: self
@@ -48,6 +52,7 @@ impl Site {
                     page_url: p.page_url.clone(),
                 })
                 .collect(),
+            index: index_json,
         }
     }
 }

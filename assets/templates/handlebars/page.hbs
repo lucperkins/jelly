@@ -22,8 +22,8 @@
       }
     </style>
 
-    <script src="https://unpkg.com/@alpinejs/persist" defer></script>
-    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script defer src="https://unpkg.com/@alpinejs/persist"></script>
+    <script defer src="https://unpkg.com/alpinejs"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 
     <script type="text/javascript">
@@ -42,78 +42,59 @@
       };
 
       const options = {
-        keys: [
-          {
-            name: "level",
-            weight: 1.0,
-          },
-          {
-            name: "page_title",
-            weight: 1.0
-          },
-          {
-            name: "title",
-            weight: 1.0
-          },
-          {
-            name: "content",
-            weight: 1.0
-          }
-        ],
+        keys: ["level", "page_title", "title", "content"],
         isCaseSensitive: false,
         useExtendedSearch: true,
       };
 
-      fetch("/search.json")
-        .then((res) => res.json())
-        .then((docs) => {
-          const fuse = new Fuse(docs, options, Fuse.createIndex(options.keys, docs));
+      document.addEventListener("alpine:init", () => {
+        const docs = {{{site.index}}};
+        console.log(docs);
+        const fuse = new Fuse(docs, options, Fuse.createIndex(options.keys, docs));
 
-          document.addEventListener("alpine:init", () => {
-            Alpine.store("search", {
-              query: "",
-              showModal: false,
-              selectedN: -1,
+        Alpine.store("search", {
+          query: "",
+          showModal: false,
+          selectedN: -1,
 
-              // Move between results
-              down() {
-                const newSelected = (this.selected + 1) % this.results.length;
-                this.select(newSelected);
-              },
-              up() {
-                const newSelected = (this.selected - 1 + this.results.length) % this.results.length;
-                this.select(newSelected);
-              },
-              navigateToResult() {
-                const result = this.results[this.selectedN];
-                const href = `#${result.item.kind}-${result.item.name.replace('/', '-')}`;
-                window.location.href = href;
-                self.close();
-              },
-              enter() {
-                if (this.selected >= 0) {
-                  this.navigateToResult();
-                  this.close();
-                  this.query = '';
-                  this.select(-1);
-                }
-              },
-              hasResults() { return this.results.length > 0; },
-              isHere(idx) { return this.selectedN === idx; },
-              get selected() { return this.selectedN; },
-              select(idx) { this.selectedN = idx; },
-              get show() { return this.showModal; },
-              open() { this.showModal = true; },
-              close() { this.showModal = false; },
-              toggle() { this.showModal = !this.showModal; },
-              get placeholder() { return (this.query === "") ? "Search" : ""; },
-              get results() { return fuse.search(this.query); },
-            });
-          });
-
+          // Move between results
+          down() {
+            const newSelected = (this.selected + 1) % this.results.length;
+            this.select(newSelected);
+          },
+          up() {
+            const newSelected = (this.selected - 1 + this.results.length) % this.results.length;
+            this.select(newSelected);
+          },
+          navigateToResult() {
+            /*
+            const result = this.results[this.selectedN];
+            const href = `#${result.item.kind}-${result.item.name.replace('/', '-')}`;
+            window.location.href = href;
+            self.close();
+            */
+          },
+          enter() {
+            if (this.selected >= 0) {
+              this.navigateToResult();
+              this.close();
+              this.query = '';
+              this.select(-1);
+            }
+          },
+          hasResults() { return this.results.length > 0; },
+          isHere(idx) { return this.selectedN === idx; },
+          get selected() { return this.selectedN; },
+          select(idx) { this.selectedN = idx; },
+          get show() { return this.showModal; },
+          open() { this.showModal = true; },
+          close() { this.showModal = false; },
+          toggle() { this.showModal = !this.showModal; },
+          get placeholder() { return (this.query === "") ? "Search" : ""; },
+          get results() { return fuse.search(this.query); },
         });
-
-      </script>
+      });
+    </script>
   </head>
   <body class="font-sans antialiased flex flex-col min-h-full dark:bg-black dark:text-white">
     <main class="flex-1">
@@ -127,7 +108,7 @@
             </div>
 
             <div class="flex items-center gap-4">
-              <button @click="$store.search.open()">
+              <button @click="$store.search.open()" x-cloak>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 duration-hover">
                   <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                 </svg>
@@ -225,7 +206,7 @@
             </svg>
           </div>
 
-          <div x-show="$store.search.hasResults()" class="border-t pb-2">
+          <div x-show="$store.search.hasResults()" class="border-t pb-2 dark:bg-black dark:text-white">
             <ul>
               <template x-for="(result, idx) in $store.search.results" :key="idx">
                 <li
@@ -235,19 +216,10 @@
                   :class="$store.search.isHere(idx) ? 'bg-gray-100' : ''"
                 >
                   <a
-                    x-text="result.item.name"
-                    x-bind:href="`#${result.item.kind}-${result.item.name.replace('/', '-')}`"
+                    x-text="result.item.title"
+                    href="#"
                     @click="$store.search.close()"
                   ></a>
-
-                  <span
-                    x-text="result.item.kind"
-                    class="py-0.5 px-2 inline-flex items-center rounded-full text-xs font-medium"
-                    :class="{
-                      'bg-purple-100 text-purple-700': result.item.kind === 'flow',
-                      'bg-blue-100 text-blue-700': result.item.kind === 'runner'
-                    }"
-                  />
                 </li>
               </template>
             </ul>
