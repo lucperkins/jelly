@@ -25,3 +25,21 @@ on_success = "back"
 command = ["cargo", "run", "--color", "always"]
 need_stdout = true
 allow_warnings = true
+
+# Develop Handlebars templates
+[jobs.tpl]
+command = [
+  "cargo",
+  "run",
+  "--color",
+  "always",
+  "--features",
+  "dev-handlebars-templates",
+  "--",
+  "serve",
+  "--open",
+  "--source",
+  "./tests/full/medium",
+]
+need_stdout = true
+allow_warnings = true
