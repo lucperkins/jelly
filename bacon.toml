@@ -26,6 +26,20 @@ command = ["cargo", "run", "--color", "always"]
 need_stdout = true
 allow_warnings = true
 
+# Build example site
+[jobs.build]
+command = [
+  "cargo",
+  "run",
+  "--color",
+  "always",
+  "--",
+  "build",
+  "--source",
+  "./tests/full/medium",
+]
+on_success = "quit"
+
 # Develop Handlebars templates
 [jobs.tpl]
 command = [
