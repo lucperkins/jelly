@@ -110,11 +110,11 @@ fn get_pages_in_dir(
         let path = entry.path();
         let meta = metadata(&path)?;
         if meta.is_file() {
-            let ext = path.extension();
-
-            if ext.is_some() && ext.unwrap().to_string_lossy().ends_with("md") {
-                let page = Page::from_path(&path, breadcrumb, config)?;
-                pages.push(page);
+            if let Some(ext) = path.extension() {
+                if ext.to_string_lossy().ends_with("md") {
+                    let page = Page::from_path(&path, breadcrumb, config)?;
+                    pages.push(page);
+                }
             }
         }
     }

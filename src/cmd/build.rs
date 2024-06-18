@@ -27,7 +27,7 @@ pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
 pub fn build(source: &PathBuf, out: &Path) -> Result<(), Error> {
     let site = build_site(source.into())?;
 
-    let attrs = site.attrs();
+    let attrs = site.attrs()?;
 
     for page in site.pages() {
         let html = render_page(page, &attrs)?;
@@ -35,8 +35,9 @@ pub fn build(source: &PathBuf, out: &Path) -> Result<(), Error> {
 
         path.set_extension("html");
 
-        let dir = path.as_path().parent().unwrap();
-        create_dir_all(dir)?;
+        if let Some(dir) = path.as_path().parent() {
+            create_dir_all(dir)?;
+        }
 
         let mut file = File::create(path)?;
         file.write_all(html.as_bytes())?;

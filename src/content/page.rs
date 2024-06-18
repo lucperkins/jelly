@@ -49,8 +49,10 @@ impl Page {
         let front = FrontMatter::parse(result.data)?;
         let order = front.order;
 
-        if order.is_some() && order.unwrap() == 0 {
-            return Err(Error::ZeroOrder(path.to_path_buf()));
+        if let Some(order) = order {
+            if order == 0 {
+                return Err(Error::ZeroOrder(path.to_path_buf()));
+            }
         }
 
         let title: String = infer_page_title(front, path, file, &config.title_config);

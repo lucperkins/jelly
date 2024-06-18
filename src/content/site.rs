@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::md::SearchDocument;
+use crate::{error::Error, md::SearchDocument};
 
 use super::{page::Page, Section};
 
@@ -38,11 +38,11 @@ impl Site {
         docs
     }
 
-    pub fn attrs(&self) -> SiteAttrs {
+    pub fn attrs(&self) -> Result<SiteAttrs, Error> {
         // TODO: remove unwrap
-        let index_json = serde_json::to_string(&self.documents()).unwrap();
+        let index_json = serde_json::to_string(&self.documents())?;
 
-        SiteAttrs {
+        Ok(SiteAttrs {
             title: &self.0.title,
             pages: self
                 .pages()
@@ -53,6 +53,6 @@ impl Site {
                 })
                 .collect(),
             index: index_json,
-        }
+        })
     }
 }

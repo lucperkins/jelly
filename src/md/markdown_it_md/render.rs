@@ -7,6 +7,10 @@ use serde::Serialize;
 
 use super::TableOfContents;
 
+const KEY_PAGE: &str = "page";
+const KEY_SIDEBAR: &str = "sidebar";
+const KEY_TOC: &str = "toc";
+
 #[derive(Serialize)]
 struct TemplateAttrs<'a> {
     title: String,
@@ -39,53 +43,52 @@ impl<'a> TemplateAttrs<'a> {
 }
 
 #[cfg(feature = "dev-handlebars-templates")]
-fn register_templates(h: &mut Handlebars) {
+fn register_templates(h: &mut Handlebars) -> Result<(), Error> {
     use std::fs;
 
     h.register_template_string(
-        "page",
-        fs::read_to_string("assets/templates/handlebars/page.hbs").expect("couldn't read page.hbs"),
+        KEY_PAGE,
+        fs::read_to_string("assets/templates/handlebars/page.hbs")?,
     )
-    .unwrap();
-
+    .map_err(Box::new)?;
     h.register_template_string(
-        "toc",
-        fs::read_to_string("assets/templates/handlebars/toc.hbs").expect("couldn't read toc.hbs"),
+        KEY_SIDEBAR,
+        fs::read_to_string("assets/templates/handlebars/sidebar.hbs")?,
     )
-    .unwrap();
-
+    .map_err(Box::new)?;
     h.register_template_string(
-        "sidebar",
-        fs::read_to_string("assets/templates/handlebars/sidebar.hbs")
-            .expect("couldn't read sidebar.hbs"),
+        KEY_TOC,
+        fs::read_to_string("assets/templates/handlebars/toc.hbs")?,
     )
-    .unwrap();
+    .map_err(Box::new)?;
+    Ok(())
 }
 
 #[cfg(not(feature = "dev-handlebars-templates"))]
-fn register_templates(h: &mut Handlebars) {
+fn register_templates(h: &mut Handlebars) -> Result<(), Error> {
     h.register_template_string(
-        "page",
+        KEY_PAGE,
         include_str!("../../../assets/templates/handlebars/page.hbs"),
     )
-    .unwrap();
+    .map_err(Box::new)?;
     h.register_template_string(
-        "toc",
-        include_str!("../../../assets/templates/handlebars/toc.hbs"),
-    )
-    .unwrap();
-    h.register_template_string(
-        "sidebar",
+        KEY_SIDEBAR,
         include_str!("../../../assets/templates/handlebars/sidebar.hbs"),
     )
-    .unwrap();
+    .map_err(Box::new)?;
+    h.register_template_string(
+        KEY_TOC,
+        include_str!("../../../assets/templates/handlebars/toc.hbs"),
+    )
+    .map_err(Box::new)?;
+    Ok(())
 }
 
 #[cfg(feature = "handlebars-templating")]
 pub fn render_page(page: &Page, site: &SiteAttrs) -> Result<String, Error> {
     let mut h = Handlebars::new();
     h.set_strict_mode(false);
-    register_templates(&mut h);
+    register_templates(&mut h)?;
     let html = page.html.as_str();
 
     let attrs = TemplateAttrs::new(
@@ -96,6 +99,6 @@ pub fn render_page(page: &Page, site: &SiteAttrs) -> Result<String, Error> {
         site,
     );
 
-    let s = h.render("page", &attrs)?;
+    let s = h.render(KEY_PAGE, &attrs)?;
     Ok(s)
 }
