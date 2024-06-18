@@ -1,7 +1,9 @@
 use super::build;
 use crate::error::Error;
+use indoc::{formatdoc, indoc};
 use notify::{Event, Watcher};
 use std::{
+    fmt::Debug,
     net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener},
     path::PathBuf,
     process::exit,
@@ -47,7 +49,7 @@ impl FileServer {
     }
 
     fn serve(&self) -> Result<(), Error> {
-        let server = tiny_http::Server::http(self.address).expect("couldn't start server"); // TODO: don't use expect here
+        let server = tiny_http::Server::http(self.address)?;
 
         for req in server.incoming_requests() {
             self.handle_files(req)?;
@@ -61,13 +63,11 @@ impl FileServer {
         let mut req_path = req.url().to_string();
 
         if req_path.starts_with("/livereload.js") {
-            req.respond(
+            handle_error(req.respond(
                 tiny_http::Response::from_string(LIVE_RELOAD_JS).with_header(
-                    tiny_http::Header::from_str("Content-Type:text/javascript")
-                        .expect("formatted correctly"),
+                    tiny_http::Header::from_str("Content-Type:text/javascript").unwrap(),
                 ),
-            )
-            .expect("can't respond");
+            ));
         } else {
             if let Some(position) = req_path.rfind('?') {
                 req_path.truncate(position);
@@ -82,28 +82,22 @@ impl FileServer {
             };
 
             if serve_path.exists() {
-                let file = std::fs::File::open(&serve_path).expect("failed to find file");
+                let file = std::fs::File::open(&serve_path)?;
                 let mut response = tiny_http::Response::from_file(file);
                 if let Some(mime) = mime_guess::MimeGuess::from_path(&serve_path).first_raw() {
                     let content_type = format!("Content-Type:{}", mime);
-
-                    let content_type =
-                        tiny_http::Header::from_str(&content_type).expect("formatted correctly");
+                    let content_type = tiny_http::Header::from_str(&content_type).unwrap();
                     response.add_header(content_type);
                 }
-                req.respond(response).expect("can't respond");
+                req.respond(response)?;
             } else {
                 req.respond(
                     tiny_http::Response::from_string(
                         "<h1><center>404: Page not found</center></h1>",
                     )
                     .with_status_code(404)
-                    .with_header(
-                        tiny_http::Header::from_str("Content-Type: text/html")
-                            .expect("formatted correctly"),
-                    ),
-                )
-                .expect("couldn't respond with 404");
+                    .with_header(tiny_http::Header::from_str("Content-Type: text/html").unwrap()),
+                )?;
             }
         }
 
@@ -127,8 +121,7 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     ctrlc::set_handler(move || {
         debug!("detected Ctrl-C; exiting");
         exit(0);
-    })
-    .expect("something went wrong while quitting");
+    })?;
 
     debug!("added Ctrl-C handler");
 
@@ -157,21 +150,19 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
 
             debug!("starting file server");
 
-            file_server.serve().expect("http server error");
+            handle_error(file_server.serve());
         });
 
         let ws_server = WebSocket::new(|output: Sender| {
             move |msg: Message| {
-                if msg.into_text().unwrap().contains("\"hello\"") {
-                    return output.send(Message::text(
-                        r#"
-                    {
-                        "command": "hello",
-                        "protocols": [ "http://livereload.com/protocols/official-7" ],
-                        "serverName": "Jelly"
-                    }
-                "#,
-                    ));
+                if msg.into_text()?.contains("\"hello\"") {
+                    return output.send(Message::text(indoc! {r#"
+                        {
+                          "command": "hello",
+                          "protocols": [ "http://livereload.com/protocols/official-7" ],
+                          "serverName": "Jelly"
+                        }
+                    "#}));
                 }
                 Ok(())
             }
@@ -184,7 +175,7 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
         let ws_server = ws_server.bind("127.0.0.1:8999").map_err(Box::new)?;
 
         thread::spawn(move || {
-            ws_server.run().unwrap();
+            handle_error(ws_server.run());
         });
 
         broadcaster
@@ -209,9 +200,9 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
 
                     debug!("broadcaster sending message");
 
-                    broadcaster
-                        .send(live_reload_message(paths.first().unwrap()))
-                        .unwrap();
+                    if let Some(path) = paths.first() {
+                        handle_error(broadcaster.send(live_reload_message(path)));
+                    }
 
                     debug!("broadcaster sent message");
                 }
@@ -247,15 +238,21 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
 }
 
 fn live_reload_message(path: &PathBuf) -> String {
-    format!(
-        r#"
-{{
-    "command": "reload",
-    "path": {path:?},
-    "originalPath": "",
-    "liveCSS": true,
-    "liveImg": true,
-    "protocol": ["http://livereload.com/protocols/official-7"]
-}}"#
-    )
+    formatdoc! {r#"
+        {{
+            "command": "reload",
+            "path": {path:?},
+            "originalPath": "",
+            "liveCSS": true,
+            "liveImg": true,
+            "protocol": ["http://livereload.com/protocols/official-7"]
+        }}
+    "#}
+}
+
+// Handler for errors inside spawns and move blocks and such
+fn handle_error<T, E: Debug>(result: Result<T, E>) {
+    if let Err(e) = result {
+        error!("{e:?}");
+    }
 }

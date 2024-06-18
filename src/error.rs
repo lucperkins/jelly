@@ -2,6 +2,9 @@ use std::{path::PathBuf, sync::mpsc::RecvError};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
+    #[error("ctrl-c error: {0}")]
+    Ctrlc(#[from] ctrlc::Error),
+
     #[error("glob error: {0}")]
     Glob(#[from] glob::GlobError),
 
@@ -56,4 +59,7 @@ pub enum Error {
 
     #[error("order parameter on page {0} is set to zero")]
     ZeroOrder(PathBuf),
+
+    #[error(transparent)]
+    ExternalError(#[from] Box<dyn std::error::Error + Send + Sync>),
 }
