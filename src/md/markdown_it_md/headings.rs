@@ -13,8 +13,8 @@ use slug::slugify;
 use super::parse::nodes_to_string;
 
 #[derive(Debug)]
-pub struct FancyHeading {
-    pub level: u8,
+pub(super) struct FancyHeading {
+    pub(super) level: u8,
 }
 
 fn h_attrs<'a>(slug: &str) -> Vec<(&'a str, String)> {
@@ -61,7 +61,7 @@ impl NodeValue for FancyHeading {
     }
 }
 
-pub struct FancyHeadingsRule;
+struct FancyHeadingsRule;
 
 impl BlockRule for FancyHeadingsRule {
     fn run(state: &mut BlockState) -> Option<(Node, usize)> {
@@ -124,19 +124,19 @@ impl BlockRule for FancyHeadingsRule {
     }
 }
 
-pub fn add_heading_rule(md: &mut MarkdownIt) {
+pub(super) fn add_heading_rule(md: &mut MarkdownIt) {
     md.block.add_rule::<FancyHeadingsRule>();
 }
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
-pub struct Heading {
-    pub level: u8,
-    pub text: String,
+pub(super) struct Heading {
+    pub(super) level: u8,
+    pub(super) text: String,
     slug: String,
 }
 
 impl Heading {
-    pub fn new(level: u8, text: &str) -> Self {
+    fn new(level: u8, text: &str) -> Self {
         let slug = slugify(text);
         Self {
             level,
@@ -146,7 +146,7 @@ impl Heading {
     }
 }
 
-pub struct Headings<'a>(pub &'a [Node]);
+pub(super) struct Headings<'a>(pub(super) &'a [Node]);
 
 impl<'a> IntoIterator for Headings<'a> {
     type Item = Heading;
@@ -167,7 +167,7 @@ impl<'a> IntoIterator for Headings<'a> {
     }
 }
 
-pub struct HeadingsWithIdx<'a>(pub &'a [Node]);
+struct HeadingsWithIdx<'a>(&'a [Node]);
 
 impl<'a> IntoIterator for HeadingsWithIdx<'a> {
     type Item = (usize, Heading);
@@ -188,7 +188,7 @@ impl<'a> IntoIterator for HeadingsWithIdx<'a> {
     }
 }
 
-pub struct HeadingsWithTextAfter<'a>(pub &'a [Node]);
+pub(super) struct HeadingsWithTextAfter<'a>(pub(super) &'a [Node]);
 
 impl<'a> IntoIterator for HeadingsWithTextAfter<'a> {
     type Item = (Heading, String);

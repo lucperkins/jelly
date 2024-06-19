@@ -9,13 +9,13 @@ use slug::slugify;
 
 use super::headings::Headings;
 
-#[derive(Debug, Eq, PartialEq, Serialize)]
-pub struct TableOfContents {
-    pub entries: Vec<TocEntry>,
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub(crate) struct TableOfContents {
+    pub(super) entries: Vec<TocEntry>,
 }
 
 impl TableOfContents {
-    pub fn parse(document: &Node) -> Self {
+    pub(crate) fn parse(document: &Node) -> Self {
         let mut builder = TocBuilder::new();
 
         for heading in Headings(&document.children) {
@@ -25,18 +25,18 @@ impl TableOfContents {
         builder.into_toc()
     }
 
-    pub fn empty() -> Self {
+    pub(crate) fn empty() -> Self {
         Self { entries: vec![] }
     }
 
     #[cfg(test)]
-    pub fn new(entries: Vec<TocEntry>) -> Self {
+    pub(crate) fn new(entries: Vec<TocEntry>) -> Self {
         Self { entries }
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Serialize)]
-pub struct TocEntry {
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub(crate) struct TocEntry {
     level: u8,
     text: String,
     slug: String,
@@ -44,7 +44,7 @@ pub struct TocEntry {
 }
 
 impl TocEntry {
-    pub fn new(level: u8, text: &str, children: TableOfContents) -> Self {
+    pub(crate) fn new(level: u8, text: &str, children: TableOfContents) -> Self {
         let slug = slugify(text);
         Self {
             level,

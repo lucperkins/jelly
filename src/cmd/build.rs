@@ -7,13 +7,13 @@ use std::{
 use crate::{
     config::{SiteConfig, TitleConfig},
     content::{Section, Site},
-    error::Error,
+    error::JellyError,
     md::render_page,
 };
 
 use super::index::SiteIndex;
 
-pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
+pub(crate) fn build_site(source: PathBuf) -> Result<Site, JellyError> {
     let config = SiteConfig {
         root: source,
         title_config: TitleConfig::default(),
@@ -24,13 +24,13 @@ pub(super) fn build_site(source: PathBuf) -> Result<Site, Error> {
     Ok(Site(content))
 }
 
-pub fn build(source: &PathBuf, out: &Path) -> Result<(), Error> {
+pub fn build(source: &PathBuf, out: &Path) -> Result<(), JellyError> {
     let site = build_site(source.into())?;
 
     let attrs = site.attrs()?;
 
     for page in site.pages() {
-        let html = render_page(page, &attrs)?;
+        let html = render_page(page, attrs.clone())?;
         let mut path = out.join(&page.relative_path);
 
         path.set_extension("html");

@@ -6,8 +6,8 @@ mod site;
 mod sort;
 mod title;
 
-pub use breadcrumb::Link;
-pub use page::Page;
-pub use section::Section;
-pub use site::{Site, SiteAttrs};
-pub use sort::by_title;
+pub(super) use breadcrumb::Link;
+pub(super) use page::Page;
+pub(super) use section::Section;
+pub(super) use site::{Site, SiteAttrs};
+pub(super) use sort::by_title;

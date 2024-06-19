@@ -5,18 +5,18 @@ use std::{
 
 use crate::{
     config::{SectionConfigInput, SectionConfigOutput, SiteConfig, TitleConfig},
-    error::Error,
+    error::JellyError,
     md::get_document_title,
     utils::{get_file, name_from_path},
 };
 
 use super::front::FrontMatter;
 
-pub trait WithTitle {
+pub(crate) trait WithTitle {
     fn title(&self) -> String;
 }
 
-pub fn infer_page_title(
+pub(super) fn infer_page_title(
     front: FrontMatter,
     path: &Path,
     file: String,
@@ -27,7 +27,7 @@ pub fn infer_page_title(
     })
 }
 
-fn title_from_index_page(path: &Path) -> Result<Option<String>, Error> {
+fn title_from_index_page(path: &Path) -> Result<Option<String>, JellyError> {
     let index_path = Path::new(&path).join("index.md");
     if index_path.exists() {
         let file = get_file(&index_path)?;
@@ -40,19 +40,19 @@ fn title_from_index_page(path: &Path) -> Result<Option<String>, Error> {
     }
 }
 
-pub fn get_section_config(
+pub(super) fn get_section_config(
     path: &PathBuf,
     config: &SiteConfig,
-) -> Result<SectionConfigOutput, Error> {
+) -> Result<SectionConfigOutput, JellyError> {
     let title: String;
-    let mut order: Option<usize> = None;
+    //let mut order: Option<usize> = None;
 
     let yaml_file_path = Path::new(&path).join("_dir.yaml");
     if yaml_file_path.exists() {
         let yaml_file_str = read_to_string(&yaml_file_path)?;
         let section_config: SectionConfigInput = serde_yaml::from_str(&yaml_file_str)?;
 
-        order = section_config.order;
+        //order = section_config.order;
 
         match section_config.title {
             Some(t) => title = t,
@@ -66,5 +66,5 @@ pub fn get_section_config(
         title = t.unwrap_or_else(|| name_from_path(path, &config.title_config));
     }
 
-    Ok(SectionConfigOutput { title, order })
+    Ok(SectionConfigOutput { title })
 }

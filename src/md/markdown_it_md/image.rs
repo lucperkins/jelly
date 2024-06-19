@@ -34,7 +34,7 @@ impl NodeValue for FancyImage {
     }
 }
 
-pub fn add_image_rule(md: &mut MarkdownIt) {
+pub(super) fn add_image_rule(md: &mut MarkdownIt) {
     full_link::add_prefix::<'!', true>(md, |href, title| {
         Node::new(FancyImage {
             url: href.unwrap_or_default(),

@@ -1,7 +1,7 @@
 use crate::content::Link;
 use crate::content::Page;
 use crate::content::SiteAttrs;
-use crate::error::Error;
+use crate::error::JellyError;
 use handlebars::Handlebars;
 use serde::Serialize;
 
@@ -17,7 +17,7 @@ struct TemplateAttrs<'a> {
     content: String,
     breadcrumb: &'a Vec<Link>,
     toc: Option<&'a TableOfContents>,
-    site: &'a SiteAttrs<'a>,
+    site: SiteAttrs,
 }
 
 impl<'a> TemplateAttrs<'a> {
@@ -26,7 +26,7 @@ impl<'a> TemplateAttrs<'a> {
         content: &str,
         breadcrumb: &'a Vec<Link>,
         toc: &'a TableOfContents,
-        site: &'a SiteAttrs,
+        site: SiteAttrs,
     ) -> Self {
         Self {
             title: String::from(title),
@@ -43,7 +43,7 @@ impl<'a> TemplateAttrs<'a> {
 }
 
 #[cfg(feature = "dev-handlebars-templates")]
-fn register_templates(h: &mut Handlebars) -> Result<(), Error> {
+fn register_templates(h: &mut Handlebars) -> Result<(), JellyError> {
     use std::fs;
 
     h.register_template_string(
@@ -65,7 +65,7 @@ fn register_templates(h: &mut Handlebars) -> Result<(), Error> {
 }
 
 #[cfg(not(feature = "dev-handlebars-templates"))]
-fn register_templates(h: &mut Handlebars) -> Result<(), Error> {
+fn register_templates(h: &mut Handlebars) -> Result<(), JellyError> {
     h.register_template_string(
         KEY_PAGE,
         include_str!("../../../assets/templates/handlebars/page.hbs"),
@@ -85,7 +85,7 @@ fn register_templates(h: &mut Handlebars) -> Result<(), Error> {
 }
 
 #[cfg(feature = "handlebars-templating")]
-pub fn render_page(page: &Page, site: &SiteAttrs) -> Result<String, Error> {
+pub(crate) fn render_page(page: &Page, site: SiteAttrs) -> Result<String, JellyError> {
     let mut h = Handlebars::new();
     h.set_strict_mode(false);
     register_templates(&mut h)?;

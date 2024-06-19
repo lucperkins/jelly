@@ -31,11 +31,11 @@ pub(super) fn preamble(node: &Node) -> String {
     nodes_to_string(nodes)
 }
 
-pub fn render(ast: &Node) -> String {
+pub(crate) fn render(ast: &Node) -> String {
     ast.render()
 }
 
-pub fn ast(input: &str) -> Node {
+pub(crate) fn ast(input: &str) -> Node {
     use markdown_it::plugins::cmark::{block, inline};
 
     let md = &mut markdown_it::MarkdownIt::new();

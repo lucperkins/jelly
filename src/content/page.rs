@@ -1,6 +1,6 @@
 use crate::{
     config::SiteConfig,
-    error::Error,
+    error::JellyError,
     md::{ast, build_search_index_for_page, render, SearchIndex, TableOfContents},
     utils::get_file,
 };
@@ -17,32 +17,31 @@ use std::{
     cmp::Ordering,
     path::{Path, PathBuf},
 };
-use tracing::debug;
 
-#[derive(Debug, Eq, PartialEq, Serialize)]
-pub struct Page {
-    pub path: String,
-    pub relative_path: String,
-    pub page_url: String,
-    pub title: String,
-    pub body: String,
-    pub html: String,
-    pub breadcrumb: Vec<Link>,
-    pub table_of_contents: TableOfContents,
-    pub search_index: SearchIndex,
-    pub order: Option<usize>,
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub(crate) struct Page {
+    pub(crate) path: String,
+    pub(crate) relative_path: String,
+    pub(crate) page_url: String,
+    pub(crate) title: String,
+    pub(crate) body: String,
+    pub(crate) html: String,
+    pub(crate) breadcrumb: Vec<Link>,
+    pub(crate) table_of_contents: TableOfContents,
+    pub(crate) search_index: SearchIndex,
+    pub(crate) order: Option<usize>,
 }
 
 impl Page {
-    pub fn is_index(&self) -> bool {
+    fn is_index(&self) -> bool {
         self.relative_path == "index.md"
     }
 
-    pub fn from_path(
+    pub(super) fn from_path(
         path: &Path,
         breadcrumb: &[(&PathBuf, &str)],
         config: &SiteConfig,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, JellyError> {
         let file = get_file(path)?;
         let matter = Matter::<YAML>::new();
         let result = matter.parse(&file);
@@ -51,7 +50,7 @@ impl Page {
 
         if let Some(order) = order {
             if order == 0 {
-                return Err(Error::ZeroOrder(path.to_path_buf()));
+                return Err(JellyError::ZeroOrder(path.to_path_buf()));
             }
         }
 
@@ -79,10 +78,6 @@ impl Page {
             relative_path.to_path_buf()
         };
 
-        debug!("path: {path:?}");
-        debug!("relative_path: {relative_path:?}");
-        debug!("page_url: {page_url:?}");
-
         Ok(Page {
             path: String::from(path.to_string_lossy()),
             relative_path: String::from(relative_path.to_string_lossy()),
@@ -103,7 +98,7 @@ impl Page {
 
     #[allow(clippy::too_many_arguments)]
     #[cfg(test)]
-    pub fn new(
+    pub(crate) fn new(
         path: &str,
         relative_path: &str,
         page_url: &str,

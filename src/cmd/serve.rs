@@ -1,5 +1,5 @@
 use super::build;
-use crate::error::Error;
+use crate::error::JellyError;
 use indoc::{formatdoc, indoc};
 use notify::{Event, Watcher};
 use std::{
@@ -48,7 +48,7 @@ impl FileServer {
         Self { root, address }
     }
 
-    fn serve(&self) -> Result<(), Error> {
+    fn serve(&self) -> Result<(), JellyError> {
         let server = tiny_http::Server::http(self.address)?;
 
         for req in server.incoming_requests() {
@@ -58,7 +58,7 @@ impl FileServer {
         Ok(())
     }
 
-    fn handle_files(&self, req: Request) -> Result<(), Error> {
+    fn handle_files(&self, req: Request) -> Result<(), JellyError> {
         // Borrowed from Cobalt
         let mut req_path = req.url().to_string();
 
@@ -105,13 +105,13 @@ impl FileServer {
     }
 }
 
-pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
+pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
     let tmp_dir = TempDir::new()?; // TODO: make this a temporary directory
     let out_path = tmp_dir.as_ref().to_owned();
 
     let bind_address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port); // TODO: make this configurable
     if TcpListener::bind(bind_address).is_err() {
-        return Err(Error::PortNotFree(bind_address.to_string())); // TODO: improve this error
+        return Err(JellyError::PortNotFree(bind_address.to_string())); // TODO: improve this error
     }
 
     info!("listening on port {port}");
@@ -229,7 +229,7 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), Error> {
     if let Err(e) = rx.recv() {
         tmp_dir.close()?;
         tracing::debug!("error encountered from listener: {}", e);
-        return Err(Error::Recv(e));
+        return Err(JellyError::Recv(e));
     }
 
     debug!("quitting");

@@ -8,10 +8,10 @@ mod search;
 mod title;
 mod toc;
 
-pub use parse::{ast, render};
-pub use render::render_page;
-pub use search::{build_search_index_for_page, SearchDocument, SearchIndex};
-pub use title::get_document_title;
-pub use toc::TableOfContents;
+pub(crate) use parse::{ast, render};
+pub(crate) use render::render_page;
+pub(crate) use search::{build_search_index_for_page, SearchDocument, SearchIndex};
+pub(crate) use title::get_document_title;
+pub(crate) use toc::TableOfContents;
 #[cfg(test)]
-pub use toc::TocEntry;
+pub(crate) use toc::TocEntry;

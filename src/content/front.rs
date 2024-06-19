@@ -1,21 +1,19 @@
 use gray_matter::Pod;
 use serde::Deserialize;
 
-use crate::error::Error;
+use crate::error::JellyError;
 
 #[derive(Default, Deserialize)]
-pub struct FrontMatter {
-    pub title: Option<String>,
-    pub order: Option<usize>,
+pub(super) struct FrontMatter {
+    pub(super) title: Option<String>,
+    pub(super) order: Option<usize>,
 }
 
 impl FrontMatter {
-    pub fn parse(maybe_pod: Option<Pod>) -> Result<Self, Error> {
-        let front: FrontMatter = match maybe_pod {
+    pub(super) fn parse(maybe_pod: Option<Pod>) -> Result<Self, JellyError> {
+        Ok(match maybe_pod {
             Some(f) => f.deserialize()?,
             None => FrontMatter::default(),
-        };
-
-        Ok(front)
+        })
     }
 }

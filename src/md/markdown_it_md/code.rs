@@ -7,9 +7,9 @@ use markdown_it::{
 use super::highlight::Highlighter;
 
 #[derive(Debug)]
-pub struct FancyCodeBlock {
+struct FancyCodeBlock {
     meta: Option<String>,
-    pub content: String,
+    content: String,
 }
 
 impl NodeValue for FancyCodeBlock {
@@ -36,7 +36,7 @@ impl NodeValue for FancyCodeBlock {
     }
 }
 
-pub struct FancyCodeBlockRule;
+struct FancyCodeBlockRule;
 
 impl CoreRule for FancyCodeBlockRule {
     fn run(root: &mut Node, _: &MarkdownIt) {
@@ -62,6 +62,6 @@ impl CoreRule for FancyCodeBlockRule {
     }
 }
 
-pub fn add_code_block_rule(md: &mut MarkdownIt) {
+pub(super) fn add_code_block_rule(md: &mut MarkdownIt) {
     md.add_rule::<FancyCodeBlockRule>();
 }

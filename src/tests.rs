@@ -1,5 +1,5 @@
 #[cfg(test)]
-pub fn test_markdown_produces_expected_html(cases: Vec<(&str, &str)>) {
+pub(super) fn test_markdown_produces_expected_html(cases: Vec<(&str, &str)>) {
     use crate::md::{ast, render};
 
     for case in cases {

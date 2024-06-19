@@ -1,5 +1,5 @@
 use crate::config::SiteConfig;
-use crate::error::Error;
+use crate::error::JellyError;
 use crate::utils::get_or_none;
 use serde::Serialize;
 use std::fs::{metadata, read_dir};
@@ -9,17 +9,17 @@ use super::by_title;
 use super::page::Page;
 use super::title::{get_section_config, WithTitle};
 
-#[derive(Debug, PartialEq, Serialize)]
-pub struct Section {
-    pub title: String,
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub(crate) struct Section {
+    pub(super) title: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub pages: Option<Vec<Page>>,
+    pages: Option<Vec<Page>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub sections: Option<Vec<Section>>,
+    sections: Option<Vec<Section>>,
 }
 
 impl Section {
-    pub fn pages(&self) -> Vec<&Page> {
+    pub(crate) fn pages(&self) -> Vec<&Page> {
         let mut pages: Vec<&Page> = Vec::new();
 
         if let Some(section_pages) = &self.pages {
@@ -43,11 +43,11 @@ impl Section {
         pages
     }
 
-    pub fn from_path(
+    pub(crate) fn from_path(
         path: &PathBuf,
         breadcrumb: Option<&Vec<(&PathBuf, &str)>>,
         config: &SiteConfig,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, JellyError> {
         let section_config = &get_section_config(path, config)?;
         let title = section_config.title.clone();
 
@@ -83,7 +83,11 @@ impl Section {
     }
 
     #[cfg(test)]
-    pub fn new(title: &str, pages: Option<Vec<Page>>, sections: Option<Vec<Section>>) -> Self {
+    pub(crate) fn new(
+        title: &str,
+        pages: Option<Vec<Page>>,
+        sections: Option<Vec<Section>>,
+    ) -> Self {
         Self {
             title: String::from(title),
             pages,
@@ -102,7 +106,7 @@ fn get_pages_in_dir(
     dir: &PathBuf,
     breadcrumb: &[(&PathBuf, &str)],
     config: &SiteConfig,
-) -> Result<Vec<Page>, Error> {
+) -> Result<Vec<Page>, JellyError> {
     let mut pages: Vec<Page> = Vec::new();
 
     for entry in read_dir(dir)? {
@@ -120,7 +124,7 @@ fn get_pages_in_dir(
     }
 
     if pages.is_empty() {
-        return Err(Error::NoPages(String::from(dir.to_string_lossy())));
+        return Err(JellyError::NoPages(String::from(dir.to_string_lossy())));
     }
 
     Ok(pages)

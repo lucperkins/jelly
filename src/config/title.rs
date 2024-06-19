@@ -1,6 +1,6 @@
-pub struct TitleConfig {
-    pub title_case: bool,
-    pub first_letter_capitalized: bool,
+pub(crate) struct TitleConfig {
+    pub(crate) title_case: bool,
+    pub(crate) first_letter_capitalized: bool,
 }
 
 impl Default for TitleConfig {

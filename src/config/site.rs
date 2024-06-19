@@ -4,9 +4,9 @@ use super::TitleConfig;
 
 static DEFAULT_DOCS_DIR: &str = "docs";
 
-pub struct SiteConfig {
-    pub root: PathBuf,
-    pub title_config: TitleConfig,
+pub(crate) struct SiteConfig {
+    pub(crate) root: PathBuf,
+    pub(crate) title_config: TitleConfig,
 }
 
 impl Default for SiteConfig {

@@ -4,9 +4,9 @@ use syntect::{
     util::LinesWithEndings,
 };
 
-use crate::error::Error;
+use crate::error::JellyError;
 
-pub struct Highlighter {
+pub(super) struct Highlighter {
     syntaxes: SyntaxSet,
 }
 
@@ -19,7 +19,7 @@ impl Default for Highlighter {
 }
 
 impl Highlighter {
-    pub fn highlight(&self, language: &str, code: &str) -> Result<String, Error> {
+    pub(super) fn highlight(&self, language: &str, code: &str) -> Result<String, JellyError> {
         match self.syntaxes.find_syntax_by_token(language) {
             Some(sx) => {
                 let mut html_generator = ClassedHTMLGenerator::new_with_class_style(
@@ -32,7 +32,7 @@ impl Highlighter {
                 }
                 Ok(html_generator.finalize())
             }
-            None => Err(Error::Highlight(format!(
+            None => Err(JellyError::Highlight(format!(
                 "no syntax found for language {}",
                 language
             ))),

@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::mpsc::RecvError};
 
 #[derive(thiserror::Error, Debug)]
-pub enum Error {
+pub enum JellyError {
     #[error("ctrl-c error: {0}")]
     Ctrlc(#[from] ctrlc::Error),
 

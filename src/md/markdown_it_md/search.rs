@@ -4,7 +4,7 @@ use serde::Serialize;
 use super::{headings::HeadingsWithTextAfter, parse::preamble};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
-pub struct SearchDocument {
+pub(crate) struct SearchDocument {
     level: u8,
     page_title: String,
     title: String,
@@ -12,7 +12,7 @@ pub struct SearchDocument {
 }
 
 impl SearchDocument {
-    pub fn new(level: u8, page_title: &str, title: &str, content: &str) -> Self {
+    pub(crate) fn new(level: u8, page_title: &str, title: &str, content: &str) -> Self {
         Self {
             level,
             page_title: String::from(page_title),
@@ -22,10 +22,10 @@ impl SearchDocument {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Serialize)]
-pub struct SearchIndex(pub Vec<SearchDocument>);
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub(crate) struct SearchIndex(pub(crate) Vec<SearchDocument>);
 
-pub fn build_search_index_for_page(page_title: &str, document: &Node) -> SearchIndex {
+pub(crate) fn build_search_index_for_page(page_title: &str, document: &Node) -> SearchIndex {
     let mut documents: Vec<SearchDocument> = Vec::new();
 
     documents.push(SearchDocument::new(

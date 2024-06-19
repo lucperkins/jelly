@@ -72,6 +72,7 @@
               rustToolchain
               cargo-edit
               cargo-machete
+              cargo-minimize
               bacon
               rust-analyzer
               static-web-server

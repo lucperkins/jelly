@@ -1,22 +1,11 @@
 use serde::Serialize;
 use std::{fs::File, io::Write, path::PathBuf};
 
-use crate::{error::Error, md::SearchDocument};
+use crate::{error::JellyError, md::SearchDocument};
 
 use super::build::build_site;
 
-#[derive(Serialize)]
-pub struct SiteIndex {
-    documents: Vec<SearchDocument>,
-}
-
-impl SiteIndex {
-    pub fn new(documents: Vec<SearchDocument>) -> Self {
-        Self { documents }
-    }
-}
-
-pub fn index(source: PathBuf, out: Option<PathBuf>) -> Result<(), Error> {
+pub fn index(source: PathBuf, out: Option<PathBuf>) -> Result<(), JellyError> {
     let site = build_site(source)?;
     let site_index = SiteIndex::new(site.documents());
     let json = serde_json::to_string(&site_index)?;
@@ -29,4 +18,15 @@ pub fn index(source: PathBuf, out: Option<PathBuf>) -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+#[derive(Serialize)]
+pub(super) struct SiteIndex {
+    documents: Vec<SearchDocument>,
+}
+
+impl SiteIndex {
+    pub(super) fn new(documents: Vec<SearchDocument>) -> Self {
+        Self { documents }
+    }
 }

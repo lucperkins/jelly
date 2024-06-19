@@ -2,6 +2,6 @@ mod section;
 mod site;
 mod title;
 
-pub use section::{SectionConfigInput, SectionConfigOutput};
-pub use site::SiteConfig;
-pub use title::TitleConfig;
+pub(super) use section::{SectionConfigInput, SectionConfigOutput};
+pub(super) use site::SiteConfig;
+pub(super) use title::TitleConfig;

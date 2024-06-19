@@ -1,6 +1,6 @@
 use super::{headings::FancyHeading, parse::ast};
 
-pub fn get_document_title(body: &str) -> Option<String> {
+pub(crate) fn get_document_title(body: &str) -> Option<String> {
     let ast = ast(body);
     let mut num_headers = 0;
 

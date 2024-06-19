@@ -1,9 +1,6 @@
 use clap::{Parser, Subcommand};
 
-use jelly::{
-    cmd::{build, index, serve},
-    error::Error,
-};
+use jelly::{build, index, serve, JellyError};
 use std::io::IsTerminal;
 use std::path::PathBuf;
 use tracing_subscriber::EnvFilter;
@@ -73,7 +70,7 @@ struct Cli {
     command: Command,
 }
 
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), JellyError> {
     tracing_subscriber::fmt()
         .with_ansi(true)
         .with_env_filter(EnvFilter::from_default_env())
