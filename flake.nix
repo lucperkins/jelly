@@ -46,11 +46,15 @@
               name = "ci";
               runtimeInputs = with pkgs; [ rustToolchain ];
               text = ''
+                set -e
+
                 cargo fmt --check
-                cargo clippy
+                cargo clippy --all --all-targets --all-features --  -Dwarnings
                 cargo build --release
-                cargo test
-                nix build
+                cargo test --all --all-targets --all-features
+                cargo machete
+
+                echo "SUCCESS"
               '';
             };
 
@@ -58,7 +62,7 @@
               name = "dev";
               runtimeInputs = with pkgs; [ bacon ];
               text = ''
-                bacon check
+                bacon
               '';
             };
 
@@ -72,7 +76,6 @@
               rustToolchain
               cargo-edit
               cargo-machete
-              cargo-minimize
               bacon
               rust-analyzer
               static-web-server
