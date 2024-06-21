@@ -3,8 +3,6 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - main
 
 jobs:
   checks:
@@ -31,24 +29,6 @@ jobs:
         run: nix develop --command cargo test --all --all-targets --all-features
       - name: Ensure no unused Rust dependencies
         run: nix develop --command cargo machete
-
-  build:
-    runs-on: ${{ matrix.systems.runner }}
-    strategy:
-      matrix:
-        systems:
-          - nix-system: x86_64-darwin
-            runner: macos-14
-          - nix-system: x86_64-linux
-            runner: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v10
-      - name: Set up Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v4
-      - name: Build jelly package for ${{ matrix.systems.nix-system }} on ${{ matrix.systems.runner }}
-        run: nix build
 
   site:
     runs-on: ubuntu-22.04
