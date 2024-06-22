@@ -4,6 +4,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use ammonia::clean;
+
 use crate::{
     config::{SiteConfig, TitleConfig},
     content::{Section, Site},
@@ -24,7 +26,7 @@ pub(crate) fn build_site(source: PathBuf) -> Result<Site, JellyError> {
     Ok(Site(content))
 }
 
-pub fn build(source: &PathBuf, out: &Path) -> Result<(), JellyError> {
+pub fn build(source: &PathBuf, out: &Path, sanitize: bool) -> Result<(), JellyError> {
     let site = build_site(source.into())?;
 
     let attrs = site.attrs()?;
@@ -40,7 +42,10 @@ pub fn build(source: &PathBuf, out: &Path) -> Result<(), JellyError> {
         }
 
         let mut file = File::create(path)?;
-        file.write_all(html.as_bytes())?;
+
+        let final_html = if sanitize { clean(&html) } else { html };
+
+        file.write_all(final_html.as_bytes())?;
     }
 
     let search_index = SiteIndex::new(site.documents());
