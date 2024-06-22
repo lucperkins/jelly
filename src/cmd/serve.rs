@@ -32,7 +32,7 @@ impl Site {
     fn build(&self) {
         debug!("building site");
 
-        if let Err(e) = build(&self.source, &self.out) {
+        if let Err(e) = build(&self.source, &self.out, false) {
             error!("error building site: {e}");
         }
     }
