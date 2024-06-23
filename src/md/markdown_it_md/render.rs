@@ -17,7 +17,7 @@ struct TemplateAttrs<'a> {
     content: String,
     breadcrumb: &'a Vec<Link>,
     toc: Option<&'a TableOfContents>,
-    site: &'a SiteAttrs,
+    site: &'a SiteAttrs<'a>,
 }
 
 impl<'a> TemplateAttrs<'a> {
