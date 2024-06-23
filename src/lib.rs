@@ -1,3 +1,4 @@
+mod cli;
 mod cmd;
 mod config;
 mod content;
@@ -6,5 +7,5 @@ mod md;
 mod tests;
 mod utils;
 
-pub use cmd::{build, index, serve};
+pub use cli::Cli;
 pub use error::JellyError;
