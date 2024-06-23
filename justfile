@@ -7,7 +7,7 @@ alias t := tpl
 
 default: dev
 
-ci:
+@ci:
     set -e
 
     cargo fmt --check
@@ -18,16 +18,17 @@ ci:
 
     echo "SUCCESS"
 
-dev:
+@dev:
     bacon
 
-tpl:
+@tpl:
     {{ jellyTpl }} serve --open --source ./tests/full/medium
 
-build:
+@build:
     {{ jelly }} build --source ./tests/full/medium
 
-preview: build
+@preview: build
     static-web-server \
         --root ./dist \
+        --log-level error \
         --port 3000
