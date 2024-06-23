@@ -71,6 +71,7 @@ mod tests {
                 "basic",
                 Site(Section::new(
                     "Welcome",
+                    "/",
                     Some(vec![
                         Page::new(
                             "tests/full/basic/contact.md",
@@ -143,6 +144,7 @@ mod tests {
                 "medium",
                 Site(Section::new(
                     "Medium-sized project",
+                    "/",
                     Some(vec![Page::new(
                         "tests/full/medium/index.md",
                         "index.md",
@@ -167,6 +169,7 @@ mod tests {
                     )]),
                     Some(vec![Section::new(
                         "Setup",
+                        "/setup",
                         Some(vec![Page::new(
                             "tests/full/medium/setup/index.md",
                             "setup/index.md",

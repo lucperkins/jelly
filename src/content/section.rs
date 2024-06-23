@@ -114,11 +114,13 @@ impl Section {
     #[cfg(test)]
     pub(crate) fn new(
         title: &str,
+        url: &str,
         pages: Option<Vec<Page>>,
         sections: Option<Vec<Section>>,
     ) -> Self {
         Self {
             title: String::from(title),
+            url: String::from(url),
             pages,
             sections,
         }
