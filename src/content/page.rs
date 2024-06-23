@@ -22,7 +22,7 @@ use std::{
 pub(crate) struct Page {
     pub(crate) path: String,
     pub(crate) relative_path: String,
-    pub(crate) page_url: String,
+    pub(crate) url: String,
     pub(crate) title: String,
     pub(crate) body: String,
     pub(crate) html: String,
@@ -32,11 +32,13 @@ pub(crate) struct Page {
     pub(crate) order: Option<usize>,
 }
 
-impl Page {
-    fn is_index(&self) -> bool {
-        self.relative_path == "index.md"
-    }
+#[derive(Clone, Serialize)]
+pub(super) struct PageEntry {
+    pub(super) title: String,
+    pub(super) url: String,
+}
 
+impl Page {
     pub(super) fn from_path(
         path: &Path,
         breadcrumb: &[(&PathBuf, &str)],
@@ -61,7 +63,7 @@ impl Page {
         let html = render(&tree);
         let search_index = build_search_index_for_page(&title, &tree);
 
-        let page_url = if let Some(last_segment) = relative_path
+        let url = if let Some(last_segment) = relative_path
             .with_extension("")
             .file_name()
             .and_then(|name| name.to_str())
@@ -81,7 +83,7 @@ impl Page {
         Ok(Page {
             path: String::from(path.to_string_lossy()),
             relative_path: String::from(relative_path.to_string_lossy()),
-            page_url: String::from(page_url.to_string_lossy()),
+            url: String::from(url.to_string_lossy()),
             title,
             body: result.content,
             html,
@@ -96,12 +98,16 @@ impl Page {
         })
     }
 
+    fn is_index(&self) -> bool {
+        self.relative_path == "index.md"
+    }
+
     #[allow(clippy::too_many_arguments)]
     #[cfg(test)]
     pub(crate) fn new(
         path: &str,
         relative_path: &str,
-        page_url: &str,
+        url: &str,
         title: &str,
         body: &str,
         html: &str,
@@ -113,7 +119,7 @@ impl Page {
         Self {
             path: String::from(path),
             relative_path: String::from(relative_path),
-            page_url: String::from(page_url),
+            url: String::from(url),
             title: String::from(title),
             body: String::from(body),
             html: String::from(html),

@@ -6,16 +6,44 @@ use std::fs::{metadata, read_dir};
 use std::path::PathBuf;
 
 use super::by_title;
-use super::page::Page;
+use super::page::{Page, PageEntry};
 use super::title::{get_section_config, WithTitle};
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub(crate) struct Section {
     pub(super) title: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pages: Option<Vec<Page>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    sections: Option<Vec<Section>>,
+    pub(super) url: String,
+    pub(super) pages: Option<Vec<Page>>,
+    pub(super) sections: Option<Vec<Section>>,
+}
+
+#[derive(Clone, Serialize)]
+pub(super) struct SectionEntry {
+    pub(super) title: String,
+    pub(super) url: String,
+    pub(super) pages: Option<Vec<PageEntry>>,
+    pub(super) sections: Option<Vec<SectionEntry>>,
+}
+
+impl From<&Section> for SectionEntry {
+    fn from(s: &Section) -> Self {
+        Self {
+            title: s.title.clone(),
+            url: s.url.clone(),
+            pages: s.pages.as_ref().map(|ps| {
+                ps.iter()
+                    .map(|Page { title, url, .. }| PageEntry {
+                        title: title.to_string(),
+                        url: url.to_string(),
+                    })
+                    .collect()
+            }),
+            sections: s
+                .sections
+                .as_ref()
+                .map(|ss| ss.iter().map(Self::from).collect()),
+        }
+    }
 }
 
 impl Section {
@@ -77,6 +105,7 @@ impl Section {
 
         Ok(Section {
             title,
+            url: path.display().to_string(),
             pages: get_or_none(pages),
             sections: get_or_none(sections),
         })

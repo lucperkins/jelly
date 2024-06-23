@@ -2,21 +2,15 @@ use serde::Serialize;
 
 use crate::{error::JellyError, md::SearchDocument};
 
-use super::{page::Page, Section};
+use super::{page::Page, section::SectionEntry, Section};
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
-pub(crate) struct Site(pub Section);
-
-#[derive(Clone, Serialize)]
-struct PageEntry {
-    title: String,
-    page_url: String,
-}
+pub(crate) struct Site(pub(crate) Section);
 
 #[derive(Clone, Serialize)]
 pub(crate) struct SiteAttrs {
     title: String,
-    pages: Vec<PageEntry>,
+    sections: Option<Vec<SectionEntry>>,
     index: String,
 }
 
@@ -44,14 +38,11 @@ impl Site {
 
         Ok(SiteAttrs {
             title: self.0.title.clone(),
-            pages: self
-                .pages()
-                .iter()
-                .map(|p| PageEntry {
-                    title: p.title.clone(),
-                    page_url: p.page_url.clone(),
-                })
-                .collect(),
+            sections: self
+                .0
+                .sections
+                .as_ref()
+                .map(|ss| ss.iter().map(SectionEntry::from).collect()),
             index: index_json,
         })
     }
