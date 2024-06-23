@@ -33,7 +33,7 @@ pub(super) fn write_file<F: Into<Vec<u8>>>(path: &Path, content: F) -> Result<()
 }
 
 // TODO: find a built-in function for this
-pub(super) fn get_or_none<T>(items: Vec<T>) -> Option<Vec<T>> {
+pub(super) fn vec_or_none<T>(items: Vec<T>) -> Option<Vec<T>> {
     if items.is_empty() {
         None
     } else {

@@ -1,6 +1,6 @@
 use crate::config::SiteConfig;
 use crate::error::JellyError;
-use crate::utils::get_or_none;
+use crate::utils::vec_or_none;
 use serde::Serialize;
 use std::fs::{metadata, read_dir};
 use std::path::PathBuf;
@@ -106,8 +106,8 @@ impl Section {
         Ok(Section {
             title,
             url: path.display().to_string(),
-            pages: get_or_none(pages),
-            sections: get_or_none(sections),
+            pages: vec_or_none(pages),
+            sections: vec_or_none(sections),
         })
     }
 
