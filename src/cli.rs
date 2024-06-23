@@ -3,7 +3,14 @@ use std::{io::IsTerminal, path::PathBuf};
 use clap::{Parser, Subcommand};
 use tracing_subscriber::EnvFilter;
 
-use crate::cmd::{build, index, serve};
+use crate::{
+    cmd::{build, index, serve},
+    JellyError,
+};
+
+trait Cmd {
+    fn execute(&self) -> Result<(), JellyError>;
+}
 
 /// Jelly: golden path static site generator for documentation
 #[derive(Parser)]
@@ -30,6 +37,12 @@ struct Build {
     sanitize: bool,
 }
 
+impl Cmd for Build {
+    fn execute(&self) -> Result<(), JellyError> {
+        build(&self.source, &self.out, self.sanitize)
+    }
+}
+
 /// Serve a Jelly docs project
 #[derive(Parser)]
 #[command(alias = "s", alias = "se", alias = "sr", alias = "srv")]
@@ -54,6 +67,12 @@ struct Serve {
     port: u16,
 }
 
+impl Cmd for Serve {
+    fn execute(&self) -> Result<(), JellyError> {
+        serve(&self.source, self.open, self.port)
+    }
+}
+
 /// Generate a search index for a Jelly docs project
 #[derive(Parser)]
 #[command(alias = "i", alias = "idx")]
@@ -65,6 +84,12 @@ struct Index {
     /// Output path
     #[arg(short, long = "out")]
     out: Option<PathBuf>,
+}
+
+impl Cmd for Index {
+    fn execute(&self) -> Result<(), JellyError> {
+        index(&self.source, &self.out)
+    }
 }
 
 #[derive(Subcommand)]
@@ -90,13 +115,9 @@ impl Cli {
             .install()?;
 
         Ok(match self.command {
-            Command::Build(Build {
-                source,
-                out,
-                sanitize,
-            }) => build(&source, &out, sanitize),
-            Command::Index(Index { source, out }) => index(&source, out),
-            Command::Serve(Serve { source, open, port }) => serve(&source, open, port),
+            Command::Build(build) => build.execute(),
+            Command::Index(index) => index.execute(),
+            Command::Serve(serve) => serve.execute(),
         }?)
     }
 }

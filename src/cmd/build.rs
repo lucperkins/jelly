@@ -1,36 +1,9 @@
-use std::{fs::create_dir_all, path::PathBuf};
+use std::path::PathBuf;
 
-use ammonia::clean;
-
-use crate::{
-    config::SiteConfig, content::Site, error::JellyError, md::render_page, utils::write_file,
-};
+use crate::{config::SiteConfig, content::Site, error::JellyError};
 
 pub fn build(source: &PathBuf, out: &PathBuf, sanitize: bool) -> Result<(), JellyError> {
-    let config = SiteConfig::new(source.to_path_buf());
-
-    let site = Site::build(&config)?;
-    let attrs = site.attrs();
-
-    for page in site.pages() {
-        let html = render_page(page, &attrs)?;
-        let mut path = page.html_path(&out);
-
-        if let Some(dir) = path.as_path().parent() {
-            create_dir_all(dir)?;
-        }
-
-        let final_html = if sanitize { clean(&html) } else { html };
-
-        path.set_extension("html");
-
-        write_file(&path, final_html)?;
-    }
-
-    let search_index_json = serde_json::to_string(&site.index())?;
-    let index_file_path = out.join("search.json");
-
-    write_file(&index_file_path, search_index_json)
+    Site::write(&SiteConfig::new(source), out, sanitize)
 }
 
 #[cfg(test)]
@@ -38,11 +11,10 @@ mod tests {
     use std::path::PathBuf;
 
     use crate::{
+        config::SiteConfig,
         content::{Link, Page, Section, Site},
         md::{SearchDocument, SearchIndex, TableOfContents, TocEntry},
     };
-
-    use super::build_site;
 
     #[test]
     fn build_real_site() {
@@ -181,7 +153,9 @@ mod tests {
 
         for (dir, expected_site) in cases {
             let project_dir = format!("tests/full/{}", dir);
-            let content = build_site(PathBuf::from(project_dir)).unwrap().0;
+            let config = SiteConfig::new(&PathBuf::from(project_dir));
+
+            let content = Site::build(&config).unwrap().0;
 
             for (idx, page) in content.pages().iter().enumerate() {
                 let expected = expected_site.pages()[idx];

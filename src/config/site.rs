@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use super::TitleConfig;
 
-static DEFAULT_DOCS_DIR: &str = "docs";
+const DEFAULT_DOCS_DIR: &str = "docs";
 
 pub(crate) struct SiteConfig {
     pub(crate) root: PathBuf,
@@ -10,9 +10,9 @@ pub(crate) struct SiteConfig {
 }
 
 impl SiteConfig {
-    pub(crate) fn new(root: PathBuf) -> Self {
+    pub(crate) fn new(root: &PathBuf) -> Self {
         Self {
-            root,
+            root: root.to_path_buf(),
             title_config: TitleConfig::default(),
         }
     }

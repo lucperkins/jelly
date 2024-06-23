@@ -122,7 +122,7 @@ pub fn serve(source: &PathBuf, open: bool, port: u16) -> Result<(), JellyError> 
 
     debug!("serving docs; writing output to {:?}", out_path);
 
-    let site = Site::new(SiteConfig::new(source.to_path_buf()));
+    let site = Site::new(SiteConfig::new(&source));
 
     if open {
         open::that(format!("http://localhost:{port}"))?;

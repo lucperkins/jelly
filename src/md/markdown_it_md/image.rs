@@ -10,11 +10,11 @@ struct FancyImage {
 
 impl NodeValue for FancyImage {
     fn render(&self, node: &Node, fmt: &mut dyn Renderer) {
-        let mut img_attrs = vec![("src", self.url.clone())];
+        let mut img_attrs = vec![("src", self.url.to_string())];
         if let Some(title) = &self.title {
-            img_attrs.push(("title", title.clone()));
+            img_attrs.push(("title", title.to_string()));
         }
-        let a_attrs = vec![("href", self.url.clone())];
+        let a_attrs = &[("href", self.url.to_string())];
 
         let mut alt = String::new();
         node.walk(|node, _| {
@@ -23,11 +23,11 @@ impl NodeValue for FancyImage {
             }
         });
         if !alt.is_empty() {
-            img_attrs.push(("alt", alt));
+            img_attrs.push(("alt", alt.to_string()));
         }
 
         fmt.open("figure", &[]);
-        fmt.open("a", &a_attrs);
+        fmt.open("a", a_attrs);
         fmt.self_close("img", &img_attrs);
         fmt.close("a");
         fmt.close("figure");
@@ -37,7 +37,7 @@ impl NodeValue for FancyImage {
 pub(super) fn add_image_rule(md: &mut MarkdownIt) {
     full_link::add_prefix::<'!', true>(md, |href, title| {
         Node::new(FancyImage {
-            url: href.unwrap_or_default(),
+            url: href.unwrap_or("".to_string()),
             title,
         })
     });

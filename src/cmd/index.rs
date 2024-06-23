@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use crate::{config::SiteConfig, content::Site, error::JellyError, utils::write_file};
 
-pub fn index(source: &PathBuf, out: Option<PathBuf>) -> Result<(), JellyError> {
-    let config = SiteConfig::new(source.to_path_buf());
+pub fn index(source: &PathBuf, out: &Option<PathBuf>) -> Result<(), JellyError> {
+    let config = SiteConfig::new(source);
 
     let index = Site::build(&config)?.index();
     let json = serde_json::to_string(&index)?;
