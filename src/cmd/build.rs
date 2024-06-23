@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{config::SiteConfig, content::Site, error::JellyError};
 
-pub fn build(source: &PathBuf, out: &PathBuf, sanitize: bool) -> Result<(), JellyError> {
+pub fn build(source: PathBuf, out: PathBuf, sanitize: bool) -> Result<(), JellyError> {
     Site::write(&SiteConfig::new(source), out, sanitize)
 }
 
@@ -153,7 +153,7 @@ mod tests {
 
         for (dir, expected_site) in cases {
             let project_dir = format!("tests/full/{}", dir);
-            let config = SiteConfig::new(&PathBuf::from(project_dir));
+            let config = SiteConfig::new(PathBuf::from(project_dir));
 
             let content = Site::build(&config).unwrap().0;
 

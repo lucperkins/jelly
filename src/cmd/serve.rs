@@ -100,7 +100,7 @@ impl FileServer {
     }
 }
 
-pub fn serve(source: &PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
+pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
     let tmp_dir = TempDir::new()?; // TODO: make this a temporary directory
     let out_path = tmp_dir.as_ref().to_owned();
 
@@ -122,7 +122,7 @@ pub fn serve(source: &PathBuf, open: bool, port: u16) -> Result<(), JellyError> 
 
     debug!("serving docs; writing output to {:?}", out_path);
 
-    let site = Site::new(SiteConfig::new(&source));
+    let site = Site::new(SiteConfig::new(source.clone()));
 
     if open {
         open::that(format!("http://localhost:{port}"))?;

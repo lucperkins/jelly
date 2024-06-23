@@ -27,14 +27,14 @@ pub(crate) struct SiteIndex(Vec<SearchDocument>);
 impl Site {
     pub(crate) fn write(
         config: &SiteConfig,
-        out: &PathBuf,
+        out: PathBuf,
         sanitize: bool,
     ) -> Result<(), JellyError> {
-        let this: Self = Self::build(&config)?;
+        let this: Self = Self::build(config)?;
 
         for page in this.pages() {
             let html = render_page(page, &this.attrs())?;
-            let mut path = page.html_path(&out);
+            let mut path = page.html_path(out.clone());
 
             if let Some(dir) = path.as_path().parent() {
                 create_dir_all(dir)?;
@@ -51,7 +51,7 @@ impl Site {
     }
 
     pub(crate) fn build(config: &SiteConfig) -> Result<Self, JellyError> {
-        Ok(Self(Section::from_path(&config.root, None, &config)?))
+        Ok(Self(Section::from_path(&config.root, None, config)?))
     }
 
     pub(crate) fn index(&self) -> SiteIndex {

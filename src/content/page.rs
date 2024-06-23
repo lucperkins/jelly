@@ -98,7 +98,7 @@ impl Page {
         })
     }
 
-    pub(crate) fn html_path(&self, root: &PathBuf) -> PathBuf {
+    pub(crate) fn html_path(&self, root: PathBuf) -> PathBuf {
         root.join(&self.relative_path)
     }
 

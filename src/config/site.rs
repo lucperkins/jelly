@@ -10,7 +10,7 @@ pub(crate) struct SiteConfig {
 }
 
 impl SiteConfig {
-    pub(crate) fn new(root: &PathBuf) -> Self {
+    pub(crate) fn new(root: PathBuf) -> Self {
         Self {
             root: root.to_path_buf(),
             title_config: TitleConfig::default(),

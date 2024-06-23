@@ -39,7 +39,7 @@ struct Build {
 
 impl Cmd for Build {
     fn execute(&self) -> Result<(), JellyError> {
-        build(&self.source, &self.out, self.sanitize)
+        build(self.source.clone(), self.out.clone(), self.sanitize)
     }
 }
 
@@ -69,7 +69,7 @@ struct Serve {
 
 impl Cmd for Serve {
     fn execute(&self) -> Result<(), JellyError> {
-        serve(&self.source, self.open, self.port)
+        serve(self.source.clone(), self.open, self.port)
     }
 }
 
@@ -88,7 +88,7 @@ struct Index {
 
 impl Cmd for Index {
     fn execute(&self) -> Result<(), JellyError> {
-        index(&self.source, &self.out)
+        index(self.source.clone(), self.out.clone())
     }
 }
 
