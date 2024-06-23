@@ -39,21 +39,3 @@ command = [
   "./tests/full/medium",
 ]
 on_success = "quit"
-
-# Develop Handlebars templates
-[jobs.tpl]
-command = [
-  "cargo",
-  "run",
-  "--color",
-  "always",
-  "--features",
-  "dev-handlebars-templates",
-  "--",
-  "serve",
-  "--open",
-  "--source",
-  "./tests/full/medium",
-]
-need_stdout = true
-allow_warnings = true

@@ -1,7 +1,9 @@
-jelly := "cargo run --quiet --"
+jelly := "cargo run --quiet --color always --"
+jellyTpl := "cargo run --quiet --color always --features dev-handlebars-templates --"
 
 alias b := build
 alias p := preview
+alias t := tpl
 
 ci:
     set -e
@@ -18,7 +20,7 @@ dev:
     bacon
 
 tpl:
-    bacon tpl
+    {{ jellyTpl }} serve --open --source ./tests/full/medium
 
 build:
     {{ jelly }} build --source ./tests/full/medium
