@@ -5,7 +5,17 @@ command = ["cargo", "check", "--color", "always"]
 need_stdout = false
 
 [jobs.clippy]
-command = ["cargo", "clippy", "--color", "always"]
+command = [
+  "cargo",
+  "clippy",
+  "--color",
+  "always",
+  "--all",
+  "--all-targets",
+  "--all-features",
+  "--",
+  "-Dwarnings",
+]
 need_stdout = false
 
 [jobs.test]
