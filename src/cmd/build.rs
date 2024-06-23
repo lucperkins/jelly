@@ -1,6 +1,5 @@
 use std::{
-    fs::{create_dir_all, File},
-    io::Write,
+    fs::create_dir_all,
     path::{Path, PathBuf},
 };
 
@@ -11,6 +10,7 @@ use crate::{
     content::{Section, Site},
     error::JellyError,
     md::render_page,
+    utils::write_file,
 };
 
 use super::index::SiteIndex;
@@ -41,20 +41,16 @@ pub fn build(source: &PathBuf, out: &Path, sanitize: bool) -> Result<(), JellyEr
             create_dir_all(dir)?;
         }
 
-        let mut file = File::create(path)?;
-
         let final_html = if sanitize { clean(&html) } else { html };
 
-        file.write_all(final_html.as_bytes())?;
+        write_file(&path, final_html)?;
     }
 
     let search_index = SiteIndex::new(site.documents());
     let search_index_json = serde_json::to_string(&search_index)?;
     let index_file_path = out.join("search.json");
-    let mut index_json_file = File::create(index_file_path)?;
-    index_json_file.write_all(search_index_json.as_bytes())?;
 
-    Ok(())
+    write_file(&index_file_path, search_index_json)
 }
 
 #[cfg(test)]

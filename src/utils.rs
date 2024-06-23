@@ -1,7 +1,7 @@
 use crate::config::TitleConfig;
 use crate::error::JellyError;
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::path::Path;
 use titlecase::titlecase;
 
@@ -24,6 +24,12 @@ pub(super) fn get_file(path: &Path) -> Result<String, JellyError> {
     let mut contents = String::new();
     let _ = file.read_to_string(&mut contents)?;
     Ok(contents)
+}
+
+pub(super) fn write_file<F: Into<Vec<u8>>>(path: &Path, content: F) -> Result<(), JellyError> {
+    let mut file = File::create(path)?;
+    file.write_all(&content.into())?;
+    Ok(())
 }
 
 // TODO: find a built-in function for this

@@ -1,7 +1,7 @@
 use serde::Serialize;
-use std::{fs::File, io::Write, path::PathBuf};
+use std::path::PathBuf;
 
-use crate::{error::JellyError, md::SearchDocument};
+use crate::{error::JellyError, md::SearchDocument, utils::write_file};
 
 use super::build::build_site;
 
@@ -11,8 +11,7 @@ pub fn index(source: PathBuf, out: Option<PathBuf>) -> Result<(), JellyError> {
     let json = serde_json::to_string(&site_index)?;
 
     if let Some(out) = out {
-        let mut file = File::create(out)?;
-        file.write_all(json.as_bytes())?;
+        write_file(&out, json)?;
     } else {
         println!("{json}");
     }
