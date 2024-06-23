@@ -40,49 +40,18 @@
       };
 
       devShells = forEachSupportedSystem ({ pkgs }: {
-        default =
-          let
-            ci = pkgs.writeShellApplication {
-              name = "ci";
-              runtimeInputs = with pkgs; [ rustToolchain ];
-              text = ''
-                set -e
-
-                cargo fmt --check
-                cargo clippy --all --all-targets --all-features --  -Dwarnings
-                cargo build --release
-                cargo test --all --all-targets --all-features
-                cargo machete
-
-                echo "SUCCESS"
-              '';
-            };
-
-            dev = pkgs.writeShellApplication {
-              name = "dev";
-              runtimeInputs = with pkgs; [ bacon ];
-              text = ''
-                bacon
-              '';
-            };
-
-            scripts = [
-              ci
-              dev
-            ];
-          in
-          pkgs.mkShell {
-            packages = with pkgs; [
-              rustToolchain
-              cargo-edit
-              cargo-machete
-              bacon
-              rust-analyzer
-              static-web-server
-            ]
-            ++ scripts
-            ++ pkgs.lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk.frameworks; [ CoreServices ]);
-          };
+        default = pkgs.mkShell {
+          packages = with pkgs; [
+            rustToolchain
+            cargo-edit
+            cargo-machete
+            bacon
+            rust-analyzer
+            static-web-server
+            just
+          ]
+          ++ pkgs.lib.optionals pkgs.stdenv.isDarwin (with pkgs.darwin.apple_sdk.frameworks; [ CoreServices ]);
+        };
       });
 
       packages = forEachSupportedSystem ({ pkgs }: {

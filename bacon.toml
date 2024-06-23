@@ -1,4 +1,4 @@
-default_job = "check"
+default_job = "clippy"
 
 [jobs.check]
 command = ["cargo", "check", "--color", "always"]
