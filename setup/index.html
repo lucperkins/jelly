@@ -48,7 +48,7 @@
       };
 
       document.addEventListener("alpine:init", () => {
-        const docs = [{"level":1,"page_title":"Welcome","title":"Welcome","content":"Welcome to the site."},{"level":2,"page_title":"Welcome","title":"About this site","content":"Some info here."},{"level":1,"page_title":"Setup","title":"Setup","content":"Here is how to set things up. Here is some other info."}];
+        const docs = ;
         console.log(docs);
         const fuse = new Fuse(docs, options, Fuse.createIndex(options.keys, docs));
 
@@ -143,10 +143,7 @@
           <aside class="w-1/4">
             <ul>
   <li>
-                <a href="">Welcome</a>
-              </li>
-  <li>
-                <a href="setup">Setup</a>
+                <a href="./tests/full/medium/setup">Setup</a>
               </li>
 </ul>
           </aside>
