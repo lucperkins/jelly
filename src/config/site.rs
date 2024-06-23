@@ -9,6 +9,15 @@ pub(crate) struct SiteConfig {
     pub(crate) title_config: TitleConfig,
 }
 
+impl SiteConfig {
+    pub(crate) fn new(root: PathBuf) -> Self {
+        Self {
+            root,
+            title_config: TitleConfig::default(),
+        }
+    }
+}
+
 impl Default for SiteConfig {
     fn default() -> Self {
         Self {

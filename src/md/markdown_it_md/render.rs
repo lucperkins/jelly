@@ -17,7 +17,7 @@ struct TemplateAttrs<'a> {
     content: String,
     breadcrumb: &'a Vec<Link>,
     toc: Option<&'a TableOfContents>,
-    site: SiteAttrs,
+    site: &'a SiteAttrs,
 }
 
 impl<'a> TemplateAttrs<'a> {
@@ -26,7 +26,7 @@ impl<'a> TemplateAttrs<'a> {
         content: &str,
         breadcrumb: &'a Vec<Link>,
         toc: &'a TableOfContents,
-        site: SiteAttrs,
+        site: &'a SiteAttrs,
     ) -> Self {
         Self {
             title: String::from(title),
@@ -85,7 +85,7 @@ fn register_templates(h: &mut Handlebars) -> Result<(), JellyError> {
 }
 
 #[cfg(feature = "handlebars-templating")]
-pub(crate) fn render_page(page: &Page, site: SiteAttrs) -> Result<String, JellyError> {
+pub(crate) fn render_page(page: &Page, site: &SiteAttrs) -> Result<String, JellyError> {
     let mut h = Handlebars::new();
     h.set_strict_mode(false);
     register_templates(&mut h)?;

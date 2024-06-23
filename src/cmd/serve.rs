@@ -1,5 +1,4 @@
-use super::build;
-use crate::error::JellyError;
+use crate::{config::SiteConfig, content::Site as Buildable, error::JellyError};
 use indoc::{formatdoc, indoc};
 use notify::{Event, Watcher};
 use std::{
@@ -18,21 +17,17 @@ use ws::{Message, Sender, WebSocket};
 
 const LIVE_RELOAD_JS: &str = include_str!("../../assets/livereload.js");
 
-#[derive(Clone)]
-struct Site {
-    source: PathBuf,
-    out: PathBuf,
-}
+struct Site(SiteConfig);
 
 impl Site {
-    fn new(source: PathBuf, out: PathBuf) -> Self {
-        Self { source, out }
+    fn new(config: SiteConfig) -> Self {
+        Self(config)
     }
 
     fn build(&self) {
         debug!("building site");
 
-        if let Err(e) = build(&self.source, &self.out, false) {
+        if let Err(e) = Buildable::build(&self.0) {
             error!("error building site: {e}");
         }
     }
@@ -105,7 +100,7 @@ impl FileServer {
     }
 }
 
-pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
+pub fn serve(source: &PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
     let tmp_dir = TempDir::new()?; // TODO: make this a temporary directory
     let out_path = tmp_dir.as_ref().to_owned();
 
@@ -127,10 +122,7 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
 
     debug!("serving docs; writing output to {:?}", out_path);
 
-    let site = Site::new(source.clone(), out_path.clone());
-
-    // Initial site build
-    site.build();
+    let site = Site::new(SiteConfig::new(source.to_path_buf()));
 
     if open {
         open::that(format!("http://localhost:{port}"))?;
@@ -181,7 +173,7 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
         broadcaster
     };
 
-    debug!("setting up watcher on {:?}", source);
+    debug!("setting up watcher on {:?}", &source);
 
     let (_tx, rx) = channel::<Event>();
     let mut watcher = notify::recommended_watcher(move |res| match res {

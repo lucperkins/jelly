@@ -95,8 +95,8 @@ impl Cli {
                 out,
                 sanitize,
             }) => build(&source, &out, sanitize),
-            Command::Index(Index { source, out }) => index(source, out),
-            Command::Serve(Serve { source, open, port }) => serve(source, open, port),
+            Command::Index(Index { source, out }) => index(&source, out),
+            Command::Serve(Serve { source, open, port }) => serve(&source, open, port),
         }?)
     }
 }

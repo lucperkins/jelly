@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::{error::JellyError, md::SearchDocument};
+use crate::{config::SiteConfig, error::JellyError, md::SearchDocument};
 
 use super::{page::Page, section::SectionEntry, Section};
 
@@ -11,10 +11,20 @@ pub(crate) struct Site(pub(crate) Section);
 pub(crate) struct SiteAttrs {
     title: String,
     sections: Option<Vec<SectionEntry>>,
-    index: String,
 }
 
+#[derive(Serialize)]
+pub(crate) struct SiteIndex(Vec<SearchDocument>);
+
 impl Site {
+    pub(crate) fn build(config: &SiteConfig) -> Result<Self, JellyError> {
+        Ok(Self(Section::from_path(&config.root, None, &config)?))
+    }
+
+    pub(crate) fn index(&self) -> SiteIndex {
+        SiteIndex(self.documents())
+    }
+
     pub(crate) fn pages(&self) -> Vec<&Page> {
         self.0.pages()
     }
@@ -32,18 +42,14 @@ impl Site {
         docs
     }
 
-    pub(crate) fn attrs(&self) -> Result<SiteAttrs, JellyError> {
-        // TODO: remove unwrap
-        let index_json = serde_json::to_string(&self.documents())?;
-
-        Ok(SiteAttrs {
+    pub(crate) fn attrs(&self) -> SiteAttrs {
+        SiteAttrs {
             title: self.0.title.clone(),
             sections: self
                 .0
                 .sections
                 .as_ref()
                 .map(|ss| ss.iter().map(SectionEntry::from).collect()),
-            index: index_json,
-        })
+        }
     }
 }

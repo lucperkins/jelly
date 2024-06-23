@@ -1,41 +1,20 @@
-use std::{
-    fs::create_dir_all,
-    path::{Path, PathBuf},
-};
+use std::{fs::create_dir_all, path::PathBuf};
 
 use ammonia::clean;
 
 use crate::{
-    config::{SiteConfig, TitleConfig},
-    content::{Section, Site},
-    error::JellyError,
-    md::render_page,
-    utils::write_file,
+    config::SiteConfig, content::Site, error::JellyError, md::render_page, utils::write_file,
 };
 
-use super::index::SiteIndex;
+pub fn build(source: &PathBuf, out: &PathBuf, sanitize: bool) -> Result<(), JellyError> {
+    let config = SiteConfig::new(source.to_path_buf());
 
-pub(crate) fn build_site(source: PathBuf) -> Result<Site, JellyError> {
-    let config = SiteConfig {
-        root: source,
-        title_config: TitleConfig::default(),
-    };
-
-    let content = Section::from_path(&config.root, None, &config)?;
-
-    Ok(Site(content))
-}
-
-pub fn build(source: &PathBuf, out: &Path, sanitize: bool) -> Result<(), JellyError> {
-    let site = build_site(source.into())?;
-
-    let attrs = site.attrs()?;
+    let site = Site::build(&config)?;
+    let attrs = site.attrs();
 
     for page in site.pages() {
-        let html = render_page(page, attrs.clone())?;
-        let mut path = out.join(&page.relative_path);
-
-        path.set_extension("html");
+        let html = render_page(page, &attrs)?;
+        let mut path = page.html_path(&out);
 
         if let Some(dir) = path.as_path().parent() {
             create_dir_all(dir)?;
@@ -43,11 +22,12 @@ pub fn build(source: &PathBuf, out: &Path, sanitize: bool) -> Result<(), JellyEr
 
         let final_html = if sanitize { clean(&html) } else { html };
 
+        path.set_extension("html");
+
         write_file(&path, final_html)?;
     }
 
-    let search_index = SiteIndex::new(site.documents());
-    let search_index_json = serde_json::to_string(&search_index)?;
+    let search_index_json = serde_json::to_string(&site.index())?;
     let index_file_path = out.join("search.json");
 
     write_file(&index_file_path, search_index_json)

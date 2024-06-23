@@ -5,6 +5,8 @@ alias b := build
 alias p := preview
 alias t := tpl
 
+default: dev
+
 ci:
     set -e
 
@@ -29,6 +31,3 @@ preview: build
     static-web-server \
         --root ./dist \
         --port 3000
-
-default:
-    dev

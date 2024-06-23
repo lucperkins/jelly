@@ -98,6 +98,10 @@ impl Page {
         })
     }
 
+    pub(crate) fn html_path(&self, root: &PathBuf) -> PathBuf {
+        root.join(&self.relative_path)
+    }
+
     fn is_index(&self) -> bool {
         self.relative_path == "index.md"
     }

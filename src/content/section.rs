@@ -77,7 +77,6 @@ impl Section {
         config: &SiteConfig,
     ) -> Result<Self, JellyError> {
         let section_config = &get_section_config(path, config)?;
-        let title = section_config.title.clone();
 
         let mut breadcrumb_acc: Vec<(&PathBuf, &str)> = Vec::new();
 
@@ -104,7 +103,7 @@ impl Section {
         }
 
         Ok(Section {
-            title,
+            title: section_config.title.clone(),
             url: path.display().to_string(),
             pages: vec_or_none(pages),
             sections: vec_or_none(sections),
