@@ -18,7 +18,7 @@ pub(crate) struct Site(pub(crate) Section);
 #[derive(Clone, Serialize)]
 pub(crate) struct SiteAttrs<'a> {
     title: &'a str,
-    sections: Option<Vec<SectionEntry>>,
+    sections: Option<Vec<SectionEntry<'a>>>,
 }
 
 #[derive(Serialize)]

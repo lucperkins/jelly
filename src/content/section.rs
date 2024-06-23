@@ -18,17 +18,17 @@ pub(crate) struct Section {
 }
 
 #[derive(Clone, Serialize)]
-pub(super) struct SectionEntry {
-    pub(super) title: String,
+pub(super) struct SectionEntry<'a> {
+    pub(super) title: &'a str,
     pub(super) url: String,
     pub(super) pages: Option<Vec<PageEntry>>,
-    pub(super) sections: Option<Vec<SectionEntry>>,
+    pub(super) sections: Option<Vec<SectionEntry<'a>>>,
 }
 
-impl From<&Section> for SectionEntry {
-    fn from(s: &Section) -> Self {
+impl<'a> From<&'a Section> for SectionEntry<'a> {
+    fn from(s: &'a Section) -> Self {
         Self {
-            title: s.title.clone(),
+            title: &s.title,
             url: s.url.clone(),
             pages: s.pages.as_ref().map(|ps| {
                 ps.iter()
