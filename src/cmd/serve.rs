@@ -219,8 +219,9 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
     }
 
     if let Err(e) = rx.recv() {
+        debug!("deleting temporary directory {tmp_dir:?}",);
         tmp_dir.close()?;
-        tracing::debug!("error encountered from listener: {}", e);
+        debug!("error encountered from listener: {}", e);
         return Err(JellyError::Recv(e));
     }
 

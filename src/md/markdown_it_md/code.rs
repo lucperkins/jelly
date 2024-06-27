@@ -10,6 +10,7 @@ use super::highlight::Highlighter;
 struct Metadata {
     language: Option<String>,
     show_line_numbers: bool,
+    file: Option<String>,
 }
 
 impl Metadata {
@@ -17,6 +18,7 @@ impl Metadata {
         let mut metadata = Metadata {
             language: None,
             show_line_numbers: false,
+            file: None,
         };
         let mut parts = s.split_whitespace();
 
@@ -27,6 +29,18 @@ impl Metadata {
         while let Some(part) = parts.next() {
             if part == "showLineNumbers" {
                 metadata.show_line_numbers = true;
+            }
+
+            if let Some(file) = {
+                let parts: Vec<&str> = s.split('=').collect();
+                if parts.len() == 2 && parts[0].trim() == "file" {
+                    let filename = parts[1].trim().trim_matches('"');
+                    Some(filename.to_string())
+                } else {
+                    None
+                }
+            } {
+                metadata.file = Some(file);
             }
         }
         metadata
@@ -81,8 +95,6 @@ impl CoreRule for FancyCodeBlockRule {
             }
 
             if let Some(content) = content {
-                println!("{meta:?}");
-
                 node.replace(FancyCodeBlock {
                     meta: meta.unwrap_or_default(),
                     content: String::from(content),
