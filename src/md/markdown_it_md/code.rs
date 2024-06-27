@@ -26,7 +26,7 @@ impl Metadata {
             metadata.language = Some(String::from(part));
         }
 
-        while let Some(part) = parts.next() {
+        for part in parts {
             if part == "showLineNumbers" {
                 metadata.show_line_numbers = true;
             }
@@ -63,7 +63,7 @@ impl NodeValue for FancyCodeBlock {
 
         let higlighter = Highlighter::default();
 
-        let code = match higlighter.highlight(&lang, &self.content) {
+        let code = match higlighter.highlight(lang, &self.content) {
             Ok(html) => html,
             Err(e) => e.to_string(),
         };
