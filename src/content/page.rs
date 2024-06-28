@@ -10,8 +10,8 @@ use super::{
     front::FrontMatter,
     title::{infer_page_title, WithTitle},
 };
-use gray_matter::engine::YAML;
-use gray_matter::Matter;
+use gray_matter::{engine::YAML, Matter};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::Serialize;
 use std::{
     cmp::Ordering,
@@ -44,7 +44,7 @@ impl Page {
         breadcrumb: &[(&PathBuf, &str)],
         config: &SiteConfig,
     ) -> Result<Self, JellyError> {
-        let file = get_file(path)?;
+        let file: String = get_file(path)?;
         let matter = Matter::<YAML>::new();
         let result = matter.parse(&file);
         let front = FrontMatter::parse(result.data)?;
@@ -88,7 +88,7 @@ impl Page {
             body: result.content,
             html,
             breadcrumb: breadcrumb
-                .iter()
+                .par_iter()
                 .copied()
                 .map(|(a, b)| Link::new(a, b))
                 .collect(),

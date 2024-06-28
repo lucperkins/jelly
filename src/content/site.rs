@@ -1,6 +1,7 @@
 use std::{fs::create_dir_all, path::PathBuf};
 
 use ammonia::clean;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::Serialize;
 
 use crate::{
@@ -82,7 +83,7 @@ impl Site {
                 .0
                 .sections
                 .as_ref()
-                .map(|ss| ss.iter().map(SectionEntry::from).collect()),
+                .map(|ss| ss.par_iter().map(SectionEntry::from).collect()),
         }
     }
 }

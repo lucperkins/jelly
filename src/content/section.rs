@@ -1,6 +1,7 @@
 use crate::config::SiteConfig;
 use crate::error::JellyError;
 use crate::utils::vec_or_none;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::Serialize;
 use std::fs::{metadata, read_dir};
 use std::path::PathBuf;
@@ -31,7 +32,7 @@ impl<'a> From<&'a Section> for SectionEntry<'a> {
             title: &s.title,
             url: &s.url,
             pages: s.pages.as_ref().map(|ps| {
-                ps.iter()
+                ps.par_iter()
                     .map(|Page { title, url, .. }| PageEntry {
                         title: title.to_string(),
                         url: url.to_string(),
@@ -41,7 +42,7 @@ impl<'a> From<&'a Section> for SectionEntry<'a> {
             sections: s
                 .sections
                 .as_ref()
-                .map(|ss| ss.iter().map(Self::from).collect()),
+                .map(|ss| ss.par_iter().map(Self::from).collect()),
         }
     }
 }

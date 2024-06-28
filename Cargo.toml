@@ -53,3 +53,4 @@ tracing-subscriber = { version = "0.3.18", default-features = false, features = 
 ] }
 ws = { version = "0.9.2", default-features = false }
 ammonia = { version = "4.0.0", default-features = false }
+rayon = { version = "1.10.0", default-features = false }
