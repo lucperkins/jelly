@@ -1,7 +1,6 @@
 use std::{fs::create_dir_all, path::PathBuf};
 
 use ammonia::clean;
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::Serialize;
 
 use crate::{
@@ -17,9 +16,9 @@ use super::{page::Page, section::SectionEntry, Section};
 pub(crate) struct Site(pub(crate) Section);
 
 #[derive(Clone, Serialize)]
-pub(crate) struct SiteAttrs<'a> {
-    title: &'a str,
-    sections: Option<Vec<SectionEntry<'a>>>,
+pub(crate) struct SiteAttrs {
+    title: String,
+    root: Option<SectionEntry>,
 }
 
 #[derive(Serialize)]
@@ -78,12 +77,8 @@ impl Site {
 
     pub(crate) fn attrs(&self) -> SiteAttrs {
         SiteAttrs {
-            title: &self.0.title,
-            sections: self
-                .0
-                .sections
-                .as_ref()
-                .map(|ss| ss.par_iter().map(SectionEntry::from).collect()),
+            title: self.0.title.clone(),
+            root: Some((&self.0).into()),
         }
     }
 }

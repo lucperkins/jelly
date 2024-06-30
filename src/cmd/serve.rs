@@ -120,7 +120,10 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
 
     debug!("added Ctrl-C handler");
 
-    debug!("serving docs; writing output to {:?}", out_path);
+    debug!(
+        "serving docs; writing output to {}",
+        out_path.display().to_string()
+    );
 
     let site = Site::new(SiteConfig::new(source.clone()));
 

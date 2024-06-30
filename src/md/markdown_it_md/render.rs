@@ -12,21 +12,21 @@ const KEY_SIDEBAR: &str = "sidebar";
 const KEY_TOC: &str = "toc";
 
 #[derive(Serialize)]
-struct TemplateAttrs<'a> {
+struct TemplateAttrs {
     title: String,
     content: String,
-    breadcrumb: &'a Vec<Link>,
-    toc: Option<&'a TableOfContents>,
-    site: &'a SiteAttrs<'a>,
+    breadcrumb: Vec<Link>,
+    toc: Option<TableOfContents>,
+    site: SiteAttrs,
 }
 
-impl<'a> TemplateAttrs<'a> {
+impl TemplateAttrs {
     fn new(
         title: &str,
         content: &str,
-        breadcrumb: &'a Vec<Link>,
-        toc: &'a TableOfContents,
-        site: &'a SiteAttrs,
+        breadcrumb: Vec<Link>,
+        toc: TableOfContents,
+        site: SiteAttrs,
     ) -> Self {
         Self {
             title: String::from(title),
@@ -94,9 +94,9 @@ pub(crate) fn render_page(page: &Page, site: &SiteAttrs) -> Result<String, Jelly
     let attrs = TemplateAttrs::new(
         &page.title,
         html,
-        &page.breadcrumb,
-        &page.table_of_contents,
-        site,
+        page.breadcrumb.clone(),
+        page.table_of_contents.clone(),
+        site.clone(),
     );
 
     let s = h.render(KEY_PAGE, &attrs)?;
