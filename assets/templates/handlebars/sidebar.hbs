@@ -1,3 +1,25 @@
-<ul>
-  <li><p>TODO</p></li>
+{{#*inline "section"}}
+<ul class="flex flex-col gap-1">
+  <li>
+    <a href="{{this.url}}" class="hover:text-primary duration-hover">{{this.title}}</a>
+  </li>
+
+  {{#with this.pages}}
+  <ul>
+    {{#each this}}
+    <li>
+      <a href="{{this.url}}" class="hover:text-primary duration-hover ml-4">{{this.title}}</a>
+    </li>
+    {{/each}}
+  </ul>
+  {{/with}}
+
+  {{#each this.sections}}
+  {{> section this}}
+  {{/each}}
 </ul>
+{{/inline}}
+
+{{#with this}}
+{{> section this}}
+{{/with}}
