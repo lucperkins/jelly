@@ -23,6 +23,9 @@ pub enum JellyError {
     #[error("no pages found in directory: {0}")]
     NoPages(String),
 
+    #[error("no root section")]
+    NoRootSection,
+
     #[error("notify error: {0}")]
     Notify(#[from] notify::Error),
 

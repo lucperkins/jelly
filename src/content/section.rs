@@ -26,8 +26,8 @@ pub(super) struct SectionEntry {
     pub(super) sections: Option<Vec<SectionEntry>>,
 }
 
-impl<'a> From<&'a Section> for SectionEntry {
-    fn from(s: &'a Section) -> Self {
+impl From<Section> for SectionEntry {
+    fn from(s: Section) -> Self {
         Self {
             title: s.title.clone(),
             url: s.url.clone(),
@@ -39,10 +39,16 @@ impl<'a> From<&'a Section> for SectionEntry {
                     })
                     .collect()
             }),
-            sections: s
-                .sections
-                .as_ref()
-                .map(|ss| ss.par_iter().map(Self::from).collect()),
+            sections: s.sections.as_ref().map(|ss| {
+                ss.par_iter()
+                    .map(|s| SectionEntry {
+                        title: s.title.clone(),
+                        url: s.url.clone(),
+                        pages: None,
+                        sections: None,
+                    })
+                    .collect()
+            }),
         }
     }
 }

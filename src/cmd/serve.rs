@@ -17,17 +17,20 @@ use ws::{Message, Sender, WebSocket};
 
 const LIVE_RELOAD_JS: &str = include_str!("../../assets/livereload.js");
 
-struct Site(SiteConfig);
+struct Site {
+    out_path: PathBuf,
+    config: SiteConfig,
+}
 
 impl Site {
-    fn new(config: SiteConfig) -> Self {
-        Self(config)
+    fn new(out_path: PathBuf, config: SiteConfig) -> Self {
+        Self { out_path, config }
     }
 
     fn build(&self) {
         debug!("building site");
 
-        if let Err(e) = Buildable::build(&self.0) {
+        if let Err(e) = Buildable::write(&self.config, self.out_path.clone(), false) {
             error!("error building site: {e}");
         }
     }
@@ -125,7 +128,8 @@ pub fn serve(source: PathBuf, open: bool, port: u16) -> Result<(), JellyError> {
         out_path.display().to_string()
     );
 
-    let site = Site::new(SiteConfig::new(source.clone()));
+    let site = Site::new(out_path.clone(), SiteConfig::new(source.clone()));
+    site.build();
 
     if open {
         open::that(format!("http://localhost:{port}"))?;
